@@ -246,11 +246,13 @@
 
         <div class="col-md-12 text-end mt-4">
             @if ($permohonan->proyek)
-                <a href="{{ route('proyek.show', $permohonan->proyek->id) }}" class="main-btn info-btn">
-                    Lihat Proyek
-                </a>
+                @can('proyek.show')
+                    <a href="{{ route('proyek.show', $permohonan->proyek->id) }}" class="main-btn info-btn">
+                        Lihat Proyek
+                    </a>
+                @endcan
             @else
-                @can('permohonan.edit')
+                @can('permohonan.jadikan_project')
                     <button type="button" class="main-btn success-btn" data-bs-toggle="modal"
                         data-bs-target="#projectModal">
                         Jadikan proyek

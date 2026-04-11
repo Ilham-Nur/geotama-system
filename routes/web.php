@@ -170,7 +170,7 @@ Route::middleware('auth')->group(function () {
         ->name('permohonan.export-pdf');
 
     Route::post('permohonan/{id}/jadikan-project', [PermohonanController::class, 'jadikanProject'])
-        ->middleware('permission:permohonan.edit')
+        ->middleware('permission:permohonan.jadikan_project')
         ->name('permohonan.jadikan-project');
 
     Route::get('/proyek', [ProyekController::class, 'index'])
