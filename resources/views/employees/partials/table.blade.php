@@ -8,7 +8,7 @@
                 <th>Posisi</th>
                 <th>Status</th>
                 <th>Akun Sistem</th>
-                <th width="160">Aksi</th>
+                <th width="140">Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -28,14 +28,23 @@
                         @endif
                     </td>
                     <td>
-                        @can('employees.edit')
-                            <button type="button" class="btn btn-sm btn-warning btn-edit-employee"
-                                data-id="{{ $employee->id }}">Edit</button>
-                        @endcan
-                        @can('employees.delete')
-                            <button type="button" class="btn btn-sm btn-danger btn-delete-employee"
-                                data-id="{{ $employee->id }}">Hapus</button>
-                        @endcan
+                        <div class="d-flex gap-2 align-items-center">
+                            @can('employees.edit')
+                                <a href="{{ route('employees.edit', $employee->id) }}" class="btn btn-sm btn-warning" title="Edit">
+                                    <i class="lni lni-pencil"></i>
+                                </a>
+                            @endcan
+
+                            @can('employees.delete')
+                                <form action="{{ route('employees.destroy', $employee->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="btn btn-sm btn-danger btn-delete-employee" title="Hapus">
+                                        <i class="lni lni-trash-can"></i>
+                                    </button>
+                                </form>
+                            @endcan
+                        </div>
                     </td>
                 </tr>
             @empty

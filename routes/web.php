@@ -73,13 +73,17 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:employees.view')
         ->name('employees.index');
 
+    Route::get('/employees/create', [EmployeeController::class, 'create'])
+        ->middleware('permission:employees.create')
+        ->name('employees.create');
+
     Route::post('/employees', [EmployeeController::class, 'store'])
         ->middleware('permission:employees.create')
         ->name('employees.store');
 
-    Route::get('/employees/{employee}', [EmployeeController::class, 'show'])
-        ->middleware('permission:employees.edit|employees.view')
-        ->name('employees.show');
+    Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])
+        ->middleware('permission:employees.edit')
+        ->name('employees.edit');
 
     Route::put('/employees/{employee}', [EmployeeController::class, 'update'])
         ->middleware('permission:employees.edit')
