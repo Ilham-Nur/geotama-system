@@ -1,0 +1,54 @@
+.sidebar-nav-wrapper {
+    background-color: #0d1b2a !important; /* biru gelap */
+}
+
+.sidebar-nav-wrapper .sidebar-nav .nav-item a {
+    color: #ffffff;
+}
+
+.sidebar-nav-wrapper .sidebar-nav .nav-item a:hover {
+    background-color: #1b263b;
+    color: #ffffff;
+}
+
+.sidebar-nav-wrapper .sidebar-nav .nav-item.active > a {
+    background-color: #415a77;
+    color: #ffffff;
+}
+
+.sidebar-nav-wrapper .sidebar-nav .nav-item a i {
+    color: #ffffff;
+}
+
+.sidebar-nav-wrapper {
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* hover jadi biru bootstrap */
+.sidebar-nav-wrapper .sidebar-nav .nav-item a:hover {
+    background-color: #1b263b;
+    color: #0d6efd !important; /* biru bootstrap */
+}
+
+/* text */
+.sidebar-nav-wrapper .sidebar-nav .nav-item a:hover .text {
+    color: #0d6efd !important;
+}
+
+/* icon biasa (i) */
+.sidebar-nav-wrapper .sidebar-nav .nav-item a:hover i {
+    color: #0d6efd !important;
+}
+
+/* SVG FIX PENTING */
+.sidebar-nav-wrapper .sidebar-nav .nav-item a:hover svg path {
+    fill: #0d6efd !important;
+}
+
+/* default icon ikut text */
+.sidebar-nav-wrapper .sidebar-nav .nav-item a svg path {
+    fill: currentColor;
+}
+
+
+
