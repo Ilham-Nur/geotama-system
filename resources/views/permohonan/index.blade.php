@@ -42,9 +42,11 @@
                     </div>
 
                     <div class="col-md-6 mb-30 text-end">
-                        <a href="{{ route('permohonan.create') }}" class="btn btn-primary">
-                            + Tambah Permohonan
-                        </a>
+                        @can('permohonan.create')
+                            <a href="{{ route('permohonan.create') }}" class="btn btn-primary">
+                                + Tambah Permohonan
+                            </a>
+                        @endcan
                     </div>
                 </div>
 
@@ -99,25 +101,29 @@
                                                 <i class="lni lni-eye"></i>
                                             </a>
 
-                                            <a href="{{ route('permohonan.edit', $row->id) }}" class="text-primary"
-                                                title="Edit">
-                                                <i class="lni lni-pencil"></i>
-                                            </a>
+                                            @can('permohonan.edit')
+                                                <a href="{{ route('permohonan.edit', $row->id) }}" class="text-primary"
+                                                    title="Edit">
+                                                    <i class="lni lni-pencil"></i>
+                                                </a>
+                                            @endcan
 
                                             <a href="{{ route('permohonan.export-pdf', $row->id) }}" class="text-warning"
                                                 title="Export PDF" target="_blank">
                                                 <i class="lni lni-download"></i>
                                             </a>
 
-                                            <form action="{{ route('permohonan.destroy', $row->id) }}" method="POST"
-                                                class="d-inline" onsubmit="return confirm('Yakin hapus data ini?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-danger border-0 bg-transparent p-0"
-                                                    title="Hapus">
-                                                    <i class="lni lni-trash-can"></i>
-                                                </button>
-                                            </form>
+                                            @can('permohonan.delete')
+                                                <form action="{{ route('permohonan.destroy', $row->id) }}" method="POST"
+                                                    class="d-inline" onsubmit="return confirm('Yakin hapus data ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-danger border-0 bg-transparent p-0"
+                                                        title="Hapus">
+                                                        <i class="lni lni-trash-can"></i>
+                                                    </button>
+                                                </form>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

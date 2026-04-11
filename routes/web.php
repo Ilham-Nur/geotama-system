@@ -93,15 +93,48 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:employees.delete')
         ->name('employees.destroy');
 
-    Route::get('/permohonan', [PermohonanController::class, 'index'])->middleware('permission:dashboard.view')->name('permohonan.index');
-    Route::resource('permohonan', PermohonanController::class);
+    Route::get('/permohonan', [PermohonanController::class, 'index'])
+        ->middleware('permission:permohonan.view')
+        ->name('permohonan.index');
+
+    Route::get('/permohonan/create', [PermohonanController::class, 'create'])
+        ->middleware('permission:permohonan.create')
+        ->name('permohonan.create');
+
+    Route::post('/permohonan', [PermohonanController::class, 'store'])
+        ->middleware('permission:permohonan.create')
+        ->name('permohonan.store');
+
+    Route::get('/permohonan/{permohonan}', [PermohonanController::class, 'show'])
+        ->middleware('permission:permohonan.view')
+        ->name('permohonan.show');
+
+    Route::get('/permohonan/{permohonan}/edit', [PermohonanController::class, 'edit'])
+        ->middleware('permission:permohonan.edit')
+        ->name('permohonan.edit');
+
+    Route::put('/permohonan/{permohonan}', [PermohonanController::class, 'update'])
+        ->middleware('permission:permohonan.edit')
+        ->name('permohonan.update');
+
+    Route::delete('/permohonan/{permohonan}', [PermohonanController::class, 'destroy'])
+        ->middleware('permission:permohonan.delete')
+        ->name('permohonan.destroy');
+
     Route::get('permohonan-dokumen/{dokumen}/preview', [PermohonanController::class, 'previewDokumen'])
+        ->middleware('permission:permohonan.view')
         ->name('permohonan.dokumen.preview');
+
     Route::get('permohonan-dokumen/{dokumen}/download', [PermohonanController::class, 'downloadDokumen'])
+        ->middleware('permission:permohonan.view')
         ->name('permohonan.dokumen.download');
+
     Route::get('permohonan/{id}/export-pdf', [PermohonanController::class, 'exportPdf'])
+        ->middleware('permission:permohonan.view')
         ->name('permohonan.export-pdf');
+
     Route::post('permohonan/{id}/jadikan-project', [PermohonanController::class, 'jadikanProject'])
+        ->middleware('permission:permohonan.edit')
         ->name('permohonan.jadikan-project');
 
     Route::get('/proyek', [ProyekController::class, 'index'])->name('proyek.index');

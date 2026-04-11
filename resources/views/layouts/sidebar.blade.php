@@ -49,9 +49,10 @@
                   </a>
               </li>
 
-              <li
-                  class="nav-item {{ request()->routeIs('permohonan.index') || request()->routeIs('permohonan.create') || request()->routeIs('permohonan.edit') ? 'active' : '' }}">
-                  <a href="{{ route('permohonan.index') }}">
+              @can('permohonan.view')
+                  <li
+                      class="nav-item {{ request()->routeIs('permohonan.index') || request()->routeIs('permohonan.create') || request()->routeIs('permohonan.edit') ? 'active' : '' }}">
+                      <a href="{{ route('permohonan.index') }}">
                       <span class="icon">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                               xmlns="http://www.w3.org/2000/svg">
@@ -63,9 +64,10 @@
                                   fill="currentColor" />
                           </svg>
                       </span>
-                      <span class="text">Permohonan</span>
-                  </a>
-              </li>
+                          <span class="text">Permohonan</span>
+                      </a>
+                  </li>
+              @endcan
 
 
               <li class="nav-item {{ request()->routeIs('proyek.index') ? 'active' : '' }}">
