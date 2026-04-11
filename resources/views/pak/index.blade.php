@@ -39,9 +39,11 @@
                 </div>
 
                 <div class="col-md-6 mb-30 text-end">
-                    <a href="{{ route('pak.create') }}" class="btn btn-primary">
-                        + Tambah PAK
-                    </a>
+                    @can('pak.create')
+                        <a href="{{ route('pak.create') }}" class="btn btn-primary">
+                            + Tambah PAK
+                        </a>
+                    @endcan
                 </div>
             </div>
 
@@ -148,16 +150,20 @@
                                         </a>
 
                                         {{-- EDIT --}}
-                                        <a href="{{ route('pak.edit', $row->id) }}" class="text-primary"
-                                            title="Edit">
-                                            <i class="lni lni-pencil"></i>
-                                        </a>
+                                        @can('pak.edit')
+                                            <a href="{{ route('pak.edit', $row->id) }}" class="text-primary"
+                                                title="Edit">
+                                                <i class="lni lni-pencil"></i>
+                                            </a>
+                                        @endcan
 
                                         {{-- CONVERT --}}
-                                        <button type="button" class="border-0 bg-transparent p-0 text-success btn-convert"
-                                            data-id="{{ $row->id }}" title="Convert">
-                                            <i class="lni lni-reload"></i>
-                                        </button>
+                                        @can('pak.convert')
+                                            <button type="button" class="border-0 bg-transparent p-0 text-success btn-convert"
+                                                data-id="{{ $row->id }}" title="Convert">
+                                                <i class="lni lni-reload"></i>
+                                            </button>
+                                        @endcan
 
                                     </div>
                                 </td>

@@ -15,9 +15,10 @@
 
               {{-- MENU GEOTAMA SYSTEM --}}
 
-              <li
-                  class="nav-item {{ request()->routeIs('pak.index') ? 'active' : '' }}">
-                  <a href="{{ route('pak.index')}}">    
+              @can('pak.view')
+                  <li
+                      class="nav-item {{ request()->routeIs('pak.index') ? 'active' : '' }}">
+                      <a href="{{ route('pak.index')}}">    
                       <span class="icon">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                               xmlns="http://www.w3.org/2000/svg">
@@ -45,9 +46,10 @@
                           </svg>
 
                       </span>
-                      <span class="text">PAK</span>
-                  </a>
-              </li>
+                          <span class="text">PAK</span>
+                      </a>
+                  </li>
+              @endcan
 
               @can('permohonan.view')
                   <li
@@ -70,8 +72,9 @@
               @endcan
 
 
-              <li class="nav-item {{ request()->routeIs('proyek.index') ? 'active' : '' }}">
-                  <a href="{{ route('proyek.index') }}">
+              @can('proyek.view')
+                  <li class="nav-item {{ request()->routeIs('proyek.index') ? 'active' : '' }}">
+                      <a href="{{ route('proyek.index') }}">
                       <span class="icon">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                               xmlns="http://www.w3.org/2000/svg" transform="rotate(0 0 0)">
@@ -81,9 +84,10 @@
                           </svg>
 
                       </span>
-                      <span class="text">Proyek</span>
-                  </a>
-              </li>
+                          <span class="text">Proyek</span>
+                      </a>
+                  </li>
+              @endcan
 
               {{-- <li class="nav-item {{ request()->routeIs('invoice.*') ? 'active' : '' }}">
                   <a href="{{ route('invoice.index') }}">
@@ -100,9 +104,10 @@
               </li> --}}
 
 
-              <li
-                  class="nav-item {{ request()->routeIs('pembayaran.index') || request()->routeIs('pembayaran.create') ? 'active' : '' }}">
-                  <a href="{{ route('pembayaran.index') }}">
+              @can('pembayaran.view')
+                  <li
+                      class="nav-item {{ request()->routeIs('pembayaran.index') || request()->routeIs('pembayaran.create') ? 'active' : '' }}">
+                      <a href="{{ route('pembayaran.index') }}">
                       <span class="icon">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                               xmlns="http://www.w3.org/2000/svg">
@@ -113,9 +118,10 @@
                           </svg>
 
                       </span>
-                      <span class="text">Pembayaran</span>
-                  </a>
-              </li>
+                          <span class="text">Pembayaran</span>
+                      </a>
+                  </li>
+              @endcan
 
 
               <span class="divider">

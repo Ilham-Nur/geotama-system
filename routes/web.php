@@ -26,19 +26,33 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('pak')->name('pak.')->group(function () {
 
-        Route::get('/', [PakController::class, 'index'])->name('index');
+        Route::get('/', [PakController::class, 'index'])
+            ->middleware('permission:pak.view')
+            ->name('index');
 
-        Route::get('/create', [PakController::class, 'create'])->name('create');
+        Route::get('/create', [PakController::class, 'create'])
+            ->middleware('permission:pak.create')
+            ->name('create');
 
-        Route::post('/store', [PakController::class, 'store'])->name('store');
+        Route::post('/store', [PakController::class, 'store'])
+            ->middleware('permission:pak.create')
+            ->name('store');
 
-        Route::get('/{id}', [PakController::class, 'show'])->name('show');
+        Route::get('/{id}', [PakController::class, 'show'])
+            ->middleware('permission:pak.view')
+            ->name('show');
 
-        Route::get('/{id}/edit', [PakController::class, 'edit'])->name('edit');
+        Route::get('/{id}/edit', [PakController::class, 'edit'])
+            ->middleware('permission:pak.edit')
+            ->name('edit');
 
-        Route::put('/{id}', [PakController::class, 'update'])->name('update');
+        Route::put('/{id}', [PakController::class, 'update'])
+            ->middleware('permission:pak.edit')
+            ->name('update');
 
-        Route::post('/{id}/convert', [PakController::class, 'convert'])->name('convert');
+        Route::post('/{id}/convert', [PakController::class, 'convert'])
+            ->middleware('permission:pak.convert')
+            ->name('convert');
     });
 
 
@@ -66,7 +80,29 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:users.delete')
         ->name('users.destroy');
 
-    Route::resource('roles', RoleController::class)->middleware('permission:roles.view');
+    Route::get('/roles', [RoleController::class, 'index'])
+        ->middleware('permission:roles.view')
+        ->name('roles.index');
+
+    Route::get('/roles/create', [RoleController::class, 'create'])
+        ->middleware('permission:roles.create')
+        ->name('roles.create');
+
+    Route::post('/roles', [RoleController::class, 'store'])
+        ->middleware('permission:roles.create')
+        ->name('roles.store');
+
+    Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])
+        ->middleware('permission:roles.edit')
+        ->name('roles.edit');
+
+    Route::put('/roles/{role}', [RoleController::class, 'update'])
+        ->middleware('permission:roles.edit')
+        ->name('roles.update');
+
+    Route::delete('/roles/{role}', [RoleController::class, 'destroy'])
+        ->middleware('permission:roles.delete')
+        ->name('roles.destroy');
 
 
     Route::get('/employees', [EmployeeController::class, 'index'])
@@ -137,22 +173,49 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:permohonan.edit')
         ->name('permohonan.jadikan-project');
 
-    Route::get('/proyek', [ProyekController::class, 'index'])->name('proyek.index');
+    Route::get('/proyek', [ProyekController::class, 'index'])
+        ->middleware('permission:proyek.view')
+        ->name('proyek.index');
+
     Route::get('/proyek/{id}', [ProyekController::class, 'show'])
+        ->middleware('permission:proyek.show')
         ->name('proyek.show');
+
     Route::get('/proyek/{proyek}/pekerjaan/{item}/layanan/{layanan}', [ProyekController::class, 'showPekerjaan'])
+        ->middleware('permission:proyek.show')
         ->name('proyek.pekerjaan.show');
 
-    Route::resource('invoice', InvoiceController::class)->only(['index', 'create', 'store']);
+    Route::get('/invoice', [InvoiceController::class, 'index'])
+        ->middleware('permission:invoice.view')
+        ->name('invoice.index');
+
+    Route::get('/invoice/create', [InvoiceController::class, 'create'])
+        ->middleware('permission:invoice.create')
+        ->name('invoice.create');
+
+    Route::post('/invoice', [InvoiceController::class, 'store'])
+        ->middleware('permission:invoice.store')
+        ->name('invoice.store');
+
     Route::get('/invoice/{invoice}/pdf', [InvoiceController::class, 'exportPdf'])
+        ->middleware('permission:invoice.export_pdf')
         ->name('invoice.export-pdf');
 
     Route::post('/invoice/{invoice}/upload-signed', [InvoiceController::class, 'uploadSignedFile'])
+        ->middleware('permission:invoice.upload_signed')
         ->name('invoice.upload-signed');
 
-    Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran.index');
-    Route::get('/pembayaran/create', [PembayaranController::class, 'create'])->name('pembayaran.create');
-    Route::post('/pembayaran', [PembayaranController::class, 'store'])->name('pembayaran.store');
+    Route::get('/pembayaran', [PembayaranController::class, 'index'])
+        ->middleware('permission:pembayaran.view')
+        ->name('pembayaran.index');
+
+    Route::get('/pembayaran/create', [PembayaranController::class, 'create'])
+        ->middleware('permission:pembayaran.create')
+        ->name('pembayaran.create');
+
+    Route::post('/pembayaran', [PembayaranController::class, 'store'])
+        ->middleware('permission:pembayaran.store')
+        ->name('pembayaran.store');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
