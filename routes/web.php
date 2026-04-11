@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PakController;
 use App\Http\Controllers\PembayaranController;
@@ -66,6 +67,27 @@ Route::middleware('auth')->group(function () {
         ->name('users.destroy');
 
     Route::resource('roles', RoleController::class)->middleware('permission:roles.view');
+
+
+    Route::get('/employees', [EmployeeController::class, 'index'])
+        ->middleware('permission:employees.view')
+        ->name('employees.index');
+
+    Route::post('/employees', [EmployeeController::class, 'store'])
+        ->middleware('permission:employees.create')
+        ->name('employees.store');
+
+    Route::get('/employees/{employee}', [EmployeeController::class, 'show'])
+        ->middleware('permission:employees.edit|employees.view')
+        ->name('employees.show');
+
+    Route::put('/employees/{employee}', [EmployeeController::class, 'update'])
+        ->middleware('permission:employees.edit')
+        ->name('employees.update');
+
+    Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])
+        ->middleware('permission:employees.delete')
+        ->name('employees.destroy');
 
     Route::get('/permohonan', [PermohonanController::class, 'index'])->middleware('permission:dashboard.view')->name('permohonan.index');
     Route::resource('permohonan', PermohonanController::class);

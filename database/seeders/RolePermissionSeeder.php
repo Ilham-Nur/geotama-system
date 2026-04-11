@@ -3,18 +3,20 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
         $permissions = [
-
             'dashboard.view',
 
-            'permohonan.view',
+            'employees.view',
+            'employees.create',
+            'employees.edit',
+            'employees.delete',
 
             'users.view',
             'users.create',
@@ -42,14 +44,18 @@ class RolePermissionSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
-        $superAdmin = Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => 'web']);
+        $superAdmin = Role::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
         $admin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $staff = Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
+        $magang = Role::firstOrCreate(['name' => 'magang', 'guard_name' => 'web']);
 
         $superAdmin->syncPermissions(Permission::all());
 
         $admin->syncPermissions([
             'dashboard.view',
+            'employees.view',
+            'employees.create',
+            'employees.edit',
             'users.view',
             'users.create',
             'users.edit',
@@ -59,7 +65,11 @@ class RolePermissionSeeder extends Seeder
 
         $staff->syncPermissions([
             'dashboard.view',
-            'permohonan.view',
+            'employees.view',
+        ]);
+
+        $magang->syncPermissions([
+            'dashboard.view',
         ]);
     }
 }
