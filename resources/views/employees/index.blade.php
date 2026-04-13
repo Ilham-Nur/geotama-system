@@ -77,6 +77,63 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="generateContractModal" tabindex="-1" aria-labelledby="generateContractModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" id="generate-contract-form">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="generateContractModalLabel">Generate Kontrak</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">Karyawan: <strong id="contract-employee-name">-</strong></p>
+                        <p class="mb-3">Status: <span class="badge bg-secondary text-uppercase" id="contract-employee-status">-</span>
+                        </p>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nomor Kontrak (opsional)</label>
+                            <input type="text" name="contract_number" class="form-control"
+                                placeholder="Kosongkan untuk nomor otomatis">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Tanggal Penandatanganan</label>
+                            <input type="date" name="signing_date" class="form-control" required>
+                        </div>
+
+                        <div class="row g-3" id="period-fields">
+                            <div class="col-md-6">
+                                <label class="form-label">Tanggal Mulai</label>
+                                <input type="date" name="contract_start_date" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tanggal Berakhir</label>
+                                <input type="date" name="contract_end_date" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="mb-3 d-none" id="effective-date-field">
+                            <label class="form-label">Tanggal Efektif Karyawan Tetap</label>
+                            <input type="date" name="effective_date" class="form-control">
+                        </div>
+
+                        <div class="mb-0">
+                            <label class="form-label">Gaji Pokok per Bulan (opsional)</label>
+                            <input type="number" min="0" step="1000" name="salary" class="form-control"
+                                placeholder="Contoh: 5000000">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Generate PDF</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -84,7 +141,9 @@
         $(function() {
             const detailModalElement = document.getElementById('employeeDetailModal');
             const detailModal = new bootstrap.Modal(detailModalElement);
+            const generateContractModal = new bootstrap.Modal(document.getElementById('generateContractModal'));
             const employeeShowUrlTemplate = @json(route('employees.show', ['employee' => '__ID__']));
+            const contractGenerateUrlTemplate = @json(route('employees.contracts.generate', ['employee' => '__ID__']));
 
             function fallbackValue(value) {
                 if (value === null || value === undefined || value === '') {
@@ -223,6 +282,29 @@
                         form.trigger('submit');
                     }
                 });
+            });
+
+            function syncContractFields(status) {
+                const isPermanent = status === 'tetap';
+                $('#period-fields').toggleClass('d-none', isPermanent);
+                $('#effective-date-field').toggleClass('d-none', !isPermanent);
+                $('input[name="contract_start_date"], input[name="contract_end_date"]').prop('required', !isPermanent);
+                $('input[name="effective_date"]').prop('required', isPermanent);
+            }
+
+            $('.btn-generate-contract').on('click', function() {
+                const employeeId = $(this).data('id');
+                const employeeName = $(this).data('name');
+                const employeeStatus = $(this).data('status');
+
+                $('#contract-employee-name').text(employeeName || '-');
+                $('#contract-employee-status').text(employeeStatus || '-');
+                $('#generate-contract-form').attr('action', contractGenerateUrlTemplate.replace('__ID__', employeeId));
+                $('#generate-contract-form')[0].reset();
+                $('input[name="signing_date"]').val('{{ now()->format('Y-m-d') }}');
+                syncContractFields(employeeStatus);
+
+                generateContractModal.show();
             });
         });
     </script>

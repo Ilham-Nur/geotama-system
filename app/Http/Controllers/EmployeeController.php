@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Employee;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
 
@@ -61,6 +64,57 @@ class EmployeeController extends Controller
                 ->values()
                 ->all(),
         ]);
+    }
+
+    public function generateContract(Request $request, Employee $employee)
+    {
+        $validated = $request->validate([
+            'contract_number' => ['nullable', 'string', 'max:100'],
+            'signing_date' => ['required', 'date'],
+            'salary' => ['nullable', 'numeric', 'min:0'],
+            'contract_start_date' => [Rule::requiredIf(in_array($employee->employment_status, ['magang', 'kontrak'], true)), 'nullable', 'date'],
+            'contract_end_date' => [Rule::requiredIf(in_array($employee->employment_status, ['magang', 'kontrak'], true)), 'nullable', 'date', 'after_or_equal:contract_start_date'],
+            'effective_date' => [Rule::requiredIf($employee->employment_status === 'tetap'), 'nullable', 'date'],
+        ]);
+
+        $statusLabel = [
+            'magang' => 'Perjanjian Magang',
+            'kontrak' => 'Perjanjian Kerja Waktu Tertentu (PKWT)',
+            'tetap' => 'Surat Pengangkatan Karyawan Tetap',
+        ][$employee->employment_status] ?? 'Kontrak Kerja';
+
+        $contractNumber = $validated['contract_number']
+            ?? 'CTR/' . $employee->employee_code . '/' . now()->format('Ym') . '/' . str_pad((string) random_int(1, 999), 3, '0', STR_PAD_LEFT);
+
+        $contractData = [
+            'employee' => $employee,
+            'status_label' => $statusLabel,
+            'contract_number' => $contractNumber,
+            'signing_date' => $validated['signing_date'],
+            'contract_start_date' => $validated['contract_start_date'] ?? null,
+            'contract_end_date' => $validated['contract_end_date'] ?? null,
+            'effective_date' => $validated['effective_date'] ?? null,
+            'salary' => $validated['salary'] ?? null,
+        ];
+
+        $pdf = Pdf::loadView('contracts.employee', $contractData)->setPaper('a4');
+        $pdfBinary = $pdf->output();
+        $fileName = Str::slug('kontrak-' . $employee->full_name . '-' . now()->format('YmdHis')) . '.pdf';
+        $filePath = 'employee-documents/contracts/' . $fileName;
+
+        Storage::disk('public')->put($filePath, $pdfBinary);
+
+        $employee->documents()->create([
+            'document_label' => $statusLabel . ' - ' . $contractNumber,
+            'file_path' => $filePath,
+            'file_name' => $fileName,
+            'mime_type' => 'application/pdf',
+            'file_size' => strlen($pdfBinary),
+        ]);
+
+        return redirect()
+            ->route('employees.index')
+            ->with('success', 'Kontrak kerja berhasil digenerate dan tersimpan di dokumen karyawan.');
     }
 
     public function create()

@@ -35,6 +35,14 @@
                             </button>
 
                             @can('employees.edit')
+                                <button type="button" class="btn btn-sm btn-primary btn-generate-contract" title="Generate Kontrak"
+                                    data-id="{{ $employee->id }}" data-name="{{ $employee->full_name }}"
+                                    data-status="{{ $employee->employment_status }}">
+                                    <i class="lni lni-files"></i>
+                                </button>
+                            @endcan
+
+                            @can('employees.edit')
                                 <a href="{{ route('employees.edit', $employee->id) }}" class="btn btn-sm btn-warning" title="Edit">
                                     <i class="lni lni-pencil"></i>
                                 </a>

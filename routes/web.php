@@ -132,6 +132,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:employees.view')
         ->name('employees.show');
 
+    Route::post('/employees/{employee}/contracts/generate', [EmployeeController::class, 'generateContract'])
+        ->middleware('permission:employees.edit')
+        ->name('employees.contracts.generate');
+
     Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])
         ->middleware('permission:employees.edit')
         ->name('employees.edit');
