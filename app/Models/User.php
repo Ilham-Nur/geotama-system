@@ -36,6 +36,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function employee()
+    {
+        return $this->hasOne(Employee::class);
+    }
+
     public function proyeks()
     {
         return $this->belongsToMany(Proyek::class, 'proyek_user', 'user_id', 'proyek_id')

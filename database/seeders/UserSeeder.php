@@ -10,21 +10,18 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // pastikan role sudah ada
-        $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
+        $superAdminRole = Role::firstOrCreate(['name' => 'superadmin']);
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
 
-        // user super admin
         $superAdmin = User::firstOrCreate([
             'name' => 'Super Admin',
             'username' => 'superadmin',
             'email' => 'superadmin@gmail.com',
-            'password' => 'password123', // auto hash (karena cast)
+            'password' => 'password123',
         ]);
 
         $superAdmin->syncRoles($superAdminRole);
 
-        // user admin
         $admin = User::firstOrCreate([
             'name' => 'Admin',
             'username' => 'admin',

@@ -122,12 +122,13 @@
 
                                     {{-- Aksi --}}
                                     <td>
-                                        <a href="{{ route('proyek.show', $proyek->id) }}" class="main-btn btn-sm info-btn">
-                                            Detail
-                                        </a>
-                                        <a href="#" class="main-btn btn-sm warning-btn">
-                                            Edit
-                                        </a>
+                                        @can('proyek.show')
+                                            <a href="{{ route('proyek.show', $proyek->id) }}" class="main-btn btn-sm info-btn">
+                                                Detail
+                                            </a>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endcan
                                     </td>
                                 </tr>
                             @empty

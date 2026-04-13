@@ -1,3 +1,9 @@
+@php
+    $headerProfilePhoto = auth()->user()?->employee?->photo_path
+        ? asset('storage/' . auth()->user()->employee->photo_path)
+        : asset('template/assets/images/profile/profile-image.png');
+@endphp
+
  <!-- ========== header start ========== -->
  <header class="header">
      <div class="container-fluid">
@@ -145,7 +151,7 @@
                              <div class="profile-info">
                                  <div class="info">
                                      <div class="image">
-                                         <img src="{{ asset('template/assets/images/profile/profile-image.png') }}"
+                                         <img src="{{ $headerProfilePhoto }}"
                                              alt="Profile" />
                                      </div>
                                      <div>
@@ -160,7 +166,7 @@
                              <li>
                                  <div class="author-info flex items-center !p-1">
                                      <div class="image">
-                                         <img src="{{ asset('template/assets/images/profile/profile-image.png') }}"
+                                         <img src="{{ $headerProfilePhoto }}"
                                              alt="image">
                                      </div>
                                      <div class="content">
@@ -176,7 +182,7 @@
                              <li class="divider"></li>
 
                              <li>
-                                 <a href="#0">
+                                 <a href="{{ route('profile.show') }}">
                                      <i class="lni lni-user"></i> View Profile
                                  </a>
                              </li>
