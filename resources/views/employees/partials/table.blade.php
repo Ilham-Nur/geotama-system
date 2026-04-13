@@ -2,13 +2,27 @@
     <table class="table">
         <thead>
             <tr>
-                <th width="60">No</th>
-                <th>Kode</th>
-                <th>Nama</th>
-                <th>Posisi</th>
-                <th>Status</th>
-                <th>Akun Sistem</th>
-                <th width="220">Aksi</th>
+                <th width="60">
+                    <h6>No</h6>
+                </th>
+                <th>
+                    <h6>Kode</h6>
+                </th>
+                <th>
+                    <h6>Nama</h6>
+                </th>
+                <th>
+                    <h6>Posisi</h6>
+                </th>
+                <th>
+                    <h6>Status</h6>
+                </th>
+                <th>
+                    <h6>Akun Sistem</h6>
+                </th>
+                <th>
+                    <h6>Aksi</h6>
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -29,30 +43,34 @@
                     </td>
                     <td>
                         <div class="d-flex gap-2 align-items-center">
-                            <button type="button" class="btn btn-sm btn-info text-white btn-employee-detail" title="Detail"
-                                data-id="{{ $employee->id }}">
+                            <button type="button"
+                                class="text-info text-white btn-employee-detail border-0 bg-transparent p-0"
+                                title="Detail" data-id="{{ $employee->id }}">
                                 <i class="lni lni-eye"></i>
                             </button>
 
                             @can('employees.edit')
-                                <button type="button" class="btn btn-sm btn-primary btn-generate-contract" title="Generate Kontrak"
-                                    data-id="{{ $employee->id }}" data-name="{{ $employee->full_name }}"
-                                    data-status="{{ $employee->employment_status }}">
+                                <button type="button"
+                                    class="text-primary btn-generate-contract border-0 bg-transparent p-0"
+                                    title="Generate Kontrak" data-id="{{ $employee->id }}"
+                                    data-name="{{ $employee->full_name }}" data-status="{{ $employee->employment_status }}">
                                     <i class="lni lni-files"></i>
                                 </button>
                             @endcan
 
                             @can('employees.edit')
-                                <a href="{{ route('employees.edit', $employee->id) }}" class="btn btn-sm btn-warning" title="Edit">
+                                <a href="{{ route('employees.edit', $employee->id) }}" class="text-warning" title="Edit">
                                     <i class="lni lni-pencil"></i>
                                 </a>
                             @endcan
 
                             @can('employees.delete')
-                                <form action="{{ route('employees.destroy', $employee->id) }}" method="POST" class="d-inline">
+                                <form action="{{ route('employees.destroy', $employee->id) }}" method="POST"
+                                    class="d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" class="btn btn-sm btn-danger btn-delete-employee" title="Hapus">
+                                    <button type="button"
+                                        class="text-danger btn-delete-employee border-0 bg-transparent p-0" title="Hapus">
                                         <i class="lni lni-trash-can"></i>
                                     </button>
                                 </form>
