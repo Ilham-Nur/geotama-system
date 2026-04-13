@@ -1,3 +1,9 @@
+@php
+    $headerProfilePhoto = auth()->user()?->employee?->photo_path
+        ? asset('storage/' . auth()->user()->employee->photo_path)
+        : asset('template/assets/images/profile/profile-image.png');
+@endphp
+
  <!-- ========== header start ========== -->
  <header class="header">
      <div class="container-fluid">
@@ -145,8 +151,8 @@
                              <div class="profile-info">
                                  <div class="info">
                                      <div class="image">
-                                         <img src="{{ asset('template/assets/images/profile/profile-image.png') }}"
-                                             alt="Profile" />
+                                         <img src="{{ $headerProfilePhoto }}"
+                                             alt="Profile" style="width:50px;height:50px;object-fit:cover;border-radius:50%;" />
                                      </div>
                                      <div>
                                          <h6 class="fw-500">{{ Auth::user()->name ?? 'User' }}</h6>
@@ -160,8 +166,8 @@
                              <li>
                                  <div class="author-info flex items-center !p-1">
                                      <div class="image">
-                                         <img src="{{ asset('template/assets/images/profile/profile-image.png') }}"
-                                             alt="image">
+                                         <img src="{{ $headerProfilePhoto }}"
+                                             alt="image" style="width:40px;height:40px;object-fit:cover;border-radius:50%;">
                                      </div>
                                      <div class="content">
                                          <h4 class="text-sm">{{ Auth::user()->name ?? 'User' }}</h4>
@@ -176,7 +182,7 @@
                              <li class="divider"></li>
 
                              <li>
-                                 <a href="#0">
+                                 <a href="{{ route('profile.show') }}">
                                      <i class="lni lni-user"></i> View Profile
                                  </a>
                              </li>

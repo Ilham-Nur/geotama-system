@@ -8,6 +8,7 @@ use App\Http\Controllers\PakController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PermohonanController;
 use App\Http\Controllers\ProyekController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 
@@ -23,6 +24,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard.index');
     })->name('dashboard');
+
+
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo.update');
+    Route::post('/profile/documents', [ProfileController::class, 'storeDocument'])->name('profile.documents.store');
+    Route::delete('/profile/documents/{document}', [ProfileController::class, 'destroyDocument'])->name('profile.documents.destroy');
 
     Route::prefix('pak')->name('pak.')->group(function () {
 
