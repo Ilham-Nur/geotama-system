@@ -53,11 +53,38 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="employeeDetailModal" tabindex="-1" aria-labelledby="employeeDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="employeeDetailModalLabel">Detail Karyawan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="employee-detail-photo-wrapper" class="mb-3"></div>
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-bordered mb-0">
+                            <tbody id="employee-detail-table-body"></tbody>
+                        </table>
+                    </div>
+                    <h6 class="mb-2">Dokumen</h6>
+                    <div id="employee-detail-documents"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
     <script>
         $(function() {
+            const detailModalElement = document.getElementById('employeeDetailModal');
+            const detailModal = new bootstrap.Modal(detailModalElement);
+
             function fallbackValue(value) {
                 if (value === null || value === undefined || value === '') {
                     return '-';
@@ -78,6 +105,10 @@
             $('.btn-employee-detail').on('click', function() {
                 const employee = $(this).data('employee') || {};
                 const documents = $(this).data('documents') || [];
+                const tableBody = $('#employee-detail-table-body');
+                const documentsContainer = $('#employee-detail-documents');
+                const photoWrapper = $('#employee-detail-photo-wrapper');
+                const modalTitle = $('#employeeDetailModalLabel');
 
                 const fields = [{
                         label: 'Kode Karyawan / NIK',
@@ -153,25 +184,11 @@
                     `<img src="${employee.photo_url}" alt="Foto Karyawan" class="img-thumbnail mb-3" style="max-height: 180px;">` :
                     '<p class="text-muted mb-3 text-start">Foto belum tersedia.</p>';
 
-                Swal.fire({
-                    title: `Detail Karyawan: ${fallbackValue(employee.full_name)}`,
-                    width: 900,
-                    html: `
-                        <div class="mb-3 text-start">
-                            ${photoHtml}
-                        </div>
-                        <div class="table-responsive mb-3">
-                            <table class="table table-sm table-bordered mb-0">
-                                <tbody>
-                                    ${fields.map((field) => renderField(field.label, field.value)).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                        <h6 class="text-start mb-2">Dokumen</h6>
-                        ${documentsHtml}
-                    `,
-                    confirmButtonText: 'Tutup',
-                });
+                modalTitle.text(`Detail Karyawan: ${fallbackValue(employee.full_name)}`);
+                tableBody.html(fields.map((field) => renderField(field.label, field.value)).join(''));
+                documentsContainer.html(documentsHtml);
+                photoWrapper.html(photoHtml);
+                detailModal.show();
             });
 
             $('.btn-delete-employee').on('click', function(e) {
