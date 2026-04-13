@@ -102,9 +102,25 @@
                 `;
             }
 
+            function parseDataPayload(payload, fallback) {
+                if (payload === null || payload === undefined || payload === '') {
+                    return fallback;
+                }
+
+                if (typeof payload === 'string') {
+                    try {
+                        return JSON.parse(payload);
+                    } catch (error) {
+                        return fallback;
+                    }
+                }
+
+                return payload;
+            }
+
             $('.btn-employee-detail').on('click', function() {
-                const employee = $(this).data('employee') || {};
-                const documents = $(this).data('documents') || [];
+                const employee = parseDataPayload($(this).attr('data-employee'), {});
+                const documents = parseDataPayload($(this).attr('data-documents'), []);
                 const tableBody = $('#employee-detail-table-body');
                 const documentsContainer = $('#employee-detail-documents');
                 const photoWrapper = $('#employee-detail-photo-wrapper');
@@ -168,8 +184,10 @@
                     },
                 ];
 
-                const documentsHtml = documents.length ?
-                    `<ul class="list-group text-start">${documents.map((document) => `
+                const normalizedDocuments = Array.isArray(documents) ? documents : [];
+
+                const documentsHtml = normalizedDocuments.length ?
+                    `<ul class="list-group text-start">${normalizedDocuments.map((document) => `
                         <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <div>
                                 <div class="fw-semibold">${fallbackValue(document.document_label)}</div>
