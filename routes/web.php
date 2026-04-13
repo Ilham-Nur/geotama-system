@@ -128,6 +128,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:employees.create')
         ->name('employees.store');
 
+    Route::get('/employees/{employee}', [EmployeeController::class, 'show'])
+        ->middleware('permission:employees.view')
+        ->name('employees.show');
+
     Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])
         ->middleware('permission:employees.edit')
         ->name('employees.edit');

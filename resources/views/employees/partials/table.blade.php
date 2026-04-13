@@ -13,34 +13,6 @@
         </thead>
         <tbody>
             @forelse($employees as $index => $employee)
-                @php
-                    $employeeDetail = [
-                        'employee_code' => $employee->employee_code,
-                        'full_name' => $employee->full_name,
-                        'position' => $employee->position,
-                        'phone' => $employee->phone,
-                        'hire_date' => optional($employee->hire_date)->format('d M Y'),
-                        'employment_status' => $employee->employment_status,
-                        'gender' => $employee->gender,
-                        'birth_place' => $employee->birth_place,
-                        'birth_date' => optional($employee->birth_date)->format('d M Y'),
-                        'identity_number' => $employee->identity_number,
-                        'marital_status' => $employee->marital_status,
-                        'nationality' => $employee->nationality,
-                        'religion' => $employee->religion,
-                        'full_address' => $employee->full_address,
-                        'photo_url' => $employee->photo_path ? asset('storage/' . $employee->photo_path) : null,
-                    ];
-
-                    $documents = $employee->documents
-                        ->map(fn($document) => [
-                            'document_label' => $document->document_label,
-                            'file_name' => $document->file_name,
-                            'file_url' => asset('storage/' . $document->file_path),
-                        ])
-                        ->values()
-                        ->all();
-                @endphp
                 <tr>
                     <td>{{ $employees->firstItem() + $index }}</td>
                     <td>{{ $employee->employee_code }}</td>
@@ -58,8 +30,7 @@
                     <td>
                         <div class="d-flex gap-2 align-items-center">
                             <button type="button" class="btn btn-sm btn-info text-white btn-employee-detail" title="Detail"
-                                data-employee="{{ e(json_encode($employeeDetail)) }}"
-                                data-documents="{{ e(json_encode($documents)) }}">
+                                data-id="{{ $employee->id }}">
                                 <i class="lni lni-eye"></i>
                             </button>
 

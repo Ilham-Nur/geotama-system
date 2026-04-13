@@ -84,6 +84,7 @@
         $(function() {
             const detailModalElement = document.getElementById('employeeDetailModal');
             const detailModal = new bootstrap.Modal(detailModalElement);
+            const employeeShowUrlTemplate = @json(route('employees.show', ['employee' => '__ID__']));
 
             function fallbackValue(value) {
                 if (value === null || value === undefined || value === '') {
@@ -102,111 +103,108 @@
                 `;
             }
 
-            function parseDataPayload(payload, fallback) {
-                if (payload === null || payload === undefined || payload === '') {
-                    return fallback;
-                }
-
-                if (typeof payload === 'string') {
-                    try {
-                        return JSON.parse(payload);
-                    } catch (error) {
-                        return fallback;
-                    }
-                }
-
-                return payload;
-            }
-
             $('.btn-employee-detail').on('click', function() {
-                const employee = parseDataPayload($(this).attr('data-employee'), {});
-                const documents = parseDataPayload($(this).attr('data-documents'), []);
+                const employeeId = $(this).data('id');
                 const tableBody = $('#employee-detail-table-body');
                 const documentsContainer = $('#employee-detail-documents');
                 const photoWrapper = $('#employee-detail-photo-wrapper');
                 const modalTitle = $('#employeeDetailModalLabel');
+                const requestUrl = employeeShowUrlTemplate.replace('__ID__', employeeId);
 
-                const fields = [{
-                        label: 'Kode Karyawan / NIK',
-                        value: employee.employee_code
-                    },
-                    {
-                        label: 'Nama Lengkap',
-                        value: employee.full_name
-                    },
-                    {
-                        label: 'Posisi',
-                        value: employee.position
-                    },
-                    {
-                        label: 'No Telepon',
-                        value: employee.phone
-                    },
-                    {
-                        label: 'Tanggal Bergabung',
-                        value: employee.hire_date
-                    },
-                    {
-                        label: 'Status Kepegawaian',
-                        value: employee.employment_status
-                    },
-                    {
-                        label: 'Jenis Kelamin',
-                        value: employee.gender
-                    },
-                    {
-                        label: 'Tempat Lahir',
-                        value: employee.birth_place
-                    },
-                    {
-                        label: 'Tanggal Lahir',
-                        value: employee.birth_date
-                    },
-                    {
-                        label: 'No. KTP / Identitas',
-                        value: employee.identity_number
-                    },
-                    {
-                        label: 'Status Pernikahan',
-                        value: employee.marital_status
-                    },
-                    {
-                        label: 'Kewarganegaraan',
-                        value: employee.nationality
-                    },
-                    {
-                        label: 'Agama',
-                        value: employee.religion
-                    },
-                    {
-                        label: 'Alamat Lengkap',
-                        value: employee.full_address
-                    },
-                ];
-
-                const normalizedDocuments = Array.isArray(documents) ? documents : [];
-
-                const documentsHtml = normalizedDocuments.length ?
-                    `<ul class="list-group text-start">${normalizedDocuments.map((document) => `
-                        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <div>
-                                <div class="fw-semibold">${fallbackValue(document.document_label)}</div>
-                                <small class="text-muted">${fallbackValue(document.file_name)}</small>
-                            </div>
-                            <a href="${document.file_url}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat</a>
-                        </li>`).join('')}
-                    </ul>` :
-                    '<p class="text-muted mb-0 text-start">Tidak ada dokumen.</p>';
-
-                const photoHtml = employee.photo_url ?
-                    `<img src="${employee.photo_url}" alt="Foto Karyawan" class="img-thumbnail mb-3" style="max-height: 180px;">` :
-                    '<p class="text-muted mb-3 text-start">Foto belum tersedia.</p>';
-
-                modalTitle.text(`Detail Karyawan: ${fallbackValue(employee.full_name)}`);
-                tableBody.html(fields.map((field) => renderField(field.label, field.value)).join(''));
-                documentsContainer.html(documentsHtml);
-                photoWrapper.html(photoHtml);
+                modalTitle.text('Detail Karyawan');
+                tableBody.html('<tr><td class="text-center text-muted py-3" colspan="2">Memuat data...</td></tr>');
+                documentsContainer.html('<p class="text-muted mb-0">Memuat dokumen...</p>');
+                photoWrapper.html('');
                 detailModal.show();
+
+                $.get(requestUrl)
+                    .done(function(employee) {
+                        const fields = [{
+                                label: 'Kode Karyawan / NIK',
+                                value: employee.employee_code
+                            },
+                            {
+                                label: 'Nama Lengkap',
+                                value: employee.full_name
+                            },
+                            {
+                                label: 'Posisi',
+                                value: employee.position
+                            },
+                            {
+                                label: 'No Telepon',
+                                value: employee.phone
+                            },
+                            {
+                                label: 'Tanggal Bergabung',
+                                value: employee.hire_date
+                            },
+                            {
+                                label: 'Status Kepegawaian',
+                                value: employee.employment_status
+                            },
+                            {
+                                label: 'Jenis Kelamin',
+                                value: employee.gender
+                            },
+                            {
+                                label: 'Tempat Lahir',
+                                value: employee.birth_place
+                            },
+                            {
+                                label: 'Tanggal Lahir',
+                                value: employee.birth_date
+                            },
+                            {
+                                label: 'No. KTP / Identitas',
+                                value: employee.identity_number
+                            },
+                            {
+                                label: 'Status Pernikahan',
+                                value: employee.marital_status
+                            },
+                            {
+                                label: 'Kewarganegaraan',
+                                value: employee.nationality
+                            },
+                            {
+                                label: 'Agama',
+                                value: employee.religion
+                            },
+                            {
+                                label: 'Alamat Lengkap',
+                                value: employee.full_address
+                            },
+                        ];
+
+                        const normalizedDocuments = Array.isArray(employee.documents) ? employee.documents : [];
+                        const documentsHtml = normalizedDocuments.length ?
+                            `<ul class="list-group text-start">${normalizedDocuments.map((document) => `
+                                <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <div class="fw-semibold">${fallbackValue(document.document_label)}</div>
+                                        <small class="text-muted">${fallbackValue(document.file_name)}</small>
+                                    </div>
+                                    <a href="${document.file_url}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat</a>
+                                </li>`).join('')}
+                            </ul>` :
+                            '<p class="text-muted mb-0 text-start">Tidak ada dokumen.</p>';
+
+                        const photoHtml = employee.photo_url ?
+                            `<img src="${employee.photo_url}" alt="Foto Karyawan" class="img-thumbnail mb-3" style="max-height: 180px;">` :
+                            '<p class="text-muted mb-3 text-start">Foto belum tersedia.</p>';
+
+                        modalTitle.text(`Detail Karyawan: ${fallbackValue(employee.full_name)}`);
+                        tableBody.html(fields.map((field) => renderField(field.label, field.value)).join(''));
+                        documentsContainer.html(documentsHtml);
+                        photoWrapper.html(photoHtml);
+                    })
+                    .fail(function() {
+                        modalTitle.text('Detail Karyawan');
+                        tableBody.html('<tr><td class="text-center text-danger py-3" colspan="2">Gagal memuat data karyawan.</td></tr>');
+                        documentsContainer.html('<p class="text-danger mb-0">Dokumen gagal dimuat.</p>');
+                        photoWrapper.html('');
+                    });
             });
 
             $('.btn-delete-employee').on('click', function(e) {

@@ -15,7 +15,7 @@ class EmployeeController extends Controller
         $search = $request->string('search')->toString();
 
         $employees = Employee::query()
-            ->with(['user.roles', 'documents'])
+            ->with('user.roles')
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery->where('full_name', 'like', "%{$search}%")
@@ -29,6 +29,38 @@ class EmployeeController extends Controller
             ->withQueryString();
 
         return view('employees.index', compact('employees', 'search'));
+    }
+
+    public function show(Employee $employee)
+    {
+        $employee->load(['user.roles', 'documents']);
+
+        return response()->json([
+            'id' => $employee->id,
+            'employee_code' => $employee->employee_code,
+            'full_name' => $employee->full_name,
+            'position' => $employee->position,
+            'phone' => $employee->phone,
+            'hire_date' => optional($employee->hire_date)->format('d M Y'),
+            'employment_status' => $employee->employment_status,
+            'gender' => $employee->gender,
+            'birth_place' => $employee->birth_place,
+            'birth_date' => optional($employee->birth_date)->format('d M Y'),
+            'identity_number' => $employee->identity_number,
+            'marital_status' => $employee->marital_status,
+            'nationality' => $employee->nationality,
+            'religion' => $employee->religion,
+            'full_address' => $employee->full_address,
+            'photo_url' => $employee->photo_path ? asset('storage/' . $employee->photo_path) : null,
+            'documents' => $employee->documents
+                ->map(fn($document) => [
+                    'document_label' => $document->document_label,
+                    'file_name' => $document->file_name,
+                    'file_url' => asset('storage/' . $document->file_path),
+                ])
+                ->values()
+                ->all(),
+        ]);
     }
 
     public function create()
