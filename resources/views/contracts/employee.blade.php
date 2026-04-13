@@ -74,17 +74,17 @@
         <tr>
             <td width="35%">Nama Perusahaan</td>
             <td width="5%">:</td>
-            <td>PT. [Nama Perusahaan]</td>
+            <td>PT. Geotama Global Intijaya</td>
         </tr>
         <tr>
             <td>Alamat Perusahaan</td>
             <td>:</td>
-            <td>[Alamat Perusahaan]</td>
+            <td>Tanjung Buntung Block A1 No. 10 Kec. Bengkong Batam - Indonesia</td>
         </tr>
         <tr>
             <td>Penandatangan Perusahaan</td>
             <td>:</td>
-            <td>[Nama Penanggung Jawab]</td>
+            <td>Direktur Perusahaan</td>
         </tr>
     </table>
 
@@ -159,7 +159,7 @@
         <tr>
             <td>
                 Pihak Pertama<br>
-                PT. [Nama Perusahaan]
+                PT. Geotama Global Intijaya
                 <div class="placeholder">(_____________________)</div>
             </td>
             <td>
