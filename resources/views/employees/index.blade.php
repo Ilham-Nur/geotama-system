@@ -63,8 +63,8 @@
                 </div>
                 <div class="modal-body">
                     <div id="employee-detail-photo-wrapper" class="mb-3"></div>
-                    <div class="table-responsive mb-3">
-                        <table class="table table-sm table-bordered mb-0">
+                    <div class="table-wrapper table-responsive mb-3">
+                        <table class="table mb-0">
                             <tbody id="employee-detail-table-body"></tbody>
                         </table>
                     </div>
