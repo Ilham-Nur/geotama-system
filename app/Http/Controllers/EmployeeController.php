@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\EmployeeContract;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -36,7 +37,7 @@ class EmployeeController extends Controller
 
     public function show(Employee $employee)
     {
-        $employee->load(['user.roles', 'documents']);
+        $employee->load(['user.roles', 'documents', 'contracts']);
 
         return response()->json([
             'id' => $employee->id,
@@ -62,6 +63,20 @@ class EmployeeController extends Controller
                     'file_url' => asset('storage/' . $document->file_path),
                 ])
                 ->values()
+                ->all(),
+            'contracts' => $employee->contracts
+                ->sortByDesc('created_at')
+                ->values()
+                ->map(fn($contract) => [
+                    'id' => $contract->id,
+                    'contract_type' => $contract->contract_type,
+                    'contract_number' => $contract->contract_number,
+                    'signing_date' => optional($contract->signing_date)->format('d M Y'),
+                    'generated_file_url' => asset('storage/' . $contract->generated_file_path),
+                    'generated_file_name' => $contract->generated_file_name,
+                    'hardcopy_file_url' => $contract->hardcopy_file_path ? asset('storage/' . $contract->hardcopy_file_path) : null,
+                    'hardcopy_file_name' => $contract->hardcopy_file_name,
+                ])
                 ->all(),
         ]);
     }
@@ -100,21 +115,54 @@ class EmployeeController extends Controller
         $pdf = Pdf::loadView('contracts.employee', $contractData)->setPaper('a4');
         $pdfBinary = $pdf->output();
         $fileName = Str::slug('kontrak-' . $employee->full_name . '-' . now()->format('YmdHis')) . '.pdf';
-        $filePath = 'employee-documents/contracts/' . $fileName;
+        $filePath = 'employee-contracts/generated/' . $fileName;
 
         Storage::disk('public')->put($filePath, $pdfBinary);
 
-        $employee->documents()->create([
-            'document_label' => $statusLabel . ' - ' . $contractNumber,
-            'file_path' => $filePath,
-            'file_name' => $fileName,
-            'mime_type' => 'application/pdf',
-            'file_size' => strlen($pdfBinary),
+        $employee->contracts()->create([
+            'contract_type' => $employee->employment_status,
+            'contract_number' => $contractNumber,
+            'signing_date' => $validated['signing_date'],
+            'contract_start_date' => $validated['contract_start_date'] ?? null,
+            'contract_end_date' => $validated['contract_end_date'] ?? null,
+            'effective_date' => $validated['effective_date'] ?? null,
+            'salary' => $validated['salary'] ?? null,
+            'generated_file_path' => $filePath,
+            'generated_file_name' => $fileName,
+            'generated_file_size' => strlen($pdfBinary),
         ]);
 
         return redirect()
             ->route('employees.index')
-            ->with('success', 'Kontrak kerja berhasil digenerate dan tersimpan di dokumen karyawan.');
+            ->with('success', 'Kontrak kerja berhasil digenerate dan tersimpan di arsip kontrak karyawan.');
+    }
+
+    public function uploadContractHardcopy(Request $request, Employee $employee, EmployeeContract $contract)
+    {
+        if ($contract->employee_id !== $employee->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'hardcopy_file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+        ]);
+
+        if ($contract->hardcopy_file_path && Storage::disk('public')->exists($contract->hardcopy_file_path)) {
+            Storage::disk('public')->delete($contract->hardcopy_file_path);
+        }
+
+        $hardcopy = $validated['hardcopy_file'];
+        $hardcopyPath = $hardcopy->store('employee-contracts/hardcopy', 'public');
+
+        $contract->update([
+            'hardcopy_file_path' => $hardcopyPath,
+            'hardcopy_file_name' => $hardcopy->getClientOriginalName(),
+            'hardcopy_file_size' => $hardcopy->getSize(),
+        ]);
+
+        return redirect()
+            ->route('employees.index')
+            ->with('success', 'Hardcopy kontrak berhasil diupload.');
     }
 
     public function create()
