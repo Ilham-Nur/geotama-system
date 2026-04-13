@@ -68,7 +68,9 @@
                             <tbody id="employee-detail-table-body"></tbody>
                         </table>
                     </div>
-                    <h6 class="mb-2">Dokumen</h6>
+                    <h6 class="mb-2">Arsip Kontrak (Admin)</h6>
+                    <div id="employee-detail-contracts" class="mb-4"></div>
+                    <h6 class="mb-2">Dokumen Lain</h6>
                     <div id="employee-detail-documents"></div>
                 </div>
                 <div class="modal-footer">
@@ -134,6 +136,31 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="uploadHardcopyModal" tabindex="-1" aria-labelledby="uploadHardcopyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="POST" id="upload-hardcopy-form" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadHardcopyModalLabel">Upload Hardcopy Kontrak</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-2">Kontrak: <strong id="hardcopy-contract-title">-</strong></p>
+                        <div class="mb-0">
+                            <label class="form-label">File Hardcopy (PDF/JPG/PNG, maks 5MB)</label>
+                            <input type="file" name="hardcopy_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -142,8 +169,10 @@
             const detailModalElement = document.getElementById('employeeDetailModal');
             const detailModal = new bootstrap.Modal(detailModalElement);
             const generateContractModal = new bootstrap.Modal(document.getElementById('generateContractModal'));
+            const uploadHardcopyModal = new bootstrap.Modal(document.getElementById('uploadHardcopyModal'));
             const employeeShowUrlTemplate = @json(route('employees.show', ['employee' => '__ID__']));
             const contractGenerateUrlTemplate = @json(route('employees.contracts.generate', ['employee' => '__ID__']));
+            const contractHardcopyUploadTemplate = @json(route('employees.contracts.hardcopy.upload', ['employee' => '__EMP__', 'contract' => '__CTR__']));
 
             function fallbackValue(value) {
                 if (value === null || value === undefined || value === '') {
@@ -166,12 +195,14 @@
                 const employeeId = $(this).data('id');
                 const tableBody = $('#employee-detail-table-body');
                 const documentsContainer = $('#employee-detail-documents');
+                const contractsContainer = $('#employee-detail-contracts');
                 const photoWrapper = $('#employee-detail-photo-wrapper');
                 const modalTitle = $('#employeeDetailModalLabel');
                 const requestUrl = employeeShowUrlTemplate.replace('__ID__', employeeId);
 
                 modalTitle.text('Detail Karyawan');
                 tableBody.html('<tr><td class="text-center text-muted py-3" colspan="2">Memuat data...</td></tr>');
+                contractsContainer.html('<p class="text-muted mb-0">Memuat kontrak...</p>');
                 documentsContainer.html('<p class="text-muted mb-0">Memuat dokumen...</p>');
                 photoWrapper.html('');
                 detailModal.show();
@@ -237,6 +268,7 @@
                         ];
 
                         const normalizedDocuments = Array.isArray(employee.documents) ? employee.documents : [];
+                        const normalizedContracts = Array.isArray(employee.contracts) ? employee.contracts : [];
                         const documentsHtml = normalizedDocuments.length ?
                             `<ul class="list-group text-start">${normalizedDocuments.map((document) => `
                                 <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -249,21 +281,60 @@
                             </ul>` :
                             '<p class="text-muted mb-0 text-start">Tidak ada dokumen.</p>';
 
+                        const contractsHtml = normalizedContracts.length ?
+                            `<ul class="list-group text-start">${normalizedContracts.map((contract) => `
+                                <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <div class="fw-semibold">${fallbackValue(contract.contract_number)}</div>
+                                        <small class="text-muted d-block">${fallbackValue(contract.contract_type)} • ${fallbackValue(contract.signing_date)}</small>
+                                        <small class="text-muted d-block">File Generate: ${fallbackValue(contract.generated_file_name)}</small>
+                                        <small class="text-muted d-block">Hardcopy: ${fallbackValue(contract.hardcopy_file_name)}</small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a href="${contract.generated_file_url}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat PDF</a>
+                                        ${contract.hardcopy_file_url ? `<a href="${contract.hardcopy_file_url}" target="_blank" class="btn btn-sm btn-outline-success">Lihat Hardcopy</a>` : ''}
+                                        <button type="button" class="btn btn-sm btn-outline-dark btn-upload-hardcopy"
+                                            data-employee-id="${employee.id}"
+                                            data-contract-id="${contract.id}"
+                                            data-contract-number="${fallbackValue(contract.contract_number)}">
+                                            Upload Hardcopy
+                                        </button>
+                                    </div>
+                                </li>`).join('')}
+                            </ul>` :
+                            '<p class="text-muted mb-0 text-start">Belum ada kontrak.</p>';
+
                         const photoHtml = employee.photo_url ?
                             `<img src="${employee.photo_url}" alt="Foto Karyawan" class="img-thumbnail mb-3" style="max-height: 180px;">` :
                             '<p class="text-muted mb-3 text-start">Foto belum tersedia.</p>';
 
                         modalTitle.text(`Detail Karyawan: ${fallbackValue(employee.full_name)}`);
                         tableBody.html(fields.map((field) => renderField(field.label, field.value)).join(''));
+                        contractsContainer.html(contractsHtml);
                         documentsContainer.html(documentsHtml);
                         photoWrapper.html(photoHtml);
                     })
                     .fail(function() {
                         modalTitle.text('Detail Karyawan');
                         tableBody.html('<tr><td class="text-center text-danger py-3" colspan="2">Gagal memuat data karyawan.</td></tr>');
+                        contractsContainer.html('<p class="text-danger mb-0">Arsip kontrak gagal dimuat.</p>');
                         documentsContainer.html('<p class="text-danger mb-0">Dokumen gagal dimuat.</p>');
                         photoWrapper.html('');
                     });
+            });
+
+            $(document).on('click', '.btn-upload-hardcopy', function() {
+                const employeeId = $(this).data('employee-id');
+                const contractId = $(this).data('contract-id');
+                const contractNumber = $(this).data('contract-number');
+                const actionUrl = contractHardcopyUploadTemplate
+                    .replace('__EMP__', employeeId)
+                    .replace('__CTR__', contractId);
+
+                $('#upload-hardcopy-form').attr('action', actionUrl);
+                $('#upload-hardcopy-form')[0].reset();
+                $('#hardcopy-contract-title').text(contractNumber || '-');
+                uploadHardcopyModal.show();
             });
 
             $('.btn-delete-employee').on('click', function(e) {

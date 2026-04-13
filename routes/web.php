@@ -136,6 +136,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:employees.edit')
         ->name('employees.contracts.generate');
 
+    Route::post('/employees/{employee}/contracts/{contract}/hardcopy', [EmployeeController::class, 'uploadContractHardcopy'])
+        ->middleware('permission:employees.edit')
+        ->name('employees.contracts.hardcopy.upload');
+
     Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])
         ->middleware('permission:employees.edit')
         ->name('employees.edit');
