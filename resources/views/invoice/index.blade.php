@@ -40,9 +40,11 @@
             </div>
 
             <div class="col-md-6 mb-30 text-end">
-                <a href="{{ route('invoice.create') }}" class="btn btn-primary">
-                    + Buat Invoice
-                </a>
+                @can('invoice.create')
+                    <a href="{{ route('invoice.create') }}" class="btn btn-primary">
+                        + Buat Invoice
+                    </a>
+                @endcan
             </div>
         </div>
 
@@ -125,10 +127,12 @@
                                                         @endif
 
                                                         <div class="mt-1">
-                                                            <a href="{{ route('invoice.export-pdf', $invoice->id) }}"
-                                                                class="text-warning" title="Export PDF" target="_blank">
-                                                                <i class="lni lni-download"></i>
-                                                            </a>
+                                                            @can('invoice.export_pdf')
+                                                                <a href="{{ route('invoice.export-pdf', $invoice->id) }}"
+                                                                    class="text-warning" title="Export PDF" target="_blank">
+                                                                    <i class="lni lni-download"></i>
+                                                                </a>
+                                                            @endcan
                                                         </div>
                                                     </div>
                                                 </div>

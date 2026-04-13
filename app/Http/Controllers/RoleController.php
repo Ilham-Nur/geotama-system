@@ -79,7 +79,7 @@ class RoleController extends Controller
 
     public function destroy(Role $role)
     {
-        if ($role->name === 'super-admin') {
+        if (in_array($role->name, ['super-admin', 'superadmin'], true)) {
             return redirect()
                 ->route('roles.index')
                 ->with('error', 'Role super-admin tidak boleh dihapus.');

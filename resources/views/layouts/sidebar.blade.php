@@ -15,9 +15,10 @@
 
               {{-- MENU GEOTAMA SYSTEM --}}
 
-              <li
-                  class="nav-item {{ request()->routeIs('pak.index') ? 'active' : '' }}">
-                  <a href="{{ route('pak.index')}}">    
+              @can('pak.view')
+                  <li
+                      class="nav-item {{ request()->routeIs('pak.index') ? 'active' : '' }}">
+                      <a href="{{ route('pak.index')}}">    
                       <span class="icon">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                               xmlns="http://www.w3.org/2000/svg">
@@ -45,13 +46,15 @@
                           </svg>
 
                       </span>
-                      <span class="text">PAK</span>
-                  </a>
-              </li>
+                          <span class="text">PAK</span>
+                      </a>
+                  </li>
+              @endcan
 
-              <li
-                  class="nav-item {{ request()->routeIs('permohonan.index') || request()->routeIs('permohonan.create') || request()->routeIs('permohonan.edit') ? 'active' : '' }}">
-                  <a href="{{ route('permohonan.index') }}">
+              @can('permohonan.view')
+                  <li
+                      class="nav-item {{ request()->routeIs('permohonan.index') || request()->routeIs('permohonan.create') || request()->routeIs('permohonan.edit') ? 'active' : '' }}">
+                      <a href="{{ route('permohonan.index') }}">
                       <span class="icon">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                               xmlns="http://www.w3.org/2000/svg">
@@ -63,13 +66,15 @@
                                   fill="currentColor" />
                           </svg>
                       </span>
-                      <span class="text">Permohonan</span>
-                  </a>
-              </li>
+                          <span class="text">Permohonan</span>
+                      </a>
+                  </li>
+              @endcan
 
 
-              <li class="nav-item {{ request()->routeIs('proyek.index') ? 'active' : '' }}">
-                  <a href="{{ route('proyek.index') }}">
+              @can('proyek.view')
+                  <li class="nav-item {{ request()->routeIs('proyek.index') ? 'active' : '' }}">
+                      <a href="{{ route('proyek.index') }}">
                       <span class="icon">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                               xmlns="http://www.w3.org/2000/svg" transform="rotate(0 0 0)">
@@ -79,9 +84,10 @@
                           </svg>
 
                       </span>
-                      <span class="text">Proyek</span>
-                  </a>
-              </li>
+                          <span class="text">Proyek</span>
+                      </a>
+                  </li>
+              @endcan
 
               {{-- <li class="nav-item {{ request()->routeIs('invoice.*') ? 'active' : '' }}">
                   <a href="{{ route('invoice.index') }}">
@@ -98,9 +104,10 @@
               </li> --}}
 
 
-              <li
-                  class="nav-item {{ request()->routeIs('pembayaran.index') || request()->routeIs('pembayaran.create') ? 'active' : '' }}">
-                  <a href="{{ route('pembayaran.index') }}">
+              @can('pembayaran.view')
+                  <li
+                      class="nav-item {{ request()->routeIs('pembayaran.index') || request()->routeIs('pembayaran.create') ? 'active' : '' }}">
+                      <a href="{{ route('pembayaran.index') }}">
                       <span class="icon">
                           <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                               xmlns="http://www.w3.org/2000/svg">
@@ -111,14 +118,32 @@
                           </svg>
 
                       </span>
-                      <span class="text">Pembayaran</span>
-                  </a>
-              </li>
+                          <span class="text">Pembayaran</span>
+                      </a>
+                  </li>
+              @endcan
 
 
               <span class="divider">
                   <hr />
               </span>
+
+
+              @can('employees.view')
+                  <li class="nav-item {{ request()->routeIs('employees.*') ? 'active' : '' }}">
+                      <a href="{{ route('employees.index') }}">
+                          <span class="icon">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M7.5 7.5C7.5 5.84315 8.84315 4.5 10.5 4.5C12.1569 4.5 13.5 5.84315 13.5 7.5C13.5 9.15685 12.1569 10.5 10.5 10.5C8.84315 10.5 7.5 9.15685 7.5 7.5Z" fill="currentColor"/>
+                                  <path d="M3.75 17.25C3.75 14.7647 5.76472 12.75 8.25 12.75H12.75C15.2353 12.75 17.25 14.7647 17.25 17.25C17.25 17.6642 16.9142 18 16.5 18H4.5C4.08579 18 3.75 17.6642 3.75 17.25Z" fill="currentColor"/>
+                                  <path d="M16.5 8.25C16.5 6.80025 17.6753 5.625 19.125 5.625C20.5747 5.625 21.75 6.80025 21.75 8.25C21.75 9.69975 20.5747 10.875 19.125 10.875C17.6753 10.875 16.5 9.69975 16.5 8.25Z" fill="currentColor" opacity="0.5"/>
+                                  <path d="M18 13.5H20.25C21.4926 13.5 22.5 14.5074 22.5 15.75V17.25C22.5 17.6642 22.1642 18 21.75 18H18" fill="currentColor" opacity="0.5"/>
+                              </svg>
+                          </span>
+                          <span class="text">Karyawan</span>
+                      </a>
+                  </li>
+              @endcan
 
               @can('users.view')
                   <li class="nav-item {{ request()->routeIs('users.*') ? 'active' : '' }}">

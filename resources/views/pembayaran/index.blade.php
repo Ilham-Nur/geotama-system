@@ -86,10 +86,12 @@
                                     <span class="badge bg-warning text-dark">Belum Ada Invoice</span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('invoice.create', ['proyek_id' => $row->id]) }}"
-                                        class="btn btn-sm btn-primary">
-                                        Buat Invoice
-                                    </a>
+                                    @can('invoice.create')
+                                        <a href="{{ route('invoice.create', ['proyek_id' => $row->id]) }}"
+                                            class="btn btn-sm btn-primary">
+                                            Buat Invoice
+                                        </a>
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach
@@ -106,12 +108,16 @@
             </div>
 
             <div class="text-end">
-                <a href="{{ route('invoice.create') }}" class="btn btn-outline-primary me-2">
-                    + Buat Invoice
-                </a>
-                <a href="{{ route('pembayaran.create') }}" class="btn btn-primary">
-                    + Tambah Pembayaran
-                </a>
+                @can('invoice.create')
+                    <a href="{{ route('invoice.create') }}" class="btn btn-outline-primary me-2">
+                        + Buat Invoice
+                    </a>
+                @endcan
+                @can('pembayaran.create')
+                    <a href="{{ route('pembayaran.create') }}" class="btn btn-primary">
+                        + Tambah Pembayaran
+                    </a>
+                @endcan
             </div>
         </div>
 
@@ -248,31 +254,37 @@
                                                                         </a>
                                                                     @endif
 
-                                                                    <button type="button"
-                                                                        class="border-0 bg-transparent text-primary me-2 btn-upload-signed"
-                                                                        title="Upload Hardcopy Signed"
-                                                                        data-bs-toggle="modal"
-                                                                        data-bs-target="#uploadSignedModal"
-                                                                        data-id="{{ $invoice->id }}"
-                                                                        data-no_invoice="{{ $invoice->no_invoice }}"
-                                                                        data-upload_url="{{ route('invoice.upload-signed', $invoice->id) }}"
-                                                                        data-file_url="{{ $invoice->file_invoice_signed ? asset('storage/' . $invoice->file_invoice_signed) : '' }}">
-                                                                        <i class="lni lni-upload"></i>
-                                                                    </button>
+                                                                    @can('invoice.upload_signed')
+                                                                        <button type="button"
+                                                                            class="border-0 bg-transparent text-primary me-2 btn-upload-signed"
+                                                                            title="Upload Hardcopy Signed"
+                                                                            data-bs-toggle="modal"
+                                                                            data-bs-target="#uploadSignedModal"
+                                                                            data-id="{{ $invoice->id }}"
+                                                                            data-no_invoice="{{ $invoice->no_invoice }}"
+                                                                            data-upload_url="{{ route('invoice.upload-signed', $invoice->id) }}"
+                                                                            data-file_url="{{ $invoice->file_invoice_signed ? asset('storage/' . $invoice->file_invoice_signed) : '' }}">
+                                                                            <i class="lni lni-upload"></i>
+                                                                        </button>
+                                                                    @endcan
 
-                                                                    <a href="{{ route('invoice.export-pdf', $invoice->id) }}"
-                                                                        class="text-warning me-2" title="Export PDF"
-                                                                        target="_blank">
-                                                                        <i class="lni lni-download"></i>
-                                                                    </a>
-                                                                    
-                                                                    @if ($statusPembayaran == 'belum_bayar')
-                                                                        <a href="{{ route('pembayaran.create', ['invoice_id' => $invoice->id]) }}"
-                                                                            class="text-success me-2"
-                                                                            title="Tambah Pembayaran">
-                                                                            <i class="lni lni-plus"></i>
+                                                                    @can('invoice.export_pdf')
+                                                                        <a href="{{ route('invoice.export-pdf', $invoice->id) }}"
+                                                                            class="text-warning me-2" title="Export PDF"
+                                                                            target="_blank">
+                                                                            <i class="lni lni-download"></i>
                                                                         </a>
-                                                                    @endif
+                                                                    @endcan
+                                                                    
+                                                                    @can('pembayaran.create')
+                                                                        @if ($statusPembayaran == 'belum_bayar')
+                                                                            <a href="{{ route('pembayaran.create', ['invoice_id' => $invoice->id]) }}"
+                                                                                class="text-success me-2"
+                                                                                title="Tambah Pembayaran">
+                                                                                <i class="lni lni-plus"></i>
+                                                                            </a>
+                                                                        @endif
+                                                                    @endcan
                                                                 </div>
                                                             </div>
                                                         </div>

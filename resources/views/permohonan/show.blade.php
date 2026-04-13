@@ -250,15 +250,19 @@
                     Lihat Proyek
                 </a>
             @else
-                <button type="button" class="main-btn success-btn" data-bs-toggle="modal"
-                    data-bs-target="#projectModal">
-                    Jadikan proyek
-                </button>
+                @can('permohonan.edit')
+                    <button type="button" class="main-btn success-btn" data-bs-toggle="modal"
+                        data-bs-target="#projectModal">
+                        Jadikan proyek
+                    </button>
+                @endcan
             @endif
 
-            <a href="{{ route('permohonan.edit', $permohonan->id) }}" class="main-btn primary-btn btn-hover">
-                Edit
-            </a>
+            @can('permohonan.edit')
+                <a href="{{ route('permohonan.edit', $permohonan->id) }}" class="main-btn primary-btn btn-hover">
+                    Edit
+                </a>
+            @endcan
             <a href="{{ route('permohonan.index') }}" class="main-btn light-btn btn-hover">
                 Kembali
             </a>
