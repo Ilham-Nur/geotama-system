@@ -58,6 +58,122 @@
 @push('scripts')
     <script>
         $(function() {
+            function fallbackValue(value) {
+                if (value === null || value === undefined || value === '') {
+                    return '-';
+                }
+
+                return value;
+            }
+
+            function renderField(label, value) {
+                return `
+                    <tr>
+                        <th class="text-start pe-3" style="width: 220px;">${label}</th>
+                        <td class="text-start">${fallbackValue(value)}</td>
+                    </tr>
+                `;
+            }
+
+            $('.btn-employee-detail').on('click', function() {
+                const employee = $(this).data('employee') || {};
+                const documents = $(this).data('documents') || [];
+
+                const fields = [{
+                        label: 'Kode Karyawan / NIK',
+                        value: employee.employee_code
+                    },
+                    {
+                        label: 'Nama Lengkap',
+                        value: employee.full_name
+                    },
+                    {
+                        label: 'Posisi',
+                        value: employee.position
+                    },
+                    {
+                        label: 'No Telepon',
+                        value: employee.phone
+                    },
+                    {
+                        label: 'Tanggal Bergabung',
+                        value: employee.hire_date
+                    },
+                    {
+                        label: 'Status Kepegawaian',
+                        value: employee.employment_status
+                    },
+                    {
+                        label: 'Jenis Kelamin',
+                        value: employee.gender
+                    },
+                    {
+                        label: 'Tempat Lahir',
+                        value: employee.birth_place
+                    },
+                    {
+                        label: 'Tanggal Lahir',
+                        value: employee.birth_date
+                    },
+                    {
+                        label: 'No. KTP / Identitas',
+                        value: employee.identity_number
+                    },
+                    {
+                        label: 'Status Pernikahan',
+                        value: employee.marital_status
+                    },
+                    {
+                        label: 'Kewarganegaraan',
+                        value: employee.nationality
+                    },
+                    {
+                        label: 'Agama',
+                        value: employee.religion
+                    },
+                    {
+                        label: 'Alamat Lengkap',
+                        value: employee.full_address
+                    },
+                ];
+
+                const documentsHtml = documents.length ?
+                    `<ul class="list-group text-start">${documents.map((document) => `
+                        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div>
+                                <div class="fw-semibold">${fallbackValue(document.document_label)}</div>
+                                <small class="text-muted">${fallbackValue(document.file_name)}</small>
+                            </div>
+                            <a href="${document.file_url}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat</a>
+                        </li>`).join('')}
+                    </ul>` :
+                    '<p class="text-muted mb-0 text-start">Tidak ada dokumen.</p>';
+
+                const photoHtml = employee.photo_url ?
+                    `<img src="${employee.photo_url}" alt="Foto Karyawan" class="img-thumbnail mb-3" style="max-height: 180px;">` :
+                    '<p class="text-muted mb-3 text-start">Foto belum tersedia.</p>';
+
+                Swal.fire({
+                    title: `Detail Karyawan: ${fallbackValue(employee.full_name)}`,
+                    width: 900,
+                    html: `
+                        <div class="mb-3 text-start">
+                            ${photoHtml}
+                        </div>
+                        <div class="table-responsive mb-3">
+                            <table class="table table-sm table-bordered mb-0">
+                                <tbody>
+                                    ${fields.map((field) => renderField(field.label, field.value)).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <h6 class="text-start mb-2">Dokumen</h6>
+                        ${documentsHtml}
+                    `,
+                    confirmButtonText: 'Tutup',
+                });
+            });
+
             $('.btn-delete-employee').on('click', function(e) {
                 e.preventDefault();
                 const form = $(this).closest('form');

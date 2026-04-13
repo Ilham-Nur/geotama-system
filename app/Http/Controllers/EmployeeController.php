@@ -15,7 +15,7 @@ class EmployeeController extends Controller
         $search = $request->string('search')->toString();
 
         $employees = Employee::query()
-            ->with('user.roles')
+            ->with(['user.roles', 'documents'])
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery->where('full_name', 'like', "%{$search}%")
@@ -52,6 +52,14 @@ class EmployeeController extends Controller
             'phone' => $validated['phone'] ?? null,
             'hire_date' => $validated['hire_date'] ?? null,
             'employment_status' => $validated['employment_status'],
+            'gender' => $validated['gender'] ?? null,
+            'birth_place' => $validated['birth_place'] ?? null,
+            'birth_date' => $validated['birth_date'] ?? null,
+            'full_address' => $validated['full_address'] ?? null,
+            'identity_number' => $validated['identity_number'] ?? null,
+            'marital_status' => $validated['marital_status'] ?? null,
+            'nationality' => $validated['nationality'] ?? null,
+            'religion' => $validated['religion'] ?? null,
         ]);
 
         return redirect()
@@ -81,6 +89,14 @@ class EmployeeController extends Controller
             'phone' => $validated['phone'] ?? null,
             'hire_date' => $validated['hire_date'] ?? null,
             'employment_status' => $validated['employment_status'],
+            'gender' => $validated['gender'] ?? null,
+            'birth_place' => $validated['birth_place'] ?? null,
+            'birth_date' => $validated['birth_date'] ?? null,
+            'full_address' => $validated['full_address'] ?? null,
+            'identity_number' => $validated['identity_number'] ?? null,
+            'marital_status' => $validated['marital_status'] ?? null,
+            'nationality' => $validated['nationality'] ?? null,
+            'religion' => $validated['religion'] ?? null,
         ]);
 
         return redirect()
@@ -108,6 +124,14 @@ class EmployeeController extends Controller
             'phone' => ['nullable', 'string', 'max:30'],
             'hire_date' => ['nullable', 'date'],
             'employment_status' => ['required', Rule::in(['tetap', 'kontrak', 'magang'])],
+            'gender' => ['nullable', 'in:laki-laki,perempuan'],
+            'birth_place' => ['nullable', 'string', 'max:100'],
+            'birth_date' => ['nullable', 'date'],
+            'full_address' => ['nullable', 'string'],
+            'identity_number' => ['nullable', 'string', 'max:100'],
+            'marital_status' => ['nullable', 'in:belum_kawin,kawin,cerai_hidup,cerai_mati'],
+            'nationality' => ['nullable', 'string', 'max:100'],
+            'religion' => ['nullable', 'string', 'max:100'],
 
             'create_system_account' => ['nullable', 'boolean'],
             'username' => [Rule::requiredIf($createSystemAccount), 'nullable', 'string', 'max:255'],

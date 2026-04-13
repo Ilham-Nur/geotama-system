@@ -63,6 +63,97 @@
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Jenis Kelamin</label>
+        <select name="gender" class="form-select @error('gender') is-invalid @enderror">
+            <option value="">-- Pilih Jenis Kelamin --</option>
+            <option value="laki-laki" {{ old('gender', $employee->gender ?? '') === 'laki-laki' ? 'selected' : '' }}>
+                Laki-laki
+            </option>
+            <option value="perempuan" {{ old('gender', $employee->gender ?? '') === 'perempuan' ? 'selected' : '' }}>
+                Perempuan
+            </option>
+        </select>
+        @error('gender')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Tempat Lahir</label>
+        <input type="text" name="birth_place" value="{{ old('birth_place', $employee->birth_place ?? '') }}"
+            class="form-control @error('birth_place') is-invalid @enderror">
+        @error('birth_place')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Tanggal Lahir</label>
+        <input type="date" name="birth_date"
+            value="{{ old('birth_date', isset($employee->birth_date) ? $employee->birth_date->format('Y-m-d') : '') }}"
+            class="form-control @error('birth_date') is-invalid @enderror">
+        @error('birth_date')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">No. KTP / Identitas</label>
+        <input type="text" name="identity_number" value="{{ old('identity_number', $employee->identity_number ?? '') }}"
+            class="form-control @error('identity_number') is-invalid @enderror">
+        @error('identity_number')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Status Pernikahan</label>
+        <select name="marital_status" class="form-select @error('marital_status') is-invalid @enderror">
+            <option value="">-- Pilih Status Pernikahan --</option>
+            @foreach ([
+                'belum_kawin' => 'Belum Kawin',
+                'kawin' => 'Kawin',
+                'cerai_hidup' => 'Cerai Hidup',
+                'cerai_mati' => 'Cerai Mati',
+            ] as $value => $label)
+                <option value="{{ $value }}"
+                    {{ old('marital_status', $employee->marital_status ?? '') === $value ? 'selected' : '' }}>
+                    {{ $label }}
+                </option>
+            @endforeach
+        </select>
+        @error('marital_status')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Kewarganegaraan</label>
+        <input type="text" name="nationality" value="{{ old('nationality', $employee->nationality ?? '') }}"
+            class="form-control @error('nationality') is-invalid @enderror">
+        @error('nationality')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">Agama</label>
+        <input type="text" name="religion" value="{{ old('religion', $employee->religion ?? '') }}"
+            class="form-control @error('religion') is-invalid @enderror">
+        @error('religion')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-12">
+        <label class="form-label">Alamat Lengkap</label>
+        <textarea name="full_address" rows="3" class="form-control @error('full_address') is-invalid @enderror">{{ old('full_address', $employee->full_address ?? '') }}</textarea>
+        @error('full_address')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
 </div>
 
 <hr class="my-4">
