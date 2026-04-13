@@ -14,7 +14,7 @@ class ProfileController extends Controller
 
         if (!$employee) {
             return redirect()
-                ->route('dashboard')
+                ->route('blank')
                 ->with('error', 'Data karyawan belum terhubung ke akun Anda. Hubungi admin.');
         }
 
