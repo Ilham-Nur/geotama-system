@@ -241,6 +241,14 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:assets.create')
         ->name('assets.store');
 
+    Route::put('/aset/{asset}', [AssetController::class, 'update'])
+        ->middleware('permission:assets.edit')
+        ->name('assets.update');
+
+    Route::delete('/aset/{asset}', [AssetController::class, 'destroy'])
+        ->middleware('permission:assets.delete')
+        ->name('assets.destroy');
+
     Route::get('/pembayaran', [PembayaranController::class, 'index'])
         ->middleware('permission:pembayaran.view')
         ->name('pembayaran.index');

@@ -56,6 +56,7 @@
                         <th>Total</th>
                         <th>Remark</th>
                         <th>QR</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -79,10 +80,32 @@
                                 <a href="{{ $publicUrl }}" target="_blank" class="btn btn-sm btn-outline-primary mb-1">Detail</a>
                                 <a href="{{ $qrUrl }}" target="_blank" class="btn btn-sm btn-outline-secondary">QR Code</a>
                             </td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    @can('assets.edit')
+                                        <button type="button" class="btn btn-sm btn-warning btn-edit-asset"
+                                            data-bs-toggle="modal" data-bs-target="#editAssetModal"
+                                            data-update-url="{{ route('assets.update', $asset->qr_token) }}"
+                                            data-nama="{{ $asset->nama }}" data-merek="{{ $asset->merek }}"
+                                            data-no_seri="{{ $asset->no_seri }}" data-lokasi="{{ $asset->lokasi }}"
+                                            data-jumlah="{{ $asset->jumlah }}" data-harga="{{ (int) $asset->harga }}"
+                                            data-tahun="{{ $asset->tahun }}" data-remark="{{ $asset->remark }}">
+                                            Edit
+                                        </button>
+                                    @endcan
+                                    @can('assets.delete')
+                                        <form method="POST" action="{{ route('assets.destroy', $asset->qr_token) }}" class="form-delete-asset">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger btn-delete-asset">Hapus</button>
+                                        </form>
+                                    @endcan
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted">Belum ada data aset.</td>
+                            <td colspan="9" class="text-center text-muted">Belum ada data aset.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -172,6 +195,82 @@
             </div>
         </div>
     @endcan
+
+    @can('assets.edit')
+        <div class="modal fade" id="editAssetModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <form method="POST" id="editAssetForm" action="" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Data Aset</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nama</label>
+                                    <input type="text" name="nama" id="edit_nama" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Merek</label>
+                                    <input type="text" name="merek" id="edit_merek" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">No Seri</label>
+                                    <input type="text" name="no_seri" id="edit_no_seri" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Lokasi</label>
+                                    <input type="text" name="lokasi" id="edit_lokasi" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Jumlah</label>
+                                    <input type="number" name="jumlah" id="edit_jumlah" class="form-control" min="1" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Harga</label>
+                                    <input type="text" id="edit_harga_display" class="form-control" placeholder="Rp 0" inputmode="numeric" required>
+                                    <input type="hidden" name="harga" id="edit_harga" value="0">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Total (Auto)</label>
+                                    <input type="text" id="edit_total" class="form-control" value="Rp 0" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">File Faktur (opsional, ganti baru)</label>
+                                    <input type="file" name="file_faktur" class="form-control" accept=".pdf,.jpg,.jpeg,.png">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tahun</label>
+                                    <input type="number" name="tahun" id="edit_tahun" class="form-control" min="1900" max="2100" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Remark</label>
+                                    <select name="remark" id="edit_remark" class="form-select">
+                                        <option value="">- Pilih Remark -</option>
+                                        <option value="baik">Baik</option>
+                                        <option value="perlu perbaikan">Perlu Perbaikan</option>
+                                        <option value="rusak">Rusak</option>
+                                        <option value="hilang">Hilang</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Gambar (opsional, ganti baru)</label>
+                                    <input type="file" name="gambar" class="form-control" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endcan
 @endsection
 
 @push('scripts')
@@ -182,6 +281,11 @@
             const hargaDisplayInput = document.getElementById('harga_display');
             const totalInput = document.getElementById('total');
             const form = document.querySelector('#createAssetModal form');
+            const editForm = document.getElementById('editAssetForm');
+            const editJumlahInput = document.getElementById('edit_jumlah');
+            const editHargaInput = document.getElementById('edit_harga');
+            const editHargaDisplayInput = document.getElementById('edit_harga_display');
+            const editTotalInput = document.getElementById('edit_total');
 
             function formatRupiah(angka) {
                 return new Intl.NumberFormat('id-ID').format(angka);
@@ -208,6 +312,63 @@
             form?.addEventListener('submit', function() {
                 const numericValue = parseNumber(hargaDisplayInput?.value ?? '');
                 hargaInput.value = numericValue;
+            });
+
+            function hitungTotalEdit() {
+                const jumlah = Number(editJumlahInput?.value || 0);
+                const harga = Number(editHargaInput?.value || 0);
+                editTotalInput.value = `Rp ${formatRupiah(jumlah * harga)}`;
+            }
+
+            editJumlahInput?.addEventListener('input', hitungTotalEdit);
+            editHargaDisplayInput?.addEventListener('input', function() {
+                const numericValue = parseNumber(this.value);
+                editHargaInput.value = numericValue;
+                this.value = numericValue ? `Rp ${formatRupiah(numericValue)}` : '';
+                hitungTotalEdit();
+            });
+
+            editForm?.addEventListener('submit', function() {
+                const numericValue = parseNumber(editHargaDisplayInput?.value ?? '');
+                editHargaInput.value = numericValue;
+            });
+
+            document.querySelectorAll('.btn-edit-asset').forEach((button) => {
+                button.addEventListener('click', function() {
+                    editForm.action = this.dataset.updateUrl;
+                    document.getElementById('edit_nama').value = this.dataset.nama || '';
+                    document.getElementById('edit_merek').value = this.dataset.merek || '';
+                    document.getElementById('edit_no_seri').value = this.dataset.no_seri || '';
+                    document.getElementById('edit_lokasi').value = this.dataset.lokasi || '';
+                    document.getElementById('edit_jumlah').value = this.dataset.jumlah || 1;
+                    document.getElementById('edit_tahun').value = this.dataset.tahun || new Date().getFullYear();
+                    document.getElementById('edit_remark').value = this.dataset.remark || '';
+
+                    const harga = Number(this.dataset.harga || 0);
+                    editHargaInput.value = harga;
+                    editHargaDisplayInput.value = harga ? `Rp ${formatRupiah(harga)}` : '';
+                    hitungTotalEdit();
+                });
+            });
+
+            document.querySelectorAll('.form-delete-asset').forEach((formDelete) => {
+                formDelete.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: 'Hapus data aset?',
+                        text: 'Data yang dihapus tidak bisa dikembalikan.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, hapus',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            formDelete.submit();
+                        }
+                    });
+                });
             });
 
 

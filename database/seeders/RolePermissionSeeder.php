@@ -68,6 +68,8 @@ class RolePermissionSeeder extends Seeder
             // Assets
             'assets.view',
             'assets.create',
+            'assets.edit',
+            'assets.delete',
         ];
 
         foreach ($permissions as $permission) {
@@ -122,6 +124,8 @@ class RolePermissionSeeder extends Seeder
 
             'assets.view',
             'assets.create',
+            'assets.edit',
+            'assets.delete',
         ]);
 
         $staff->syncPermissions([
