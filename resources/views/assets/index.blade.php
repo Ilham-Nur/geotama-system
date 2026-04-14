@@ -77,7 +77,7 @@
                                     $publicUrl = route('assets.public-show', $asset->qr_token);
                                     $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=' . urlencode($publicUrl);
                                 @endphp
-                                <a href="{{ $publicUrl }}" target="_blank" class="btn btn-sm btn-outline-primary mb-1">Detail</a>
+                                <a href="{{ $publicUrl }}" target="_blank" class="btn btn-sm btn-outline-primary">Detail</a>
                                 <a href="{{ $qrUrl }}" target="_blank" class="btn btn-sm btn-outline-secondary">QR Code</a>
                             </td>
                             <td>
