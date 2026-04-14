@@ -132,11 +132,12 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Harga</label>
-                                    <input type="number" name="harga" id="harga" class="form-control" step="0.01" min="0" required>
+                                    <input type="text" id="harga_display" class="form-control" placeholder="Rp 0" inputmode="numeric" required>
+                                    <input type="hidden" name="harga" id="harga" value="0">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Total (Auto)</label>
-                                    <input type="number" id="total" class="form-control" readonly>
+                                    <input type="text" id="total" class="form-control" value="Rp 0" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">File Faktur</label>
@@ -178,16 +179,36 @@
         document.addEventListener('DOMContentLoaded', function() {
             const jumlahInput = document.getElementById('jumlah');
             const hargaInput = document.getElementById('harga');
+            const hargaDisplayInput = document.getElementById('harga_display');
             const totalInput = document.getElementById('total');
+            const form = document.querySelector('#createAssetModal form');
+
+            function formatRupiah(angka) {
+                return new Intl.NumberFormat('id-ID').format(angka);
+            }
+
+            function parseNumber(value) {
+                return Number(String(value).replace(/[^\d]/g, '') || 0);
+            }
 
             function hitungTotal() {
                 const jumlah = Number(jumlahInput?.value || 0);
                 const harga = Number(hargaInput?.value || 0);
-                totalInput.value = (jumlah * harga).toFixed(2);
+                totalInput.value = `Rp ${formatRupiah(jumlah * harga)}`;
             }
 
             jumlahInput?.addEventListener('input', hitungTotal);
-            hargaInput?.addEventListener('input', hitungTotal);
+            hargaDisplayInput?.addEventListener('input', function() {
+                const numericValue = parseNumber(this.value);
+                hargaInput.value = numericValue;
+                this.value = numericValue ? `Rp ${formatRupiah(numericValue)}` : '';
+                hitungTotal();
+            });
+
+            form?.addEventListener('submit', function() {
+                const numericValue = parseNumber(hargaDisplayInput?.value ?? '');
+                hargaInput.value = numericValue;
+            });
 
 
             @if ($errors->any())
