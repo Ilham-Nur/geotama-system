@@ -64,6 +64,10 @@ class RolePermissionSeeder extends Seeder
             'pembayaran.view',
             'pembayaran.create',
             'pembayaran.store',
+
+            // Assets
+            'assets.view',
+            'assets.create',
         ];
 
         foreach ($permissions as $permission) {
@@ -115,6 +119,9 @@ class RolePermissionSeeder extends Seeder
             'pembayaran.view',
             'pembayaran.create',
             'pembayaran.store',
+
+            'assets.view',
+            'assets.create',
         ]);
 
         $staff->syncPermissions([

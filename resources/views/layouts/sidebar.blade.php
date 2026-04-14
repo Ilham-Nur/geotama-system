@@ -124,6 +124,22 @@
               @endcan
 
 
+              @can('assets.view')
+                  <li class="nav-item {{ request()->routeIs('assets.*') ? 'active' : '' }}">
+                      <a href="{{ route('assets.index') }}">
+                          <span class="icon">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M3.75 6.75C3.75 5.50736 4.75736 4.5 6 4.5H18C19.2426 4.5 20.25 5.50736 20.25 6.75V17.25C20.25 18.4926 19.2426 19.5 18 19.5H6C4.75736 19.5 3.75 18.4926 3.75 17.25V6.75Z" stroke="currentColor" stroke-width="1.5"/>
+                                  <path d="M8.25 9H15.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                  <path d="M8.25 12H12.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                  <path d="M8.25 15H10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                              </svg>
+                          </span>
+                          <span class="text">Aset</span>
+                      </a>
+                  </li>
+              @endcan
+
               <span class="divider">
                   <hr />
               </span>

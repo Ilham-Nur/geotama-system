@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InvoiceController;
@@ -231,6 +232,15 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:invoice.upload_signed')
         ->name('invoice.upload-signed');
 
+
+    Route::get('/aset', [AssetController::class, 'index'])
+        ->middleware('permission:assets.view')
+        ->name('assets.index');
+
+    Route::post('/aset', [AssetController::class, 'store'])
+        ->middleware('permission:assets.create')
+        ->name('assets.store');
+
     Route::get('/pembayaran', [PembayaranController::class, 'index'])
         ->middleware('permission:pembayaran.view')
         ->name('pembayaran.index');
@@ -243,5 +253,7 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:pembayaran.store')
         ->name('pembayaran.store');
 });
+
+Route::get('/scan/aset/{asset}', [AssetController::class, 'publicShow'])->name('assets.public-show');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
