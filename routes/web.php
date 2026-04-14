@@ -24,7 +24,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard.index');
     })->name('dashboard');
-    
+
     Route::get('/blank', function () {
         return view('dashboard.blank');
     })->name('blank');
@@ -195,6 +195,9 @@ Route::middleware('auth')->group(function () {
     Route::post('permohonan/{id}/jadikan-project', [PermohonanController::class, 'jadikanProject'])
         ->middleware('permission:permohonan.jadikan_project')
         ->name('permohonan.jadikan-project');
+
+    Route::get('/permohonan/blank/pdf', [PermohonanController::class, 'blankPdf'])
+        ->name('permohonan.blank-pdf');
 
     Route::get('/proyek', [ProyekController::class, 'index'])
         ->middleware('permission:proyek.view')

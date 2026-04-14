@@ -443,4 +443,11 @@ class PermohonanController extends Controller
             ], 500);
         }
     }
+
+    public function blankPdf()
+    {
+        return Pdf::loadView('permohonan.blank_pdf')
+            ->setPaper('A4', 'portrait')
+            ->stream('form-permohonan-blank.pdf');
+    }
 }

@@ -42,6 +42,9 @@
                     </div>
 
                     <div class="col-md-6 mb-30 text-end">
+                        <a href="{{ route('permohonan.blank-pdf') }}" class="btn btn-success" target="_blank">
+                            <i class="lni lni-printer"></i> Form Blank PDF
+                        </a>
                         @can('permohonan.create')
                             <a href="{{ route('permohonan.create') }}" class="btn btn-primary">
                                 + Tambah Permohonan
