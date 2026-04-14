@@ -190,13 +190,13 @@
             hargaInput?.addEventListener('input', hitungTotal);
 
 
-            @if ($errors->any()) {
+            @if ($errors->any())
                 const modalEl = document.getElementById('createAssetModal');
                 if (modalEl && typeof bootstrap !== 'undefined') {
                     const modal = new bootstrap.Modal(modalEl);
                     modal.show();
                 }
-            }
+            @endif
 
         });
     </script>
