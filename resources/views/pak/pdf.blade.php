@@ -323,7 +323,9 @@
 
                 @php
                     $totalCost = $grandTotal;
-                    $profit = $projectValue - $totalCost;
+                    $tax = (float) ($pak->tax ?? 0);
+                    $grandWithTax = $totalCost + $tax;
+                    $profit = $projectValue - $grandWithTax;
                     $profitPercent = $projectValue > 0 ? ($profit / $projectValue) * 100 : 0;
                     $profitLabel = $profit >= 0 ? 'OK' : 'OVER';
                     $profitClass = $profit >= 0 ? 'badge-ok' : 'badge-over';
@@ -340,6 +342,18 @@
                     <td class="text-right"><strong>Rp {{ number_format($totalCost, 0, ',', '.') }}</strong></td>
                     <td class="text-right"><strong>Pengeluaran (%)</strong></td>
                     <td colspan="2" class="text-center"><strong>{{ number_format($projectValue > 0 ? ($totalCost / $projectValue) * 100 : 0, 0) }}%</strong></td>
+                </tr>
+
+                <tr class="row-grand">
+                    <td colspan="5" class="text-right"><strong>Pajak (Rp)</strong></td>
+                    <td class="text-right"><strong>Rp {{ number_format($tax, 0, ',', '.') }}</strong></td>
+                    <td colspan="3"></td>
+                </tr>
+
+                <tr class="row-grand">
+                    <td colspan="5" class="text-right"><strong>Grand Total Pengeluaran + Pajak (Rp)</strong></td>
+                    <td class="text-right"><strong>Rp {{ number_format($grandWithTax, 0, ',', '.') }}</strong></td>
+                    <td colspan="3"></td>
                 </tr>
 
                 <tr class="row-grand">

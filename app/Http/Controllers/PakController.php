@@ -16,6 +16,15 @@ use Illuminate\Support\Facades\Storage;
 
 class PakController extends Controller
 {
+    private function parseCurrency($value): int
+    {
+        if ($value === null) {
+            return 0;
+        }
+
+        return (int) preg_replace('/[^\d]/', '', (string) $value);
+    }
+
     // =========================
     // INDEX
     // =========================
@@ -130,7 +139,8 @@ class PakController extends Controller
         try {
 
             $permohonanData = $this->buildPermohonanData($request);
-            $projectValue = (int) str_replace('.', '', $request->project_value);
+            $projectValue = $this->parseCurrency($request->project_value);
+            $tax = $this->parseCurrency($request->nilai_pajak);
 
             $pak = Pak::create([
                 'pak_number' => $request->project_number,
@@ -168,12 +178,13 @@ class PakController extends Controller
             }
 
             $profit = $projectValue - $totalCost;
-            $percent = $projectValue > 0 ? ($profit / $projectValue) * 100 : 0;
+            $profitAfterTax = $profit - $tax;
 
             $pak->update([
+                'tax' => $tax,
                 'total_cost' => $totalCost,
-                'profit' => $profit,
-                'profit_percentage' => $percent,
+                'profit' => $profitAfterTax,
+                'profit_percentage' => $projectValue > 0 ? ($profitAfterTax / $projectValue) * 100 : 0,
             ]);
 
             DB::commit();
@@ -294,15 +305,19 @@ class PakController extends Controller
 
             $permohonanData = $this->buildPermohonanData($request, $oldData);
 
-            $projectValue = (int) str_replace('.', '', $request->project_value);
+            $projectValue = $this->parseCurrency($request->project_value);
+            $tax = $this->parseCurrency($request->nilai_pajak);
+            $totalCost = $this->parseCurrency($request->nilai_pak_raw);
+            $margin = $this->parseCurrency($request->nilai_margin_raw);
 
             $pak->update([
                 'permohonan_data' => $permohonanData,
                 'project_value' => $projectValue,
-                'total_cost' => $request->nilai_pak_raw,
-                'profit' => $request->nilai_margin_raw,
-                'profit_percentage' => $request->nilai_project_raw > 0
-                    ? round(($request->nilai_margin_raw / $request->nilai_project_raw) * 100, 2)
+                'tax' => $tax,
+                'total_cost' => $totalCost,
+                'profit' => $margin,
+                'profit_percentage' => $projectValue > 0
+                    ? round(($margin / $projectValue) * 100, 2)
                     : 0
             ]);
 

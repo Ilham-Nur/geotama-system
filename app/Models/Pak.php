@@ -11,6 +11,7 @@ class Pak extends Model
         'pak_name',
         'permohonan_data',
         'project_value',
+        'tax',
         'total_cost',
         'profit',
         'profit_percentage',
@@ -19,6 +20,7 @@ class Pak extends Model
     protected $casts = [
         'permohonan_data' => 'array',
         'project_value' => 'decimal:2',
+        'tax' => 'decimal:2',
         'total_cost' => 'decimal:2',
         'profit' => 'decimal:2',
         'profit_percentage' => 'decimal:2',

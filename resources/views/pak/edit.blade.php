@@ -231,7 +231,8 @@
                             <!-- PAJAK -->
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">Pajak (2%)</label>
-                                <input type="text" id="nilai_pajak" name="nilai_pajak" class="form-control">
+                                <input type="text" id="nilai_pajak" name="nilai_pajak" class="form-control"
+                                    value="{{ number_format($pak->tax ?? 0, 0, ',', '.') }}">
                             </div>
 
                             <!-- MARGIN -->
@@ -252,6 +253,7 @@
                         <!-- Hidden raw values untuk DB -->
                         <input type="hidden" name="nilai_project_raw" id="nilai_project_raw">
                         <input type="hidden" name="nilai_pak_raw" id="nilai_pak_raw">
+                        <input type="hidden" name="nilai_pajak_raw" id="nilai_pajak_raw">
                         <input type="hidden" name="nilai_margin_raw" id="nilai_margin_raw">
 
                     </div>
@@ -337,7 +339,8 @@
 
             let project = getProjectValue();
             let pak = parseRupiah($("#grand-total-display").text());
-            let pajak = Math.round(project * 0.02);
+            let pajakInput = $("#nilai_pajak").val();
+            let pajak = pajakInput ? parseRupiah(pajakInput) : Math.round(project * 0.02);
 
             let margin = project - pak - pajak;
             let percent = project > 0 ? (margin / project * 100) : 0;
@@ -350,6 +353,7 @@
 
             $("#nilai_project_raw").val(project);
             $("#nilai_pak_raw").val(pak);
+            $("#nilai_pajak_raw").val(pajak);
             $("#nilai_margin_raw").val(margin);
         }
 
@@ -452,6 +456,12 @@
             $(this).val(formatRupiah(val));
 
             recalcAll();
+        });
+
+        $('#nilai_pajak').on('keyup change', function() {
+            let pajak = parseRupiah($(this).val());
+            $(this).val(formatRupiah(pajak));
+            hitungSummaryNew();
         });
 
         /* =========================

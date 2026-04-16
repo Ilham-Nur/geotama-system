@@ -189,24 +189,34 @@
 
             <div class="row text-center">
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <small>Nilai Project</small>
                     <h6>Rp {{ number_format($pak->project_value, 0, ',', '.') }}</h6>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <small>Total Cost</small>
                     <h6>Rp {{ number_format($pak->total_cost, 0, ',', '.') }}</h6>
                 </div>
 
+                <div class="col-md-2">
+                    <small>Pajak</small>
+                    <h6>Rp {{ number_format($pak->tax ?? 0, 0, ',', '.') }}</h6>
+                </div>
+
                 <div class="col-md-3">
+                    <small>Total + Pajak</small>
+                    <h6>Rp {{ number_format(($pak->total_cost ?? 0) + ($pak->tax ?? 0), 0, ',', '.') }}</h6>
+                </div>
+
+                <div class="col-md-2">
                     <small>Profit</small>
                     <h6 class="{{ $pak->profit < 0 ? 'text-danger' : 'text-success' }}">
                         Rp {{ number_format($pak->profit, 0, ',', '.') }}
                     </h6>
                 </div>
 
-                <div class="col-md-3">
+                <div class="col-md-1">
                     <small>Margin</small>
                     <h6 class="{{ $pak->profit_percentage < 10 ? 'text-danger' : 'text-success' }}">
                         {{ number_format($pak->profit_percentage, 1) }}%
