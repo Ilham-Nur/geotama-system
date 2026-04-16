@@ -8,6 +8,7 @@ use App\Models\Layanan;
 use App\Models\Permohonan;
 use App\Models\PermohonanItem;
 use App\Models\PermohonanDokumen;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -454,5 +455,21 @@ class PakController extends Controller
                 'message' => 'Gagal convert: ' . $e->getMessage()
             ]);
         }
+    }
+
+    public function exportPdf($id)
+    {
+        $pak = Pak::with(['items.category'])->findOrFail($id);
+
+        $categories = Category::query()
+            ->get()
+            ->keyBy('id');
+
+        $permohonan = (object) ($pak->permohonan_data ?? []);
+
+        $pdf = Pdf::loadView('pak.pdf', compact('pak', 'categories', 'permohonan'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->stream('pak-' . $pak->pak_number . '.pdf');
     }
 }

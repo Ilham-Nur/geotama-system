@@ -149,6 +149,11 @@
                                             <i class="lni lni-eye"></i>
                                         </a>
 
+                                        <a href="{{ route('pak.export-pdf', $row->id) }}" class="text-danger"
+                                            title="Export PDF" target="_blank">
+                                            <i class="lni lni-printer"></i>
+                                        </a>
+
                                         {{-- EDIT --}}
                                         @can('pak.edit')
                                             <a href="{{ route('pak.edit', $row->id) }}" class="text-primary"

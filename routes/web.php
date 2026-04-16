@@ -58,6 +58,10 @@ Route::middleware('auth')->group(function () {
             ->middleware('permission:pak.edit')
             ->name('edit');
 
+        Route::get('/{id}/export-pdf', [PakController::class, 'exportPdf'])
+            ->middleware('permission:pak.view')
+            ->name('export-pdf');
+
         Route::put('/{id}', [PakController::class, 'update'])
             ->middleware('permission:pak.edit')
             ->name('update');

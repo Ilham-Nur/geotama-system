@@ -44,6 +44,9 @@
             </div>
 
             <div>
+                <a href="{{ route('pak.export-pdf', $pak->id) }}" target="_blank" class="btn btn-danger btn-sm">
+                    <i class="lni lni-printer"></i> Export PDF
+                </a>
                 <a href="{{ route('pak.index') }}" class="btn btn-secondary btn-sm">
                     <i class="lni lni-arrow-left"></i> Kembali
                 </a>
