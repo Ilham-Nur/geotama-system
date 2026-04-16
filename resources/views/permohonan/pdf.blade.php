@@ -3,7 +3,10 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Permohonan {{ $permohonan->nomor }}</title>
+    <title>
+        Permohonan {{ $permohonan->nomor }}
+        {{ $permohonan->items->contains(fn($item) => !empty($item->tanggal_pelaksanaan) || !empty($item->durasi)) ? ' Menyusul' : '' }}
+    </title>
     <style>
         @page {
             margin: 20px 20px 25px 20px;
@@ -122,6 +125,11 @@
 </head>
 
 <body>
+    @php
+        $isPermohonanMenyusul = $permohonan->items->contains(function ($item) {
+            return !empty($item->tanggal_pelaksanaan) || !empty($item->durasi);
+        });
+    @endphp
 
     <table class="outer-table">
         {{-- KOP --}}
@@ -147,7 +155,9 @@
                         <td class="center middle title-company">PT. GEOTAMA GLOBAL INTIJAYA</td>
                     </tr>
                     <tr>
-                        <td class="center middle title-form">PERMOHONAN JASA INSPEKSI</td>
+                        <td class="center middle title-form">
+                            PERMOHONAN JASA INSPEKSI{{ $isPermohonanMenyusul ? ' MENYUSUL' : '' }}
+                        </td>
                     </tr>
                     <tr>
                         <td class="center middle subtitle">APPLICATION FOR INSPECTION SERVICES</td>
@@ -232,10 +242,12 @@
                                     Needed</span></th>
                             <th style="width: 110px;">Tanggal Permintaan<br><span class="small">Request Date</span>
                             </th>
-                            {{-- <th style="width: 110px;">Tanggal Pelaksanaan<br><span class="small">Requested Execution
-                                    Date</span></th> --}}
-                            {{-- <th style="width: 80px;">Durasi Pekerjaan<br><span class="small">Duration of Work</span>
-                            </th> --}}
+                            @if ($isPermohonanMenyusul)
+                                <th style="width: 110px;">Tanggal Pelaksanaan<br><span class="small">Requested Execution
+                                        Date</span></th>
+                                <th style="width: 80px;">Durasi Pekerjaan<br><span class="small">Duration of Work</span>
+                                </th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -247,10 +259,12 @@
                                 <td class="center">
                                     {{ $item->tanggal_permintaan ? \Carbon\Carbon::parse($item->tanggal_permintaan)->format('d M Y') : '-' }}
                                 </td>
-                                {{-- <td class="center">
-                                    {{ $item->tanggal_pelaksanaan ? \Carbon\Carbon::parse($item->tanggal_pelaksanaan)->format('d M Y') : '-' }}
-                                </td> --}}
-                                {{-- <td class="center">{{ $item->durasi ?: '-' }}</td> --}}
+                                @if ($isPermohonanMenyusul)
+                                    <td class="center">
+                                        {{ $item->tanggal_pelaksanaan ? \Carbon\Carbon::parse($item->tanggal_pelaksanaan)->format('d M Y') : '-' }}
+                                    </td>
+                                    <td class="center">{{ $item->durasi ?: '-' }}</td>
+                                @endif
                             </tr>
                         @empty
                             @for ($i = 1; $i <= 5; $i++)
@@ -259,8 +273,10 @@
                                     <td>&nbsp;</td>
                                     <td>&nbsp;</td>
                                     <td>&nbsp;</td>
-                                    {{-- <td>&nbsp;</td> --}}
-                                    {{-- <td>&nbsp;</td> --}}
+                                    @if ($isPermohonanMenyusul)
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                    @endif
                                 </tr>
                             @endfor
                         @endforelse
@@ -272,8 +288,10 @@
                                     <td>&nbsp;</td>
                                     <td>&nbsp;</td>
                                     <td>&nbsp;</td>
-                                    {{-- <td>&nbsp;</td> --}}
-                                    {{-- <td>&nbsp;</td> --}}
+                                    @if ($isPermohonanMenyusul)
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                    @endif
                                 </tr>
                             @endfor
                         @endif
