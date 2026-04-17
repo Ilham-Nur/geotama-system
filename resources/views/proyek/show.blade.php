@@ -320,6 +320,7 @@
                                                         <th>Uploader</th>
                                                         <th>Tanggal</th>
                                                         <th>Catatan</th>
+                                                        <th>Aksi</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -334,6 +335,32 @@
                                                             <td>{{ $upload->uploader->name ?? '-' }}</td>
                                                             <td>{{ $upload->created_at?->format('d M Y H:i') ?? '-' }}</td>
                                                             <td>{{ $upload->notes ?? '-' }}</td>
+                                                            <td style="min-width: 260px;">
+                                                                <form action="{{ route('proyek.timesheet.hardcopy.update', [$proyek->id, $timesheet->id, $upload->id]) }}"
+                                                                    method="POST" enctype="multipart/form-data" class="mb-2">
+                                                                    @csrf
+                                                                    @method('PUT')
+                                                                    <div class="input-group input-group-sm mb-1">
+                                                                        <input type="text" class="form-control" name="notes"
+                                                                            value="{{ $upload->notes }}"
+                                                                            placeholder="Edit catatan">
+                                                                    </div>
+                                                                    <div class="input-group input-group-sm">
+                                                                        <input type="file" class="form-control" name="hardcopy_file"
+                                                                            accept=".pdf,.jpg,.jpeg,.png">
+                                                                        <button class="btn btn-outline-primary" type="submit">Update</button>
+                                                                    </div>
+                                                                </form>
+
+                                                                <form action="{{ route('proyek.timesheet.hardcopy.delete', [$proyek->id, $timesheet->id, $upload->id]) }}"
+                                                                    method="POST" onsubmit="return confirm('Yakin hapus dokumen ini?');">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                                                                        Hapus Dokumen
+                                                                    </button>
+                                                                </form>
+                                                            </td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>

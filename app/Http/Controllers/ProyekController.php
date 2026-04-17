@@ -7,6 +7,7 @@ use App\Models\ProyekTimesheet;
 use App\Models\ProyekTimesheetUpload;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProyekController extends Controller
 {
@@ -120,6 +121,92 @@ class ProyekController extends Controller
         return redirect()
             ->route('proyek.show', $proyek->id)
             ->with('success', 'Timesheet berhasil diverifikasi.');
+    }
+
+
+    public function updateTimesheetHardcopy(Request $request, Proyek $proyek, ProyekTimesheet $timesheet, ProyekTimesheetUpload $upload)
+    {
+        if ((int) $timesheet->proyek_id !== (int) $proyek->id || (int) $upload->proyek_timesheet_id !== (int) $timesheet->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'notes' => 'nullable|string|max:255',
+            'hardcopy_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+        ], [
+            'hardcopy_file.mimes' => 'File harus PDF, JPG, JPEG, atau PNG.',
+            'hardcopy_file.max' => 'Ukuran file maksimal 10 MB.',
+        ]);
+
+        if (! $request->filled('notes') && ! $request->hasFile('hardcopy_file')) {
+            return redirect()
+                ->route('proyek.show', $proyek->id)
+                ->with('error', 'Isi catatan atau pilih file baru untuk memperbarui hardcopy.');
+        }
+
+        $payload = [
+            'notes' => $validated['notes'] ?? $upload->notes,
+        ];
+
+        if ($request->hasFile('hardcopy_file')) {
+            if ($upload->file_path && Storage::disk('public')->exists($upload->file_path)) {
+                Storage::disk('public')->delete($upload->file_path);
+            }
+
+            $file = $request->file('hardcopy_file');
+            $payload['file_path'] = $file->store('timesheets/hardcopy', 'public');
+            $payload['file_name'] = $file->getClientOriginalName();
+            $payload['mime_type'] = $file->getMimeType();
+            $payload['file_size'] = $file->getSize();
+            $payload['uploaded_by'] = auth()->id();
+        }
+
+        $upload->update($payload);
+
+        if ($timesheet->status === 'verified') {
+            $timesheet->update([
+                'status' => 'completed',
+                'verified_by' => null,
+                'verified_at' => null,
+            ]);
+        }
+
+        return redirect()
+            ->route('proyek.show', $proyek->id)
+            ->with('success', 'Hardcopy timesheet berhasil diperbarui.');
+    }
+
+    public function deleteTimesheetHardcopy(Proyek $proyek, ProyekTimesheet $timesheet, ProyekTimesheetUpload $upload)
+    {
+        if ((int) $timesheet->proyek_id !== (int) $proyek->id || (int) $upload->proyek_timesheet_id !== (int) $timesheet->id) {
+            abort(404);
+        }
+
+        if ($upload->file_path && Storage::disk('public')->exists($upload->file_path)) {
+            Storage::disk('public')->delete($upload->file_path);
+        }
+
+        $upload->delete();
+
+        $remainingUploads = $timesheet->uploads()->count();
+
+        if ($remainingUploads === 0) {
+            $timesheet->update([
+                'status' => 'in_field',
+                'verified_by' => null,
+                'verified_at' => null,
+            ]);
+        } elseif ($timesheet->status === 'verified') {
+            $timesheet->update([
+                'status' => 'completed',
+                'verified_by' => null,
+                'verified_at' => null,
+            ]);
+        }
+
+        return redirect()
+            ->route('proyek.show', $proyek->id)
+            ->with('success', 'Hardcopy timesheet berhasil dihapus.');
     }
 
     public function uploadTimesheetHardcopy(Request $request, Proyek $proyek, ProyekTimesheet $timesheet)

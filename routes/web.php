@@ -228,6 +228,14 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:proyek.show')
         ->name('proyek.timesheet.hardcopy.upload');
 
+    Route::put('/proyek/{proyek}/timesheets/{timesheet}/hardcopy/{upload}', [ProyekController::class, 'updateTimesheetHardcopy'])
+        ->middleware('permission:proyek.show')
+        ->name('proyek.timesheet.hardcopy.update');
+
+    Route::delete('/proyek/{proyek}/timesheets/{timesheet}/hardcopy/{upload}', [ProyekController::class, 'deleteTimesheetHardcopy'])
+        ->middleware('permission:proyek.show')
+        ->name('proyek.timesheet.hardcopy.delete');
+
     Route::get('/proyek/{proyek}/pekerjaan/{item}/layanan/{layanan}', [ProyekController::class, 'showPekerjaan'])
         ->middleware('permission:proyek.show')
         ->name('proyek.pekerjaan.show');
