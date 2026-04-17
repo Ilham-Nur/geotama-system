@@ -27,6 +27,7 @@ class ProyekController extends Controller
             'permohonan.items.layanans',
             'permohonan.dokumens',
             'timesheets.generator',
+            'timesheets.verifier',
             'timesheets.uploads.uploader',
         ])->findOrFail($id);
 
@@ -97,6 +98,30 @@ class ProyekController extends Controller
         return $pdf->stream($timesheet->form_no . '.pdf');
     }
 
+
+    public function verifyTimesheet(Proyek $proyek, ProyekTimesheet $timesheet)
+    {
+        if ((int) $timesheet->proyek_id !== (int) $proyek->id) {
+            abort(404);
+        }
+
+        if (! $timesheet->uploads()->exists()) {
+            return redirect()
+                ->route('proyek.show', $proyek->id)
+                ->with('error', 'Timesheet belum bisa diverifikasi karena belum ada hardcopy yang diupload.');
+        }
+
+        $timesheet->update([
+            'status' => 'verified',
+            'verified_by' => auth()->id(),
+            'verified_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('proyek.show', $proyek->id)
+            ->with('success', 'Timesheet berhasil diverifikasi.');
+    }
+
     public function uploadTimesheetHardcopy(Request $request, Proyek $proyek, ProyekTimesheet $timesheet)
     {
         if ((int) $timesheet->proyek_id !== (int) $proyek->id) {
@@ -129,12 +154,14 @@ class ProyekController extends Controller
             'uploaded_by' => auth()->id(),
         ]);
 
-        $timesheet->update([
-            'status' => 'uploaded_partial',
-        ]);
+        if ($timesheet->status !== 'verified') {
+            $timesheet->update([
+                'status' => 'completed',
+            ]);
+        }
 
         return redirect()
             ->route('proyek.show', $proyek->id)
-            ->with('success', 'Hardcopy timesheet berhasil diupload (versi ' . $nextVersion . ').');
+            ->with('success', 'Hardcopy timesheet berhasil diupload (versi ' . $nextVersion . '). Status otomatis menjadi completed.');
     }
 }

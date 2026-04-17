@@ -248,7 +248,17 @@
                                             </div>
                                         </div>
                                         <div class="text-end">
-                                            <span class="badge bg-info text-dark text-uppercase d-block mb-2">{{ str_replace('_', ' ', $timesheet->status) }}</span>
+                                            @php
+                                                $statusClass = match ($timesheet->status) {
+                                                    'generated' => 'bg-secondary',
+                                                    'in_field' => 'bg-primary',
+                                                    'uploaded_partial' => 'bg-warning text-dark',
+                                                    'completed' => 'bg-success',
+                                                    'verified' => 'bg-dark',
+                                                    default => 'bg-info text-dark',
+                                                };
+                                            @endphp
+                                            <span class="badge {{ $statusClass }} text-uppercase d-block mb-2">{{ str_replace('_', ' ', $timesheet->status) }}</span>
                                             <a href="{{ route('proyek.timesheet.export-pdf', [$proyek->id, $timesheet->id]) }}"
                                                 target="_blank" class="btn btn-sm btn-outline-primary">
                                                 Export Template PDF
@@ -258,6 +268,13 @@
 
                                     @if ($timesheet->remarks)
                                         <p class="mb-3 mt-2"><small>Catatan: {{ $timesheet->remarks }}</small></p>
+                                    @endif
+
+                                    @if ($timesheet->verified_at)
+                                        <p class="mb-3 mt-2 text-success small">
+                                            Diverifikasi oleh {{ $timesheet->verifier->name ?? '-' }} pada
+                                            {{ $timesheet->verified_at?->format('d M Y H:i') }}.
+                                        </p>
                                     @endif
 
                                     <form action="{{ route('proyek.timesheet.hardcopy.upload', [$proyek->id, $timesheet->id]) }}" method="POST"
@@ -284,6 +301,14 @@
                                             <button type="submit" class="btn btn-success">Upload</button>
                                         </div>
                                     </form>
+
+                                    @if ($timesheet->uploads->count() > 0 && $timesheet->status !== 'verified')
+                                        <form action="{{ route('proyek.timesheet.verify', [$proyek->id, $timesheet->id]) }}" method="POST"
+                                            class="mb-3 text-end">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-dark">Verifikasi Timesheet</button>
+                                        </form>
+                                    @endif
 
                                     @if ($timesheet->uploads->count())
                                         <div class="table-responsive">

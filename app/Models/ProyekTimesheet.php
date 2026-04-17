@@ -16,10 +16,13 @@ class ProyekTimesheet extends Model
         'status',
         'remarks',
         'generated_by',
+        'verified_by',
+        'verified_at',
     ];
 
     protected $casts = [
         'inspection_date' => 'date',
+        'verified_at' => 'datetime',
     ];
 
     public function proyek()
@@ -35,6 +38,11 @@ class ProyekTimesheet extends Model
     public function uploads()
     {
         return $this->hasMany(ProyekTimesheetUpload::class)->latest();
+    }
+
+    public function verifier()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 
     public static function generateFormNo(Proyek $proyek): string
