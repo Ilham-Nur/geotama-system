@@ -77,6 +77,11 @@ class Proyek extends Model
         return $this->hasMany(Invoice::class, 'proyek_id');
     }
 
+    public function timesheets()
+    {
+        return $this->hasMany(ProyekTimesheet::class, 'proyek_id');
+    }
+
 
     public static function generateProjectNo(): string
     {

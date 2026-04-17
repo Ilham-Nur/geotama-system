@@ -200,6 +200,126 @@
                         @endif
                     </div>
                 </div>
+
+                {{-- TIMESHEET HARDCOPY --}}
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Timesheet Hardcopy</h5>
+                        <span class="badge bg-dark">{{ $proyek->timesheets->count() }} Form</span>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ route('proyek.timesheet.store', $proyek->id) }}" method="POST" class="mb-4">
+                            @csrf
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label class="form-label">Tanggal Inspeksi</label>
+                                    <input type="date" name="inspection_date" class="form-control @error('inspection_date') is-invalid @enderror"
+                                        value="{{ old('inspection_date') }}">
+                                    @error('inspection_date')
+                                        <small class="invalid-feedback">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Catatan Form (Opsional)</label>
+                                    <input type="text" name="remarks" class="form-control @error('remarks') is-invalid @enderror"
+                                        value="{{ old('remarks') }}" placeholder="Contoh: inspeksi area boiler">
+                                    @error('remarks')
+                                        <small class="invalid-feedback">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                                <div class="col-md-2 d-grid">
+                                    <label class="form-label d-none d-md-block">&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary">Generate Form</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        @if ($proyek->timesheets->count())
+                            @foreach ($proyek->timesheets->sortByDesc('created_at') as $timesheet)
+                                <div class="border rounded p-3 mb-3">
+                                    <div class="d-flex justify-content-between flex-wrap gap-2">
+                                        <div>
+                                            <strong>{{ $timesheet->form_no }}</strong>
+                                            <div class="text-muted small">
+                                                Tanggal inspeksi: {{ optional($timesheet->inspection_date)->format('d M Y') ?? '-' }}
+                                            </div>
+                                            <div class="text-muted small">
+                                                Dibuat oleh: {{ $timesheet->generator->name ?? '-' }}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-info text-dark text-uppercase">{{ str_replace('_', ' ', $timesheet->status) }}</span>
+                                        </div>
+                                    </div>
+
+                                    @if ($timesheet->remarks)
+                                        <p class="mb-3 mt-2"><small>Catatan: {{ $timesheet->remarks }}</small></p>
+                                    @endif
+
+                                    <form action="{{ route('proyek.timesheet.hardcopy.upload', [$proyek->id, $timesheet->id]) }}" method="POST"
+                                        enctype="multipart/form-data" class="row g-2 align-items-end mb-3">
+                                        @csrf
+                                        <div class="col-md-5">
+                                            <label class="form-label">Upload hardcopy</label>
+                                            <input type="file" name="hardcopy_file"
+                                                class="form-control @error('hardcopy_file') is-invalid @enderror"
+                                                accept=".pdf,.jpg,.jpeg,.png" required>
+                                            @error('hardcopy_file')
+                                                <small class="invalid-feedback">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="form-label">Catatan upload (opsional)</label>
+                                            <input type="text" name="notes" class="form-control @error('notes') is-invalid @enderror"
+                                                value="{{ old('notes') }}" placeholder="Contoh: halaman 1 dan 2">
+                                            @error('notes')
+                                                <small class="invalid-feedback">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-2 d-grid">
+                                            <button type="submit" class="btn btn-success">Upload</button>
+                                        </div>
+                                    </form>
+
+                                    @if ($timesheet->uploads->count())
+                                        <div class="table-responsive">
+                                            <table class="table table-sm mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Versi</th>
+                                                        <th>File</th>
+                                                        <th>Uploader</th>
+                                                        <th>Tanggal</th>
+                                                        <th>Catatan</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($timesheet->uploads as $upload)
+                                                        <tr>
+                                                            <td>v{{ $upload->version_no }}</td>
+                                                            <td>
+                                                                <a href="{{ asset('storage/' . $upload->file_path) }}" target="_blank">
+                                                                    {{ $upload->file_name }}
+                                                                </a>
+                                                            </td>
+                                                            <td>{{ $upload->uploader->name ?? '-' }}</td>
+                                                            <td>{{ $upload->created_at?->format('d M Y H:i') ?? '-' }}</td>
+                                                            <td>{{ $upload->notes ?? '-' }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @else
+                                        <p class="mb-0 text-muted small">Belum ada upload hardcopy.</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        @else
+                            <p class="mb-0 text-muted">Belum ada form timesheet. Klik <strong>Generate Form</strong> untuk membuat form baru.</p>
+                        @endif
+                    </div>
+                </div>
             </div>
 
             {{-- SIDEBAR --}}

@@ -212,6 +212,14 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:proyek.show')
         ->name('proyek.show');
 
+    Route::post('/proyek/{proyek}/timesheets', [ProyekController::class, 'storeTimesheetForm'])
+        ->middleware('permission:proyek.show')
+        ->name('proyek.timesheet.store');
+
+    Route::post('/proyek/{proyek}/timesheets/{timesheet}/hardcopy', [ProyekController::class, 'uploadTimesheetHardcopy'])
+        ->middleware('permission:proyek.show')
+        ->name('proyek.timesheet.hardcopy.upload');
+
     Route::get('/proyek/{proyek}/pekerjaan/{item}/layanan/{layanan}', [ProyekController::class, 'showPekerjaan'])
         ->middleware('permission:proyek.show')
         ->name('proyek.pekerjaan.show');
