@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Proyek;
 use App\Models\ProyekTimesheet;
 use App\Models\ProyekTimesheetUpload;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class ProyekController extends Controller
@@ -71,7 +72,29 @@ class ProyekController extends Controller
 
         return redirect()
             ->route('proyek.show', $proyek->id)
-            ->with('success', 'Form timesheet berhasil dibuat. Silakan cetak dan gunakan saat inspeksi.');
+            ->with('success', 'Form timesheet berhasil dibuat. Klik Export Template PDF untuk mencetak format baku.');
+    }
+
+    public function exportTimesheetPdf(Proyek $proyek, ProyekTimesheet $timesheet)
+    {
+        if ((int) $timesheet->proyek_id !== (int) $proyek->id) {
+            abort(404);
+        }
+
+        $proyek->loadMissing(['permohonan', 'users']);
+
+        if ($timesheet->status === 'generated') {
+            $timesheet->update([
+                'status' => 'in_field',
+            ]);
+        }
+
+        $pdf = Pdf::loadView('proyek.timesheet-pdf', [
+            'proyek' => $proyek,
+            'timesheet' => $timesheet,
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->stream($timesheet->form_no . '.pdf');
     }
 
     public function uploadTimesheetHardcopy(Request $request, Proyek $proyek, ProyekTimesheet $timesheet)

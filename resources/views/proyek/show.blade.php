@@ -247,8 +247,12 @@
                                                 Dibuat oleh: {{ $timesheet->generator->name ?? '-' }}
                                             </div>
                                         </div>
-                                        <div>
-                                            <span class="badge bg-info text-dark text-uppercase">{{ str_replace('_', ' ', $timesheet->status) }}</span>
+                                        <div class="text-end">
+                                            <span class="badge bg-info text-dark text-uppercase d-block mb-2">{{ str_replace('_', ' ', $timesheet->status) }}</span>
+                                            <a href="{{ route('proyek.timesheet.export-pdf', [$proyek->id, $timesheet->id]) }}"
+                                                target="_blank" class="btn btn-sm btn-outline-primary">
+                                                Export Template PDF
+                                            </a>
                                         </div>
                                     </div>
 

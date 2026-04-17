@@ -216,6 +216,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:proyek.show')
         ->name('proyek.timesheet.store');
 
+    Route::get('/proyek/{proyek}/timesheets/{timesheet}/export-pdf', [ProyekController::class, 'exportTimesheetPdf'])
+        ->middleware('permission:proyek.show')
+        ->name('proyek.timesheet.export-pdf');
+
     Route::post('/proyek/{proyek}/timesheets/{timesheet}/hardcopy', [ProyekController::class, 'uploadTimesheetHardcopy'])
         ->middleware('permission:proyek.show')
         ->name('proyek.timesheet.hardcopy.upload');
