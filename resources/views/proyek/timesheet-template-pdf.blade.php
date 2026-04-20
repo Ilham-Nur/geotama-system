@@ -152,14 +152,18 @@
                     <tr>
                         <th style="width: 90px;">Jam Mulai</th>
                         <th style="width: 90px;">Jam Selesai</th>
-                        <th style="width: 170px;">Layanan<br><span style="font-weight: normal;">(<span class="checkbox"></span>MT &nbsp; <span class="checkbox"></span>PT &nbsp; <span class="checkbox"></span>UT)</span></th>
+                        <th style="width: 170px;">Layanan</th>
                         <th>Aktivitas / Catatan Lapangan</th>
                     </tr>
                     @for ($i = 0; $i < 12; $i++)
                         <tr class="timesheet-row">
                             <td></td>
                             <td></td>
-                            <td></td>
+                            <td>
+                                <span class="checkbox"></span>MT &nbsp;
+                                <span class="checkbox"></span>PT &nbsp;
+                                <span class="checkbox"></span>UT
+                            </td>
                             <td></td>
                         </tr>
                     @endfor
