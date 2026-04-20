@@ -239,9 +239,12 @@
                                 <div class="border rounded p-3 mb-3">
                                     <div class="d-flex justify-content-between flex-wrap gap-2">
                                         <div>
-                                            <strong>{{ $timesheet->form_no }}</strong>
+                                            <strong>Form Timesheet Inspeksi</strong>
                                             <div class="text-muted small">
-                                                Tanggal inspeksi: {{ optional($timesheet->inspection_date)->format('d M Y') ?? '-' }}
+                                                No Form: GGI-F2-2026-REV 1
+                                            </div>
+                                            <div class="text-muted small">
+                                                Tanggal inspeksi rencana: {{ optional($timesheet->inspection_date)->format('d M Y') ?? '-' }}
                                             </div>
                                             <div class="text-muted small">
                                                 Dibuat oleh: {{ $timesheet->generator->name ?? '-' }}
@@ -280,7 +283,7 @@
                                     <form action="{{ route('proyek.timesheet.hardcopy.upload', [$proyek->id, $timesheet->id]) }}" method="POST"
                                         enctype="multipart/form-data" class="row g-2 align-items-end mb-3">
                                         @csrf
-                                        <div class="col-md-5">
+                                        <div class="col-md-3">
                                             <label class="form-label">Upload hardcopy</label>
                                             <input type="file" name="hardcopy_file"
                                                 class="form-control @error('hardcopy_file') is-invalid @enderror"
@@ -289,7 +292,24 @@
                                                 <small class="invalid-feedback">{{ $message }}</small>
                                             @enderror
                                         </div>
-                                        <div class="col-md-5">
+                                        <div class="col-md-2">
+                                            <label class="form-label">Tanggal Timesheet</label>
+                                            <input type="date" name="work_date" class="form-control @error('work_date') is-invalid @enderror"
+                                                value="{{ old('work_date') }}" required>
+                                            @error('work_date')
+                                                <small class="invalid-feedback">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label">Durasi (hari)</label>
+                                            <input type="number" min="1" name="duration_days"
+                                                class="form-control @error('duration_days') is-invalid @enderror"
+                                                value="{{ old('duration_days', 1) }}" required>
+                                            @error('duration_days')
+                                                <small class="invalid-feedback">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-3">
                                             <label class="form-label">Catatan upload (opsional)</label>
                                             <input type="text" name="notes" class="form-control @error('notes') is-invalid @enderror"
                                                 value="{{ old('notes') }}" placeholder="Contoh: halaman 1 dan 2">
@@ -319,6 +339,8 @@
                                                         <th>File</th>
                                                         <th>Uploader</th>
                                                         <th>Tanggal</th>
+                                                        <th>Tanggal Timesheet</th>
+                                                        <th>Durasi Hari</th>
                                                         <th>Catatan</th>
                                                         <th>Aksi</th>
                                                     </tr>
@@ -334,6 +356,8 @@
                                                             </td>
                                                             <td>{{ $upload->uploader->name ?? '-' }}</td>
                                                             <td>{{ $upload->created_at?->format('d M Y H:i') ?? '-' }}</td>
+                                                            <td>{{ $upload->work_date?->format('d M Y') ?? '-' }}</td>
+                                                            <td>{{ $upload->duration_days ?? '-' }}</td>
                                                             <td>{{ $upload->notes ?? '-' }}</td>
                                                             <td style="min-width: 260px;">
                                                                 <form action="{{ route('proyek.timesheet.hardcopy.update', [$proyek->id, $timesheet->id, $upload->id]) }}"
@@ -344,6 +368,13 @@
                                                                         <input type="text" class="form-control" name="notes"
                                                                             value="{{ $upload->notes }}"
                                                                             placeholder="Edit catatan">
+                                                                    </div>
+                                                                    <div class="input-group input-group-sm mb-1">
+                                                                        <input type="date" class="form-control" name="work_date"
+                                                                            value="{{ $upload->work_date?->format('Y-m-d') }}">
+                                                                        <input type="number" min="1" class="form-control"
+                                                                            name="duration_days" value="{{ $upload->duration_days }}"
+                                                                            placeholder="Durasi hari">
                                                                     </div>
                                                                     <div class="input-group input-group-sm">
                                                                         <input type="file" class="form-control" name="hardcopy_file"

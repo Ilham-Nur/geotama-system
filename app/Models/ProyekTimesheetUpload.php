@@ -17,8 +17,15 @@ class ProyekTimesheetUpload extends Model
         'mime_type',
         'file_size',
         'version_no',
+        'work_date',
+        'duration_days',
         'notes',
         'uploaded_by',
+    ];
+
+    protected $casts = [
+        'work_date' => 'date',
+        'duration_days' => 'integer',
     ];
 
     public function timesheet()

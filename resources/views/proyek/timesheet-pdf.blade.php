@@ -3,31 +3,16 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Timesheet {{ $timesheet->form_no }}</title>
+    <title>Timesheet Inspeksi</title>
     <style>
+        @page {
+            margin: 20px;
+        }
+
         body {
             font-family: DejaVu Sans, sans-serif;
-            font-size: 12px;
-            color: #1f2937;
-            margin: 28px;
-        }
-
-        h1 {
-            margin: 0 0 6px 0;
-            font-size: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        h2 {
-            margin: 0;
-            font-size: 14px;
-            font-weight: normal;
-            color: #4b5563;
-        }
-
-        .section {
-            margin-top: 18px;
+            font-size: 11px;
+            color: #000;
         }
 
         table {
@@ -35,136 +20,171 @@
             border-collapse: collapse;
         }
 
-        .meta td {
-            padding: 6px 8px;
-            border: 1px solid #d1d5db;
+        .header-table td,
+        .main-table td,
+        .main-table th,
+        .activity-table td,
+        .activity-table th {
+            border: 1px solid #000;
+            padding: 5px 6px;
             vertical-align: top;
         }
 
-        .meta td.label {
-            width: 25%;
-            background: #f3f4f6;
-            font-weight: bold;
-        }
-
-        .grid th,
-        .grid td {
-            border: 1px solid #d1d5db;
-            padding: 8px;
-            vertical-align: top;
-            height: 30px;
-        }
-
-        .grid th {
-            background: #f3f4f6;
-            text-align: left;
-            font-size: 11px;
-        }
-
-        .text-center {
+        .center {
             text-align: center;
         }
 
-        .signature-box {
-            margin-top: 42px;
+        .middle {
+            vertical-align: middle;
         }
 
-        .sign {
+        .title-company {
+            font-size: 17px;
+            font-weight: bold;
+            letter-spacing: .3px;
+        }
+
+        .title-form {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            font-size: 10px;
+            font-style: italic;
+        }
+
+        .logo-box {
+            width: 90px;
+            text-align: center;
+        }
+
+        .logo-img {
+            width: 65px;
+            height: auto;
+        }
+
+        .label {
+            width: 22%;
+            font-weight: bold;
+            background: #f2f2f2;
+        }
+
+        .activity-table th {
+            background: #f2f2f2;
+            text-align: left;
+            font-size: 10px;
+        }
+
+        .activity-table td {
+            height: 28px;
+        }
+
+        .sig-wrap {
+            margin-top: 16px;
+        }
+
+        .sig-col {
             width: 48%;
             display: inline-block;
             vertical-align: top;
         }
 
-        .line {
-            margin-top: 54px;
-            border-top: 1px solid #111827;
-            padding-top: 5px;
-            font-size: 11px;
+        .sig-line {
+            margin-top: 56px;
+            border-top: 1px solid #000;
+            padding-top: 4px;
         }
 
-        .footer-note {
-            margin-top: 24px;
-            font-size: 11px;
-            color: #6b7280;
+        .form-code {
+            margin-top: 14px;
+            text-align: right;
+            font-size: 10px;
+            font-weight: bold;
         }
     </style>
 </head>
 
 <body>
-    <h1>Timesheet Inspeksi</h1>
-    <h2>Template Baku Lapangan</h2>
+    <table class="header-table">
+        <tr>
+            <td rowspan="3" class="logo-box middle">
+                @php
+                    $path = public_path('template/assets/images/logo/logo-geotama-removebg-preview.png');
+                    $type = pathinfo($path, PATHINFO_EXTENSION);
+                    $base64 = file_exists($path)
+                        ? 'data:image/' . $type . ';base64,' . base64_encode(file_get_contents($path))
+                        : '';
+                @endphp
 
-    <div class="section">
-        <table class="meta">
-            <tr>
-                <td class="label">Nomor Form</td>
-                <td>{{ $timesheet->form_no }}</td>
-                <td class="label">Tanggal Form</td>
-                <td>{{ $timesheet->created_at?->format('d M Y') ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="label">No Proyek</td>
-                <td>{{ $proyek->no_proyek ?? '-' }}</td>
-                <td class="label">Tanggal Inspeksi</td>
-                <td>{{ optional($timesheet->inspection_date)->format('d M Y') ?? '............................' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Nama Proyek</td>
-                <td>{{ $proyek->permohonan->nama_proyek ?? '-' }}</td>
-                <td class="label">Client</td>
-                <td>{{ $proyek->permohonan->nama_perusahaan ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Lokasi</td>
-                <td colspan="3">{{ $proyek->permohonan->lokasi ?? '............................................................' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Catatan Form</td>
-                <td colspan="3">{{ $timesheet->remarks ?? '............................................................' }}</td>
-            </tr>
-        </table>
-    </div>
+                @if ($base64)
+                    <img src="{{ $base64 }}" class="logo-img">
+                @else
+                    LOGO
+                @endif
+            </td>
+            <td class="center middle title-company">PT. GEOTAMA GLOBAL INTIJAYA</td>
+        </tr>
+        <tr>
+            <td class="center middle title-form">TIMESHEET INSPEKSI LAPANGAN</td>
+        </tr>
+        <tr>
+            <td class="center middle subtitle">FIELD INSPECTION TIMESHEET</td>
+        </tr>
+    </table>
 
-    <div class="section">
-        <table class="grid">
-            <thead>
+    <table class="main-table" style="margin-top: 8px;">
+        <tr>
+            <td class="label">Nama Proyek</td>
+            <td>{{ $proyek->permohonan->nama_proyek ?? '-' }}</td>
+            <td class="label">Tanggal</td>
+            <td>................................................</td>
+        </tr>
+        <tr>
+            <td class="label">No Proyek</td>
+            <td>{{ $proyek->no_proyek ?? '-' }}</td>
+            <td class="label">Durasi Hari</td>
+            <td>................................................</td>
+        </tr>
+        <tr>
+            <td class="label">Client</td>
+            <td>{{ $proyek->permohonan->nama_perusahaan ?? '-' }}</td>
+            <td class="label">Lokasi</td>
+            <td>{{ $proyek->permohonan->lokasi ?? '-' }}</td>
+        </tr>
+    </table>
+
+    <table class="activity-table" style="margin-top: 8px;">
+        <thead>
+            <tr>
+                <th style="width: 22%;">Jam Mulai</th>
+                <th style="width: 22%;">Jam Selesai</th>
+                <th style="width: 56%;">Aktivitas / Catatan Lapangan</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for ($i = 1; $i <= 10; $i++)
                 <tr>
-                    <th style="width: 6%;">No</th>
-                    <th style="width: 14%;">Jam Mulai</th>
-                    <th style="width: 14%;">Jam Selesai</th>
-                    <th style="width: 14%;">Durasi</th>
-                    <th>Aktivitas / Catatan Lapangan</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                 </tr>
-            </thead>
-            <tbody>
-                @for ($i = 1; $i <= 8; $i++)
-                    <tr>
-                        <td class="text-center">{{ $i }}</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                @endfor
-            </tbody>
-        </table>
-    </div>
+            @endfor
+        </tbody>
+    </table>
 
-    <div class="signature-box">
-        <div class="sign">
+    <div class="sig-wrap">
+        <div class="sig-col">
             Petugas Inspeksi,
-            <div class="line">Nama & Tanda Tangan</div>
+            <div class="sig-line">Nama & Tanda Tangan</div>
         </div>
-        <div class="sign" style="float:right; text-align: right;">
-            Supervisor / Verifikator,
-            <div class="line">Nama & Tanda Tangan</div>
+        <div class="sig-col" style="float:right; text-align:right;">
+            Supervisor,
+            <div class="sig-line">Nama & Tanda Tangan</div>
         </div>
     </div>
 
-    <div class="footer-note">
-        Dokumen ini adalah template baku timesheet inspeksi. Setelah diisi manual di lapangan,
-        upload hardcopy pada detail proyek menggunakan nomor form yang sama.
-    </div>
+    <div class="form-code">GGI-F2-2026-REV 1</div>
 </body>
 
 </html>

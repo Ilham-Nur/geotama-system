@@ -96,7 +96,7 @@ class ProyekController extends Controller
             'timesheet' => $timesheet,
         ])->setPaper('a4', 'portrait');
 
-        return $pdf->stream($timesheet->form_no . '.pdf');
+        return $pdf->stream('timesheet-template-' . ($proyek->no_proyek ?: $proyek->id) . '.pdf');
     }
 
 
@@ -132,20 +132,27 @@ class ProyekController extends Controller
 
         $validated = $request->validate([
             'notes' => 'nullable|string|max:255',
+            'work_date' => 'nullable|date',
+            'duration_days' => 'nullable|integer|min:1|max:365',
             'hardcopy_file' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
         ], [
             'hardcopy_file.mimes' => 'File harus PDF, JPG, JPEG, atau PNG.',
             'hardcopy_file.max' => 'Ukuran file maksimal 10 MB.',
+            'work_date.date' => 'Tanggal kerja tidak valid.',
+            'duration_days.integer' => 'Durasi hari harus angka.',
+            'duration_days.min' => 'Durasi hari minimal 1 hari.',
         ]);
 
-        if (! $request->filled('notes') && ! $request->hasFile('hardcopy_file')) {
+        if (! $request->filled('notes') && ! $request->hasFile('hardcopy_file') && ! $request->filled('work_date') && ! $request->filled('duration_days')) {
             return redirect()
                 ->route('proyek.show', $proyek->id)
-                ->with('error', 'Isi catatan atau pilih file baru untuk memperbarui hardcopy.');
+                ->with('error', 'Isi catatan/tanggal/durasi atau pilih file baru untuk memperbarui hardcopy.');
         }
 
         $payload = [
             'notes' => $validated['notes'] ?? $upload->notes,
+            'work_date' => $validated['work_date'] ?? $upload->work_date,
+            'duration_days' => $validated['duration_days'] ?? $upload->duration_days,
         ];
 
         if ($request->hasFile('hardcopy_file')) {
@@ -217,11 +224,18 @@ class ProyekController extends Controller
 
         $validated = $request->validate([
             'hardcopy_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'work_date' => 'required|date',
+            'duration_days' => 'required|integer|min:1|max:365',
             'notes' => 'nullable|string|max:255',
         ], [
             'hardcopy_file.required' => 'File hardcopy wajib diupload.',
             'hardcopy_file.mimes' => 'File harus PDF, JPG, JPEG, atau PNG.',
             'hardcopy_file.max' => 'Ukuran file maksimal 10 MB.',
+            'work_date.required' => 'Tanggal timesheet wajib diisi.',
+            'work_date.date' => 'Tanggal timesheet tidak valid.',
+            'duration_days.required' => 'Durasi hari wajib diisi.',
+            'duration_days.integer' => 'Durasi hari harus angka.',
+            'duration_days.min' => 'Durasi minimal 1 hari.',
         ]);
 
         $nextVersion = ((int) $timesheet->uploads()->max('version_no')) + 1;
@@ -237,6 +251,8 @@ class ProyekController extends Controller
             'mime_type' => $file->getMimeType(),
             'file_size' => $file->getSize(),
             'version_no' => $nextVersion,
+            'work_date' => $validated['work_date'],
+            'duration_days' => $validated['duration_days'],
             'notes' => $validated['notes'] ?? null,
             'uploaded_by' => auth()->id(),
         ]);
