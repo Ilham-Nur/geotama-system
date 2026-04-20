@@ -200,6 +200,114 @@
                         @endif
                     </div>
                 </div>
+
+                {{-- TIMESHEET --}}
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Timesheet Proyek</h5>
+                        <a href="{{ route('proyek.timesheet.template-pdf', $proyek->id) }}" class="btn btn-sm btn-danger">
+                            Export PDF Template
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ route('proyek.timesheet.store', $proyek->id) }}" method="POST"
+                            enctype="multipart/form-data" class="mb-4">
+                            @csrf
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label">Tanggal</label>
+                                    <input type="date" name="tanggal" class="form-control"
+                                        value="{{ old('tanggal') }}" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Jam Mulai</label>
+                                    <input type="time" name="jam_mulai" class="form-control"
+                                        value="{{ old('jam_mulai') }}" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Jam Selesai</label>
+                                    <input type="time" name="jam_selesai" class="form-control"
+                                        value="{{ old('jam_selesai') }}" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Durasi Hari</label>
+                                    <input type="number" min="1" name="durasi_hari" class="form-control"
+                                        value="{{ old('durasi_hari', 1) }}" required>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">File Timesheet</label>
+                                    <input type="file" name="file_timesheet" class="form-control" required>
+                                    <small class="text-muted">Format: PDF/JPG/JPEG/PNG (maks 10MB).</small>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary">
+                                    Upload Timesheet
+                                </button>
+                            </div>
+                        </form>
+
+                        @if ($errors->has('tanggal') || $errors->has('jam_mulai') || $errors->has('jam_selesai') || $errors->has('durasi_hari') || $errors->has('file_timesheet'))
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach (['tanggal', 'jam_mulai', 'jam_selesai', 'durasi_hari', 'file_timesheet'] as $field)
+                                        @error($field)
+                                            <li>{{ $message }}</li>
+                                        @enderror
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        @if ($proyek->timesheets->count())
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Tanggal</th>
+                                            <th>Jam</th>
+                                            <th>Durasi Hari</th>
+                                            <th>Dokumen</th>
+                                            <th class="text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($proyek->timesheets->sortByDesc('created_at') as $timesheet)
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ optional($timesheet->tanggal)->format('d-m-Y') ?? '-' }}</td>
+                                                <td>{{ \Illuminate\Support\Str::substr($timesheet->jam_mulai, 0, 5) }} - {{ \Illuminate\Support\Str::substr($timesheet->jam_selesai, 0, 5) }}
+                                                </td>
+                                                <td>{{ $timesheet->durasi_hari }} hari</td>
+                                                <td>
+                                                    <a href="{{ asset('storage/' . $timesheet->file_path) }}"
+                                                        target="_blank">
+                                                        {{ $timesheet->original_name }}
+                                                    </a>
+                                                </td>
+                                                <td class="text-center">
+                                                    <form
+                                                        action="{{ route('proyek.timesheet.destroy', [$proyek->id, $timesheet->id]) }}"
+                                                        method="POST"
+                                                        onsubmit="return confirm('Yakin ingin menghapus file timesheet ini?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                            Hapus
+                                                        </button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @else
+                            <p class="mb-0 text-muted">Belum ada upload timesheet.</p>
+                        @endif
+                    </div>
+                </div>
             </div>
 
             {{-- SIDEBAR --}}
