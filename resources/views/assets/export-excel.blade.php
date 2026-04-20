@@ -17,10 +17,10 @@
                 <th>No Seri</th>
                 <th>Lokasi</th>
                 <th>Jumlah</th>
-                <th>Harga</th>
-                <th>Total</th>
                 <th>Tahun</th>
                 <th>Remark</th>
+                <th>Harga</th>
+                <th>Total</th>
             </tr>
         </thead>
         <tbody>
@@ -33,10 +33,10 @@
                     <td>{{ $asset->no_seri ?? '-' }}</td>
                     <td>{{ $asset->lokasi }}</td>
                     <td>{{ $asset->jumlah }}</td>
-                    <td>{{ (float) $asset->harga }}</td>
-                    <td>{{ (float) $asset->total }}</td>
                     <td>{{ $asset->tahun }}</td>
                     <td>{{ $asset->remark ?? '-' }}</td>
+                    <td>{{ (float) $asset->harga }}</td>
+                    <td>{{ (float) $asset->total }}</td>
                 </tr>
             @empty
                 <tr>
@@ -45,9 +45,8 @@
             @endforelse
 
             <tr>
-                <td colspan="8"><strong>Total Keseluruhan Aset</strong></td>
+                <td colspan="10" style="text-align:right;"><strong>Grand Total</strong></td>
                 <td><strong>{{ (float) $grandTotal }}</strong></td>
-                <td colspan="2"></td>
             </tr>
         </tbody>
     </table>
