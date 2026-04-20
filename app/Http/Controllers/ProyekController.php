@@ -56,25 +56,17 @@ class ProyekController extends Controller
 
     public function storeTimesheetForm(Request $request, Proyek $proyek)
     {
-        $validated = $request->validate([
-            'inspection_date' => 'nullable|date',
-            'remarks' => 'nullable|string|max:500',
-        ], [
-            'inspection_date.date' => 'Tanggal inspeksi tidak valid.',
-        ]);
-
-        ProyekTimesheet::create([
+        $timesheet = ProyekTimesheet::create([
             'proyek_id' => $proyek->id,
             'form_no' => ProyekTimesheet::generateFormNo($proyek),
-            'inspection_date' => $validated['inspection_date'] ?? null,
-            'remarks' => $validated['remarks'] ?? null,
+            'inspection_date' => null,
+            'remarks' => null,
             'generated_by' => auth()->id(),
             'status' => 'generated',
         ]);
 
         return redirect()
-            ->route('proyek.show', $proyek->id)
-            ->with('success', 'Form timesheet berhasil dibuat. Klik Export Template PDF untuk mencetak format baku.');
+            ->route('proyek.timesheet.export-pdf', [$proyek->id, $timesheet->id]);
     }
 
     public function exportTimesheetPdf(Proyek $proyek, ProyekTimesheet $timesheet)

@@ -210,27 +210,10 @@
                     <div class="card-body">
                         <form action="{{ route('proyek.timesheet.store', $proyek->id) }}" method="POST" class="mb-4">
                             @csrf
-                            <div class="row g-2">
-                                <div class="col-md-4">
-                                    <label class="form-label">Tanggal Inspeksi</label>
-                                    <input type="date" name="inspection_date" class="form-control @error('inspection_date') is-invalid @enderror"
-                                        value="{{ old('inspection_date') }}">
-                                    @error('inspection_date')
-                                        <small class="invalid-feedback">{{ $message }}</small>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Catatan Form (Opsional)</label>
-                                    <input type="text" name="remarks" class="form-control @error('remarks') is-invalid @enderror"
-                                        value="{{ old('remarks') }}" placeholder="Contoh: inspeksi area boiler">
-                                    @error('remarks')
-                                        <small class="invalid-feedback">{{ $message }}</small>
-                                    @enderror
-                                </div>
-                                <div class="col-md-2 d-grid">
-                                    <label class="form-label d-none d-md-block">&nbsp;</label>
-                                    <button type="submit" class="btn btn-primary">Generate Form</button>
-                                </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    Generate & Print Form Timesheet
+                                </button>
                             </div>
                         </form>
 
@@ -242,9 +225,6 @@
                                             <strong>Form Timesheet Inspeksi</strong>
                                             <div class="text-muted small">
                                                 No Form: GGI-F2-2026-REV 1
-                                            </div>
-                                            <div class="text-muted small">
-                                                Tanggal inspeksi rencana: {{ optional($timesheet->inspection_date)->format('d M Y') ?? '-' }}
                                             </div>
                                             <div class="text-muted small">
                                                 Dibuat oleh: {{ $timesheet->generator->name ?? '-' }}
@@ -268,10 +248,6 @@
                                             </a>
                                         </div>
                                     </div>
-
-                                    @if ($timesheet->remarks)
-                                        <p class="mb-3 mt-2"><small>Catatan: {{ $timesheet->remarks }}</small></p>
-                                    @endif
 
                                     @if ($timesheet->verified_at)
                                         <p class="mb-3 mt-2 text-success small">
