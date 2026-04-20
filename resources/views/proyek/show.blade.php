@@ -208,7 +208,7 @@
                         <span class="badge bg-dark">{{ $proyek->timesheets->count() }} Form</span>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('proyek.timesheet.store', $proyek->id) }}" method="POST" class="mb-4">
+                        <form action="{{ route('proyek.timesheet.store', $proyek->id) }}" method="POST" target="_blank" class="mb-4">
                             @csrf
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-primary">
@@ -261,10 +261,14 @@
                                         @csrf
                                         <div class="col-md-3">
                                             <label class="form-label">Upload hardcopy</label>
-                                            <input type="file" name="hardcopy_file"
-                                                class="form-control @error('hardcopy_file') is-invalid @enderror"
-                                                accept=".pdf,.jpg,.jpeg,.png" required>
-                                            @error('hardcopy_file')
+                                            <input type="file" name="hardcopy_files[]"
+                                                class="form-control @error('hardcopy_files') is-invalid @enderror @error('hardcopy_files.*') is-invalid @enderror"
+                                                accept=".pdf,.jpg,.jpeg,.png" multiple required>
+                                            <small class="text-muted">Bisa pilih lebih dari 1 file sekaligus.</small>
+                                            @error('hardcopy_files')
+                                                <small class="invalid-feedback">{{ $message }}</small>
+                                            @enderror
+                                            @error('hardcopy_files.*')
                                                 <small class="invalid-feedback">{{ $message }}</small>
                                             @enderror
                                         </div>

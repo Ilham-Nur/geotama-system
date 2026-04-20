@@ -215,14 +215,16 @@ class ProyekController extends Controller
         }
 
         $validated = $request->validate([
-            'hardcopy_file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'hardcopy_files' => 'required|array|min:1',
+            'hardcopy_files.*' => 'file|mimes:pdf,jpg,jpeg,png|max:10240',
             'work_date' => 'required|date',
             'duration_days' => 'required|integer|min:1|max:365',
             'notes' => 'nullable|string|max:255',
         ], [
-            'hardcopy_file.required' => 'File hardcopy wajib diupload.',
-            'hardcopy_file.mimes' => 'File harus PDF, JPG, JPEG, atau PNG.',
-            'hardcopy_file.max' => 'Ukuran file maksimal 10 MB.',
+            'hardcopy_files.required' => 'Minimal satu file hardcopy wajib diupload.',
+            'hardcopy_files.array' => 'Format upload file tidak valid.',
+            'hardcopy_files.*.mimes' => 'File harus PDF, JPG, JPEG, atau PNG.',
+            'hardcopy_files.*.max' => 'Ukuran masing-masing file maksimal 10 MB.',
             'work_date.required' => 'Tanggal timesheet wajib diisi.',
             'work_date.date' => 'Tanggal timesheet tidak valid.',
             'duration_days.required' => 'Durasi hari wajib diisi.',
@@ -231,23 +233,28 @@ class ProyekController extends Controller
         ]);
 
         $nextVersion = ((int) $timesheet->uploads()->max('version_no')) + 1;
+        $uploadedCount = 0;
 
-        $file = $validated['hardcopy_file'];
-        $path = $file->store('timesheets/hardcopy', 'public');
+        foreach ($validated['hardcopy_files'] as $file) {
+            $path = $file->store('timesheets/hardcopy', 'public');
 
-        ProyekTimesheetUpload::create([
-            'proyek_timesheet_id' => $timesheet->id,
-            'proyek_id' => $proyek->id,
-            'file_path' => $path,
-            'file_name' => $file->getClientOriginalName(),
-            'mime_type' => $file->getMimeType(),
-            'file_size' => $file->getSize(),
-            'version_no' => $nextVersion,
-            'work_date' => $validated['work_date'],
-            'duration_days' => $validated['duration_days'],
-            'notes' => $validated['notes'] ?? null,
-            'uploaded_by' => auth()->id(),
-        ]);
+            ProyekTimesheetUpload::create([
+                'proyek_timesheet_id' => $timesheet->id,
+                'proyek_id' => $proyek->id,
+                'file_path' => $path,
+                'file_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'file_size' => $file->getSize(),
+                'version_no' => $nextVersion,
+                'work_date' => $validated['work_date'],
+                'duration_days' => $validated['duration_days'],
+                'notes' => $validated['notes'] ?? null,
+                'uploaded_by' => auth()->id(),
+            ]);
+
+            $nextVersion++;
+            $uploadedCount++;
+        }
 
         if ($timesheet->status !== 'verified') {
             $timesheet->update([
@@ -257,6 +264,6 @@ class ProyekController extends Controller
 
         return redirect()
             ->route('proyek.show', $proyek->id)
-            ->with('success', 'Hardcopy timesheet berhasil diupload (versi ' . $nextVersion . '). Status otomatis menjadi completed.');
+            ->with('success', $uploadedCount . ' file hardcopy timesheet berhasil diupload. Status otomatis menjadi completed.');
     }
 }
