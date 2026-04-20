@@ -245,6 +245,10 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:assets.create')
         ->name('assets.store');
 
+    Route::get('/aset/export-excel', [AssetController::class, 'exportExcel'])
+        ->middleware('permission:assets.view')
+        ->name('assets.export-excel');
+
     Route::put('/aset/{asset}', [AssetController::class, 'update'])
         ->middleware('permission:assets.edit')
         ->name('assets.update');

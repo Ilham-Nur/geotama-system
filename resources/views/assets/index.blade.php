@@ -39,9 +39,12 @@
     <div class="card-style mb-30">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h6 class="text-medium mb-0">Data Aset</h6>
-            @can('assets.create')
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAssetModal">+ Tambah Aset</button>
-            @endcan
+            <div class="d-flex gap-2">
+                <a href="{{ route('assets.export-excel') }}" class="btn btn-success">Export Excel</a>
+                @can('assets.create')
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAssetModal">+ Tambah Aset</button>
+                @endcan
+            </div>
         </div>
 
         <div class="table-wrapper table-responsive">

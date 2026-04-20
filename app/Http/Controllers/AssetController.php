@@ -91,6 +91,26 @@ class AssetController extends Controller
         return redirect()->route('assets.index')->with('success', 'Data aset berhasil diperbarui.');
     }
 
+
+
+    public function exportExcel()
+    {
+        $assets = Asset::orderBy('no_aset')->get();
+        $grandTotal = $assets->sum('total');
+
+        $content = view('assets.export-excel', [
+            'assets' => $assets,
+            'grandTotal' => $grandTotal,
+        ])->render();
+
+        $filename = 'data-aset-' . now()->format('Ymd_His') . '.xls';
+
+        return response($content, 200, [
+            'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
     public function destroy(Asset $asset)
     {
         if ($asset->file_faktur) {
