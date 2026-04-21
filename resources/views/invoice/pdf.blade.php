@@ -446,7 +446,7 @@
                         </tr>
                     @endforeach
 
-                    @for ($i = 0; $i < max(0, 4 - $invoice->items->count()); $i++)
+                    @for ($i = 0; $i < max(0, 6 - $invoice->items->count()); $i++)
                         <tr class="empty-row">
                             <td class="col-desc">&nbsp;</td>
                             <td class="col-price"></td>
