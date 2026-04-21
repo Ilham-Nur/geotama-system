@@ -208,19 +208,32 @@
     <h6 class="mb-0">4. Sertifikat yang Dimiliki</h6>
     <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-certificate">+ Tambah</button>
 </div>
-<p class="text-muted small">Notice: sertifikat external yang akan kedaluwarsa dalam 3 bulan akan ditandai di halaman detail.</p>
+<p class="text-muted small mb-3">Notice: sertifikat external yang akan kedaluwarsa dalam 3 bulan akan ditandai di halaman detail.</p>
 <div id="certificate-wrapper">
     @forelse($oldCertificates as $index => $certificate)
-        <div class="border rounded p-3 mb-3 certificate-item">
+        <div class="border rounded p-3 mb-3 certificate-item bg-light">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="badge {{ ($certificate['certificate_type'] ?? 'internal') === 'external' ? 'bg-warning text-dark' : 'bg-secondary' }}">
+                    {{ strtoupper($certificate['certificate_type'] ?? 'internal') }}
+                </span>
+                <small class="text-muted">Sertifikat #{{ $index + 1 }}</small>
+            </div>
             <div class="row g-3">
                 <div class="col-md-3">
+                    <label class="form-label">Jenis</label>
                     <select name="certificates[{{ $index }}][certificate_type]" class="form-select">
                         <option value="internal" {{ ($certificate['certificate_type'] ?? '') === 'internal' ? 'selected' : '' }}>Internal</option>
                         <option value="external" {{ ($certificate['certificate_type'] ?? '') === 'external' ? 'selected' : '' }}>External</option>
                     </select>
                 </div>
-                <div class="col-md-5"><input type="text" name="certificates[{{ $index }}][certificate_name]" class="form-control" placeholder="Nama sertifikat" value="{{ $certificate['certificate_name'] ?? '' }}"></div>
-                <div class="col-md-4"><input type="text" name="certificates[{{ $index }}][issuer]" class="form-control" placeholder="Penerbit" value="{{ $certificate['issuer'] ?? '' }}"></div>
+                <div class="col-md-5">
+                    <label class="form-label">Nama Sertifikat</label>
+                    <input type="text" name="certificates[{{ $index }}][certificate_name]" class="form-control" placeholder="Contoh: Pelatihan APAR" value="{{ $certificate['certificate_name'] ?? '' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Penerbit</label>
+                    <input type="text" name="certificates[{{ $index }}][issuer]" class="form-control" placeholder="Contoh: MT PT / Internal Perusahaan" value="{{ $certificate['issuer'] ?? '' }}">
+                </div>
                 <div class="col-md-3"><label class="form-label">Tgl Terbit</label><input type="date" name="certificates[{{ $index }}][issued_at]" class="form-control" value="{{ $certificate['issued_at'] ?? '' }}"></div>
                 <div class="col-md-3"><label class="form-label">Tgl Expired</label><input type="date" name="certificates[{{ $index }}][expired_at]" class="form-control" value="{{ $certificate['expired_at'] ?? '' }}"></div>
                 <div class="col-md-4"><label class="form-label">Berkas</label><input type="file" name="certificate_files[{{ $index }}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></div>
@@ -275,8 +288,18 @@
             });
 
             $('#btn-add-certificate').on('click', function() {
-                certificateWrapper.append(`<div class="border rounded p-3 mb-3 certificate-item"><div class="row g-3"><div class="col-md-3"><select name="certificates[${certificateIndex}][certificate_type]" class="form-select"><option value="internal">Internal</option><option value="external">External</option></select></div><div class="col-md-5"><input type="text" name="certificates[${certificateIndex}][certificate_name]" class="form-control" placeholder="Nama sertifikat"></div><div class="col-md-4"><input type="text" name="certificates[${certificateIndex}][issuer]" class="form-control" placeholder="Penerbit"></div><div class="col-md-3"><label class="form-label">Tgl Terbit</label><input type="date" name="certificates[${certificateIndex}][issued_at]" class="form-control"></div><div class="col-md-3"><label class="form-label">Tgl Expired</label><input type="date" name="certificates[${certificateIndex}][expired_at]" class="form-control"></div><div class="col-md-4"><label class="form-label">Berkas</label><input type="file" name="certificate_files[${certificateIndex}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></div><div class="col-md-2 text-end d-flex align-items-end justify-content-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row">Hapus</button></div></div></div>`);
+                certificateWrapper.append(`<div class="border rounded p-3 mb-3 certificate-item bg-light"><div class="d-flex justify-content-between align-items-center mb-3"><span class="badge bg-secondary">INTERNAL</span><small class="text-muted">Sertifikat #${certificateIndex + 1}</small></div><div class="row g-3"><div class="col-md-3"><label class="form-label">Jenis</label><select name="certificates[${certificateIndex}][certificate_type]" class="form-select"><option value="internal">Internal</option><option value="external">External</option></select></div><div class="col-md-5"><label class="form-label">Nama Sertifikat</label><input type="text" name="certificates[${certificateIndex}][certificate_name]" class="form-control" placeholder="Contoh: Pelatihan APAR"></div><div class="col-md-4"><label class="form-label">Penerbit</label><input type="text" name="certificates[${certificateIndex}][issuer]" class="form-control" placeholder="Contoh: MT PT / Internal Perusahaan"></div><div class="col-md-3"><label class="form-label">Tgl Terbit</label><input type="date" name="certificates[${certificateIndex}][issued_at]" class="form-control"></div><div class="col-md-3"><label class="form-label">Tgl Expired</label><input type="date" name="certificates[${certificateIndex}][expired_at]" class="form-control"></div><div class="col-md-4"><label class="form-label">Berkas</label><input type="file" name="certificate_files[${certificateIndex}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></div><div class="col-md-2 text-end d-flex align-items-end justify-content-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-row">Hapus</button></div></div></div>`);
                 certificateIndex++;
+            });
+
+            $(document).on('change', 'select[name^="certificates"][name$="[certificate_type]"]', function() {
+                const wrapper = $(this).closest('.certificate-item');
+                const badge = wrapper.find('.badge').first();
+                if ($(this).val() === 'external') {
+                    badge.removeClass('bg-secondary').addClass('bg-warning text-dark').text('EXTERNAL');
+                } else {
+                    badge.removeClass('bg-warning text-dark').addClass('bg-secondary').text('INTERNAL');
+                }
             });
 
             $(document).on('click', '.btn-remove-row', function() { $(this).closest('.work-item, .certificate-item').remove(); });
