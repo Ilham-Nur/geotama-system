@@ -62,6 +62,12 @@
                                 data-sisa="{{ is_null($proyek->sisa_tagihan) ? '' : $proyek->sisa_tagihan }}"
                                 data-has-invoice="{{ $proyek->has_invoice ? 1 : 0 }}"
                                 data-is-nominal-empty="{{ $proyek->is_nominal_empty ? 1 : 0 }}"
+                                data-nama-perusahaan="{{ $proyek->notes_template['nama_perusahaan'] ?? '' }}"
+                                data-no-permohonan="{{ $proyek->notes_template['nomor_permohonan'] ?? '' }}"
+                                data-created-at-permohonan="{{ $proyek->notes_template['tanggal_permohonan'] ?? '' }}"
+                                data-lokasi-permohonan="{{ $proyek->notes_template['lokasi_permohonan'] ?? '' }}"
+                                data-tanggal-pelaksanaan-awal="{{ $proyek->notes_template['tanggal_pelaksanaan_awal'] ?? '' }}"
+                                data-tanggal-pelaksanaan-akhir="{{ $proyek->notes_template['tanggal_pelaksanaan_akhir'] ?? '' }}"
                                 {{ $selectedProyekId == $proyek->id ? 'selected' : '' }}>
                                 {{ $proyek->no_proyek }} - {{ $proyek->permohonan->nama_proyek ?? 'Tanpa deskripsi' }}
                             </option>
@@ -112,8 +118,13 @@
                 </div> --}}
 
                 <div class="col-md-12 mb-3">
-                    <label>Catatan</label>
-                    <textarea name="notes" class="form-control" rows="3">{{ old('notes') }}</textarea>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label>Catatan</label>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-generate-notes">
+                            Isi catatan otomatis
+                        </button>
+                    </div>
+                    <textarea name="notes" id="notes" class="form-control" rows="3">{{ old('notes') }}</textarea>
                 </div>
             </div>
 
@@ -244,6 +255,8 @@
             const nominalInput = document.getElementById('nominal_proyek');
             const nominalHelp = document.getElementById('nominal_help');
             const sisaTagihanView = document.getElementById('sisa_tagihan_view');
+            const notesInput = document.getElementById('notes');
+            const btnGenerateNotes = document.getElementById('btn-generate-notes');
             // const totalInvoiceView = document.getElementById('total_invoice_view');
 
             function formatRupiah(number) {
@@ -252,6 +265,34 @@
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 2
                 });
+            }
+
+            function formatTanggalId(value) {
+                if (!value) return '';
+                if (value.includes('-') && value.length === 10) {
+                    const [year, month, day] = value.split('-');
+                    if (year.length === 4) {
+                        return `${day}-${month}-${year}`;
+                    }
+                }
+                return value;
+            }
+
+            function buildAutoNotes() {
+                const selected = proyekSelect.options[proyekSelect.selectedIndex];
+
+                if (!selected || !selected.value) {
+                    return '';
+                }
+
+                const namaPerusahaan = selected.dataset.namaPerusahaan || '-';
+                const noPermohonan = selected.dataset.noPermohonan || '-';
+                const createdAtPermohonan = selected.dataset.createdAtPermohonan || '-';
+                const lokasiPermohonan = selected.dataset.lokasiPermohonan || '-';
+                const tanggalAwal = formatTanggalId(selected.dataset.tanggalPelaksanaanAwal || '');
+                const tanggalAkhir = formatTanggalId(selected.dataset.tanggalPelaksanaanAkhir || '');
+
+                return `Atas permintaan dari ${namaPerusahaan} dengan no permohonan ${noPermohonan} tanggal ${createdAtPermohonan} telah dilaksanakan pengujian di ${lokasiPermohonan} pada tanggal ${tanggalAwal || '-'} s/d ${tanggalAkhir || '-'}.`;
             }
 
             function updateProjectInfo() {
@@ -263,6 +304,9 @@
                     nominalInput.readOnly = false;
                     nominalHelp.innerText = '';
                     sisaTagihanView.value = '';
+                    if (!notesInput.value.trim()) {
+                        notesInput.value = '';
+                    }
                     // totalInvoiceView.value = '';
                     return;
                 }
@@ -285,6 +329,10 @@
                     nominalInput.readOnly = false;
                     nominalInput.value = nominal > 0 ? nominal : '';
                     nominalHelp.innerText = 'Isi nominal proyek karena ini invoice pertama.';
+                }
+
+                if (!notesInput.value.trim()) {
+                    notesInput.value = buildAutoNotes();
                 }
             }
 
@@ -316,6 +364,10 @@
             calculateTotals();
 
             proyekSelect.addEventListener('change', updateProjectInfo);
+
+            btnGenerateNotes.addEventListener('click', function() {
+                notesInput.value = buildAutoNotes();
+            });
 
             document.addEventListener('input', function(e) {
                 if (

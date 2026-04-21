@@ -20,7 +20,7 @@ class InvoiceController extends Controller
 
     public function create()
     {
-        $proyeks = Proyek::with('invoices')
+        $proyeks = Proyek::with(['invoices', 'permohonan.items'])
             ->get()
             ->map(function ($proyek) {
                 $totalInvoice = $proyek->invoices->sum(function ($invoice) {
@@ -58,6 +58,24 @@ class InvoiceController extends Controller
                 } else {
                     $proyek->sisa_tagihan = max($nominal - $totalInvoiceNet, 0);
                 }
+
+                $permohonanItems = optional($proyek->permohonan)->items ?? collect();
+                $tanggalPelaksanaanTersedia = $permohonanItems
+                    ->pluck('tanggal_pelaksanaan')
+                    ->filter();
+
+                $proyek->notes_template = [
+                    'nama_perusahaan' => $proyek->permohonan->nama_perusahaan ?? '',
+                    'nomor_permohonan' => $proyek->permohonan->nomor ?? '',
+                    'tanggal_permohonan' => optional($proyek->permohonan?->created_at)->format('d-m-Y') ?? '',
+                    'lokasi_permohonan' => $proyek->permohonan->lokasi ?? '',
+                    'tanggal_pelaksanaan_awal' => $tanggalPelaksanaanTersedia->isNotEmpty()
+                        ? $tanggalPelaksanaanTersedia->min()
+                        : '',
+                    'tanggal_pelaksanaan_akhir' => $tanggalPelaksanaanTersedia->isNotEmpty()
+                        ? $tanggalPelaksanaanTersedia->max()
+                        : '',
+                ];
 
                 return $proyek;
             })
