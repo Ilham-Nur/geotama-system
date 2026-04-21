@@ -64,6 +64,16 @@
     @if (session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <strong>Gagal menyimpan data profil:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     <div class="row">
         <div class="col-lg-8">
@@ -235,9 +245,12 @@
                         <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-work-profile">+ Tambah</button>
                     </div>
                     <div id="work-profile-wrapper">
-                        @foreach (old('work_experiences', $employee->workExperiences->map(fn($item) => ['company_name' => $item->company_name, 'position' => $item->position, 'start_year' => $item->start_year, 'end_year' => $item->end_year, 'certificate_file_name' => $item->certificate_file_name])->toArray()) as $i => $work)
+                        @foreach (old('work_experiences', $employee->workExperiences->map(fn($item) => ['id' => $item->id, 'company_name' => $item->company_name, 'position' => $item->position, 'start_year' => $item->start_year, 'end_year' => $item->end_year, 'certificate_file_name' => $item->certificate_file_name])->toArray()) as $i => $work)
                             <div class="border rounded p-3 mb-3 work-item-profile">
                                 <div class="row g-3">
+                                    @if (!empty($work['id']))
+                                        <input type="hidden" name="work_experiences[{{ $i }}][id]" value="{{ $work['id'] }}">
+                                    @endif
                                     <div class="col-md-4"><input type="text" name="work_experiences[{{ $i }}][company_name]" class="form-control" placeholder="Nama PT" value="{{ $work['company_name'] ?? '' }}"></div>
                                     <div class="col-md-4"><input type="text" name="work_experiences[{{ $i }}][position]" class="form-control" placeholder="Posisi" value="{{ $work['position'] ?? '' }}"></div>
                                     <div class="col-md-2"><input type="number" name="work_experiences[{{ $i }}][start_year]" class="form-control" placeholder="Mulai" value="{{ $work['start_year'] ?? '' }}"></div>
@@ -257,7 +270,7 @@
                     </div>
                     <p class="text-muted small mb-3">Sertifikat external yang expired dalam 3 bulan akan ditandai di detail.</p>
                     <div id="certificate-profile-wrapper">
-                        @foreach (old('certificates', $employee->certificates->map(fn($item) => ['certificate_type' => $item->certificate_type, 'certificate_name' => $item->certificate_name, 'issuer' => $item->issuer, 'issued_at' => optional($item->issued_at)->format('Y-m-d'), 'expired_at' => optional($item->expired_at)->format('Y-m-d'), 'file_name' => $item->file_name])->toArray()) as $i => $certificate)
+                        @foreach (old('certificates', $employee->certificates->map(fn($item) => ['id' => $item->id, 'certificate_type' => $item->certificate_type, 'certificate_name' => $item->certificate_name, 'issuer' => $item->issuer, 'issued_at' => optional($item->issued_at)->format('Y-m-d'), 'expired_at' => optional($item->expired_at)->format('Y-m-d'), 'file_name' => $item->file_name])->toArray()) as $i => $certificate)
                             <div class="border rounded p-3 mb-3 certificate-item-profile bg-light">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <span class="badge {{ ($certificate['certificate_type'] ?? 'internal') === 'external' ? 'bg-warning text-dark' : 'bg-secondary' }}">
@@ -266,6 +279,9 @@
                                     <small class="text-muted">Sertifikat #{{ $i + 1 }}</small>
                                 </div>
                                 <div class="row g-3">
+                                    @if (!empty($certificate['id']))
+                                        <input type="hidden" name="certificates[{{ $i }}][id]" value="{{ $certificate['id'] }}">
+                                    @endif
                                     <div class="col-md-3"><label class="form-label">Jenis</label><select name="certificates[{{ $i }}][certificate_type]" class="form-select"><option value="internal" {{ ($certificate['certificate_type'] ?? '') === 'internal' ? 'selected' : '' }}>Internal</option><option value="external" {{ ($certificate['certificate_type'] ?? '') === 'external' ? 'selected' : '' }}>External</option></select></div>
                                     <div class="col-md-5"><label class="form-label">Nama Sertifikat</label><input type="text" name="certificates[{{ $i }}][certificate_name]" class="form-control" placeholder="Contoh: Pelatihan APAR" value="{{ $certificate['certificate_name'] ?? '' }}"></div>
                                     <div class="col-md-4"><label class="form-label">Penerbit</label><input type="text" name="certificates[{{ $i }}][issuer]" class="form-control" placeholder="Contoh: MT PT / Internal Perusahaan" value="{{ $certificate['issuer'] ?? '' }}"></div>

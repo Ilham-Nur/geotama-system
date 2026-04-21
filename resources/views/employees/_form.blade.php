@@ -2,6 +2,7 @@
     $hasUser = old('create_system_account', isset($employee) && $employee->user_id ? '1' : '0') === '1';
     $accountRole = old('role', isset($employee) && $employee->user ? optional($employee->user->roles->first())->name : null);
     $oldWorkExperiences = old('work_experiences', isset($employee) ? $employee->workExperiences->map(fn($item) => [
+        'id' => $item->id,
         'company_name' => $item->company_name,
         'position' => $item->position,
         'start_year' => $item->start_year,
@@ -9,6 +10,7 @@
         'certificate_file_name' => $item->certificate_file_name,
     ])->toArray() : []);
     $oldCertificates = old('certificates', isset($employee) ? $employee->certificates->map(fn($item) => [
+        'id' => $item->id,
         'certificate_type' => $item->certificate_type,
         'certificate_name' => $item->certificate_name,
         'issuer' => $item->issuer,
@@ -17,6 +19,17 @@
         'file_name' => $item->file_name,
     ])->toArray() : []);
 @endphp
+
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <strong>Gagal menyimpan data:</strong>
+        <ul class="mb-0 mt-2">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
 <h6 class="mb-3">1. Data Diri Karyawan</h6>
 <div class="row g-3">
@@ -187,6 +200,9 @@
     @forelse($oldWorkExperiences as $index => $work)
         <div class="border rounded p-3 mb-3 work-item">
             <div class="row g-3">
+                @if (!empty($work['id']))
+                    <input type="hidden" name="work_experiences[{{ $index }}][id]" value="{{ $work['id'] }}">
+                @endif
                 <div class="col-md-4"><input type="text" name="work_experiences[{{ $index }}][company_name]" class="form-control" placeholder="Nama PT" value="{{ $work['company_name'] ?? '' }}"></div>
                 <div class="col-md-4"><input type="text" name="work_experiences[{{ $index }}][position]" class="form-control" placeholder="Posisi" value="{{ $work['position'] ?? '' }}"></div>
                 <div class="col-md-2"><input type="number" name="work_experiences[{{ $index }}][start_year]" class="form-control" placeholder="Mulai" value="{{ $work['start_year'] ?? '' }}"></div>
@@ -219,6 +235,9 @@
                 <small class="text-muted">Sertifikat #{{ $index + 1 }}</small>
             </div>
             <div class="row g-3">
+                @if (!empty($certificate['id']))
+                    <input type="hidden" name="certificates[{{ $index }}][id]" value="{{ $certificate['id'] }}">
+                @endif
                 <div class="col-md-3">
                     <label class="form-label">Jenis</label>
                     <select name="certificates[{{ $index }}][certificate_type]" class="form-select">

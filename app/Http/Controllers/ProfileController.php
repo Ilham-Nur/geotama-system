@@ -54,6 +54,7 @@ class ProfileController extends Controller
             'last_education_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'],
 
             'work_experiences' => ['nullable', 'array'],
+            'work_experiences.*.id' => ['nullable', 'integer'],
             'work_experiences.*.company_name' => ['required_with:work_experiences.*.start_year,work_experiences.*.end_year,work_experiences.*.position', 'nullable', 'string', 'max:255'],
             'work_experiences.*.position' => ['nullable', 'string', 'max:255'],
             'work_experiences.*.start_year' => ['nullable', 'integer', 'min:1900', 'max:2100'],
@@ -61,6 +62,7 @@ class ProfileController extends Controller
             'work_experience_files.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'],
 
             'certificates' => ['nullable', 'array'],
+            'certificates.*.id' => ['nullable', 'integer'],
             'certificates.*.certificate_type' => ['required_with:certificates.*.certificate_name', Rule::in(['internal', 'external'])],
             'certificates.*.certificate_name' => ['required_with:certificates.*.certificate_type', 'nullable', 'string', 'max:255'],
             'certificates.*.issuer' => ['nullable', 'string', 'max:255'],
@@ -189,16 +191,13 @@ class ProfileController extends Controller
 
     private function syncWorkExperiences(Request $request, $employee): void
     {
-        $existing = $employee->workExperiences()->get();
-        foreach ($existing as $item) {
-            if ($item->certificate_file_path && Storage::disk('public')->exists($item->certificate_file_path)) {
-                Storage::disk('public')->delete($item->certificate_file_path);
-            }
-            $item->delete();
+        if (!$request->has('work_experiences') && !$request->hasFile('work_experience_files')) {
+            return;
         }
 
         $rows = $request->input('work_experiences', []);
         $files = $request->file('work_experience_files', []);
+        $keptIds = [];
 
         foreach ($rows as $index => $row) {
             if (blank($row['company_name'] ?? null)) {
@@ -206,30 +205,57 @@ class ProfileController extends Controller
             }
 
             $file = $files[$index] ?? null;
+            $experience = !empty($row['id'])
+                ? $employee->workExperiences()->whereKey($row['id'])->first()
+                : null;
 
-            $employee->workExperiences()->create([
+            if (!$experience) {
+                $experience = $employee->workExperiences()->make();
+            }
+
+            if ($file && $experience->certificate_file_path && Storage::disk('public')->exists($experience->certificate_file_path)) {
+                Storage::disk('public')->delete($experience->certificate_file_path);
+            }
+
+            $experience->fill([
                 'company_name' => $row['company_name'],
                 'position' => $row['position'] ?? null,
                 'start_year' => $row['start_year'] ?? null,
                 'end_year' => $row['end_year'] ?? null,
-                'certificate_file_path' => $file ? $file->store('employee-work-experiences', 'public') : null,
-                'certificate_file_name' => $file ? $file->getClientOriginalName() : null,
             ]);
+
+            if ($file) {
+                $experience->certificate_file_path = $file->store('employee-work-experiences', 'public');
+                $experience->certificate_file_name = $file->getClientOriginalName();
+            }
+
+            $experience->employee()->associate($employee);
+            $experience->save();
+            $keptIds[] = $experience->id;
+        }
+
+        $toDelete = $employee->workExperiences()
+            ->when(!empty($keptIds), fn($query) => $query->whereNotIn('id', $keptIds))
+            ->when(empty($keptIds), fn($query) => $query)
+            ->get();
+
+        foreach ($toDelete as $item) {
+            if ($item->certificate_file_path && Storage::disk('public')->exists($item->certificate_file_path)) {
+                Storage::disk('public')->delete($item->certificate_file_path);
+            }
+            $item->delete();
         }
     }
 
     private function syncCertificates(Request $request, $employee): void
     {
-        $existing = $employee->certificates()->get();
-        foreach ($existing as $item) {
-            if ($item->file_path && Storage::disk('public')->exists($item->file_path)) {
-                Storage::disk('public')->delete($item->file_path);
-            }
-            $item->delete();
+        if (!$request->has('certificates') && !$request->hasFile('certificate_files')) {
+            return;
         }
 
         $rows = $request->input('certificates', []);
         $files = $request->file('certificate_files', []);
+        $keptIds = [];
 
         foreach ($rows as $index => $row) {
             if (blank($row['certificate_name'] ?? null)) {
@@ -237,16 +263,46 @@ class ProfileController extends Controller
             }
 
             $file = $files[$index] ?? null;
+            $certificate = !empty($row['id'])
+                ? $employee->certificates()->whereKey($row['id'])->first()
+                : null;
 
-            $employee->certificates()->create([
+            if (!$certificate) {
+                $certificate = $employee->certificates()->make();
+            }
+
+            if ($file && $certificate->file_path && Storage::disk('public')->exists($certificate->file_path)) {
+                Storage::disk('public')->delete($certificate->file_path);
+            }
+
+            $certificate->fill([
                 'certificate_type' => $row['certificate_type'],
                 'certificate_name' => $row['certificate_name'],
                 'issuer' => $row['issuer'] ?? null,
                 'issued_at' => $row['issued_at'] ?? null,
                 'expired_at' => $row['expired_at'] ?? null,
-                'file_path' => $file ? $file->store('employee-certificates', 'public') : null,
-                'file_name' => $file ? $file->getClientOriginalName() : null,
             ]);
+
+            if ($file) {
+                $certificate->file_path = $file->store('employee-certificates', 'public');
+                $certificate->file_name = $file->getClientOriginalName();
+            }
+
+            $certificate->employee()->associate($employee);
+            $certificate->save();
+            $keptIds[] = $certificate->id;
+        }
+
+        $toDelete = $employee->certificates()
+            ->when(!empty($keptIds), fn($query) => $query->whereNotIn('id', $keptIds))
+            ->when(empty($keptIds), fn($query) => $query)
+            ->get();
+
+        foreach ($toDelete as $item) {
+            if ($item->file_path && Storage::disk('public')->exists($item->file_path)) {
+                Storage::disk('public')->delete($item->file_path);
+            }
+            $item->delete();
         }
     }
 }
