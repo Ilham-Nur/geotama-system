@@ -118,12 +118,7 @@
                 </div> --}}
 
                 <div class="col-md-12 mb-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <label>Catatan</label>
-                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-generate-notes">
-                            Isi catatan otomatis
-                        </button>
-                    </div>
+                    <label>Catatan</label>
                     <textarea name="notes" id="notes" class="form-control" rows="3">{{ old('notes') }}</textarea>
                 </div>
             </div>
@@ -256,7 +251,6 @@
             const nominalHelp = document.getElementById('nominal_help');
             const sisaTagihanView = document.getElementById('sisa_tagihan_view');
             const notesInput = document.getElementById('notes');
-            const btnGenerateNotes = document.getElementById('btn-generate-notes');
             // const totalInvoiceView = document.getElementById('total_invoice_view');
 
             function formatRupiah(number) {
@@ -304,9 +298,7 @@
                     nominalInput.readOnly = false;
                     nominalHelp.innerText = '';
                     sisaTagihanView.value = '';
-                    if (!notesInput.value.trim()) {
-                        notesInput.value = '';
-                    }
+                    notesInput.value = '';
                     // totalInvoiceView.value = '';
                     return;
                 }
@@ -331,9 +323,7 @@
                     nominalHelp.innerText = 'Isi nominal proyek karena ini invoice pertama.';
                 }
 
-                if (!notesInput.value.trim()) {
-                    notesInput.value = buildAutoNotes();
-                }
+                notesInput.value = buildAutoNotes();
             }
 
             function calculateTotals() {
@@ -364,10 +354,6 @@
             calculateTotals();
 
             proyekSelect.addEventListener('change', updateProjectInfo);
-
-            btnGenerateNotes.addEventListener('click', function() {
-                notesInput.value = buildAutoNotes();
-            });
 
             document.addEventListener('input', function(e) {
                 if (
