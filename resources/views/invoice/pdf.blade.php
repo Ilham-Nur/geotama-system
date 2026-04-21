@@ -136,6 +136,19 @@
             color: #666;
         }
 
+        .notes-box {
+            margin-top: 8px;
+            margin-bottom: 12px;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .notes-box .label {
+            font-weight: bold;
+            color: #4b3b45;
+            margin-right: 6px;
+        }
+
         table.items {
             width: 100%;
             border-collapse: collapse;
@@ -403,6 +416,13 @@
                 <span class="label">Project Name :</span>
                 <strong>{{ $permohonan->nama_proyek ?? ($invoice->proyek->deskripsi ?? ($invoice->proyek->no_proyek ?? '-')) }}</strong>
             </div>
+
+            @if (!empty($invoice->notes))
+                <div class="notes-box">
+                    <span class="label">Notes :</span>
+                    {!! nl2br(e($invoice->notes)) !!}
+                </div>
+            @endif
 
             <table class="items">
                 <thead>
