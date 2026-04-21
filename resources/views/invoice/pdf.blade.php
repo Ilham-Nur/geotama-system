@@ -98,21 +98,23 @@
             margin: 0 0 5px 0;
         } */
 
-        .meta-table {
-            width: auto;
-            border-collapse: collapse;
+        .meta-inline {
             margin-top: 12px;
+            display: table;
+            width: 100%;
+            table-layout: fixed;
         }
 
-        .meta-table td {
-            padding: 2px 6px 2px 0;
+        .meta-item {
+            display: table-cell;
             vertical-align: top;
+            padding-right: 12px;
         }
 
         .meta-label {
-            width: 95px;
             color: #4b3b45;
             font-weight: bold;
+            margin-right: 6px;
         }
 
         .meta-value {
@@ -387,31 +389,23 @@
             </div>
 
             <div class="section-gap clearfix">
-                <div class="left" style="width: 42%;">
-                    <table class="meta-table">
-                        <tr>
-                            <td class="meta-label">Invoice Number</td>
-                            <td>:</td>
-                            <td class="meta-value">{{ $invoice->no_invoice }}</td>
-                        </tr>
-                        <tr>
-                            <td class="meta-label">Invoice Date</td>
-                            <td>:</td>
-                            <td class="meta-value">
-                                {{ $invoice->tanggal_invoice ? \Carbon\Carbon::parse($invoice->tanggal_invoice)->format('F d, Y') : '-' }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="meta-label">Due Date</td>
-                            <td>:</td>
-                            <td class="meta-value">
-                                {{ $invoice->tanggal_invoice ? \Carbon\Carbon::parse($invoice->tanggal_invoice)->addDays(7)->format('F d, Y') : '-' }}
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-                <div class="left" style="width: 56%;">
-
+                <div class="meta-inline">
+                    <div class="meta-item">
+                        <span class="meta-label">Invoice Number :</span>
+                        <span class="meta-value">{{ $invoice->no_invoice }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Invoice Date :</span>
+                        <span class="meta-value">
+                            {{ $invoice->tanggal_invoice ? \Carbon\Carbon::parse($invoice->tanggal_invoice)->format('F d, Y') : '-' }}
+                        </span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Due Date :</span>
+                        <span class="meta-value">
+                            {{ $invoice->tanggal_invoice ? \Carbon\Carbon::parse($invoice->tanggal_invoice)->addDays(7)->format('F d, Y') : '-' }}
+                        </span>
+                    </div>
                 </div>
             </div>
 
