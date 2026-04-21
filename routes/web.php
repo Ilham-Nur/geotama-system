@@ -216,6 +216,18 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:proyek.show')
         ->name('proyek.pekerjaan.show');
 
+    Route::get('/proyek/{proyek}/timesheet/template-pdf', [ProyekController::class, 'exportTimesheetTemplate'])
+        ->middleware('permission:proyek.show')
+        ->name('proyek.timesheet.template-pdf');
+
+    Route::post('/proyek/{proyek}/timesheet', [ProyekController::class, 'storeTimesheet'])
+        ->middleware('permission:proyek.show')
+        ->name('proyek.timesheet.store');
+
+    Route::delete('/proyek/{proyek}/timesheet/{timesheet}', [ProyekController::class, 'destroyTimesheet'])
+        ->middleware('permission:proyek.show')
+        ->name('proyek.timesheet.destroy');
+
     Route::get('/invoice', [InvoiceController::class, 'index'])
         ->middleware('permission:invoice.view')
         ->name('invoice.index');
