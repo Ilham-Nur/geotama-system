@@ -224,7 +224,7 @@
     <h6 class="mb-0">4. Sertifikat yang Dimiliki</h6>
     <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-certificate">+ Tambah</button>
 </div>
-<p class="text-muted small mb-3">Notice: sertifikat yang memiliki tanggal expired dan akan kedaluwarsa dalam 3 bulan akan ditandai di halaman detail.</p>
+<p class="text-muted small mb-3">Notice: sertifikat external yang memiliki tanggal expired dan akan kedaluwarsa dalam 3 bulan akan ditandai di halaman detail.</p>
 <div id="certificate-wrapper">
     @forelse($oldCertificates as $index => $certificate)
         <div class="border rounded p-3 mb-3 certificate-item bg-light">

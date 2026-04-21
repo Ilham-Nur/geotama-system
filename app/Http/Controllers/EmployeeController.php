@@ -89,11 +89,12 @@ class EmployeeController extends Controller
                 ->sortByDesc('created_at')
                 ->values()
                 ->map(function ($certificate) {
+                    $isExternal = $certificate->certificate_type === 'external';
                     $daysUntilExpired = $certificate->expired_at
                         ? now()->startOfDay()->diffInDays($certificate->expired_at->startOfDay(), false)
                         : null;
-                    $isExpiringSoon = $daysUntilExpired !== null && $daysUntilExpired >= 0 && $daysUntilExpired <= 90;
-                    $isExpired = $daysUntilExpired !== null && $daysUntilExpired < 0;
+                    $isExpiringSoon = $isExternal && $daysUntilExpired !== null && $daysUntilExpired >= 0 && $daysUntilExpired <= 90;
+                    $isExpired = $isExternal && $daysUntilExpired !== null && $daysUntilExpired < 0;
 
                     return [
                         'certificate_type' => $certificate->certificate_type,

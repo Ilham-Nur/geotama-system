@@ -268,7 +268,7 @@
                         <h6 class="mb-0">Sertifikat</h6>
                         <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-certificate-profile">+ Tambah</button>
                     </div>
-                    <p class="text-muted small mb-3">Sertifikat yang memiliki tanggal expired dalam 3 bulan akan ditandai di detail.</p>
+                    <p class="text-muted small mb-3">Sertifikat external yang memiliki tanggal expired dalam 3 bulan akan ditandai di detail.</p>
                     <div id="certificate-profile-wrapper">
                         @foreach (old('certificates', $employee->certificates->map(fn($item) => ['id' => $item->id, 'certificate_type' => $item->certificate_type, 'certificate_name' => $item->certificate_name, 'issuer' => $item->issuer, 'issued_at' => optional($item->issued_at)->format('Y-m-d'), 'expired_at' => optional($item->expired_at)->format('Y-m-d'), 'file_name' => $item->file_name])->toArray()) as $i => $certificate)
                             <div class="border rounded p-3 mb-3 certificate-item-profile bg-light">
