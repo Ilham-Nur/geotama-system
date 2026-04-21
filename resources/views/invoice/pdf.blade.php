@@ -99,24 +99,24 @@
         } */
 
         .meta-table {
-            width: 100%;
+            width: auto;
             border-collapse: collapse;
-            margin-top: 22px;
+            margin-top: 12px;
         }
 
         .meta-table td {
-            padding: 10px 12px;
+            padding: 2px 6px 2px 0;
+            vertical-align: top;
         }
 
         .meta-label {
-            width: 125px;
-            background: #4b3b45;
-            color: white;
+            width: 95px;
+            color: #4b3b45;
             font-weight: bold;
         }
 
         .meta-value {
-            font-weight: bold;
+            font-weight: 600;
             color: #4b3b45;
         }
 
@@ -387,27 +387,30 @@
             </div>
 
             <div class="section-gap clearfix">
-                <div class="left" style="width: 48%;">
+                <div class="left" style="width: 42%;">
                     <table class="meta-table">
                         <tr>
                             <td class="meta-label">Invoice Number</td>
+                            <td>:</td>
                             <td class="meta-value">{{ $invoice->no_invoice }}</td>
                         </tr>
                         <tr>
                             <td class="meta-label">Invoice Date</td>
+                            <td>:</td>
                             <td class="meta-value">
                                 {{ $invoice->tanggal_invoice ? \Carbon\Carbon::parse($invoice->tanggal_invoice)->format('F d, Y') : '-' }}
                             </td>
                         </tr>
                         <tr>
                             <td class="meta-label">Due Date</td>
+                            <td>:</td>
                             <td class="meta-value">
                                 {{ $invoice->tanggal_invoice ? \Carbon\Carbon::parse($invoice->tanggal_invoice)->addDays(7)->format('F d, Y') : '-' }}
                             </td>
                         </tr>
                     </table>
                 </div>
-                <div class="left" style="width: 50%;">
+                <div class="left" style="width: 56%;">
 
                 </div>
             </div>
