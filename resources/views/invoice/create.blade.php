@@ -99,8 +99,9 @@
 
                 <div class="col-md-4 mb-3">
                     <label>Nominal Proyek</label>
-                    <input type="number" step="0.01" min="0" name="nominal_proyek" id="nominal_proyek"
-                        class="form-control" value="{{ old('nominal_proyek') }}">
+                    <input type="text" id="nominal_proyek_display" class="form-control"
+                        value="{{ old('nominal_proyek') }}">
+                    <input type="hidden" name="nominal_proyek" id="nominal_proyek" value="{{ old('nominal_proyek') }}">
                     <small id="nominal_help" class="text-muted"></small>
                     @error('nominal_proyek')
                         <small class="text-danger d-block">{{ $message }}</small>
@@ -248,6 +249,7 @@
             const proyekSelect = document.getElementById('proyek_id');
             const proyekNoView = document.getElementById('proyek_no_view');
             const nominalInput = document.getElementById('nominal_proyek');
+            const nominalInputDisplay = document.getElementById('nominal_proyek_display');
             const nominalHelp = document.getElementById('nominal_help');
             const sisaTagihanView = document.getElementById('sisa_tagihan_view');
             const notesInput = document.getElementById('notes');
@@ -259,6 +261,21 @@
                     minimumFractionDigits: 0,
                     maximumFractionDigits: 2
                 });
+            }
+
+            function formatNominalDisplay(number) {
+                const parsed = Number(number || 0);
+                if (!Number.isFinite(parsed) || parsed <= 0) return '';
+                return parsed.toLocaleString('id-ID', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0
+                });
+            }
+
+            function parseNominalDisplay(value) {
+                if (!value) return '';
+                const normalized = value.toString().replace(/[^\d]/g, '');
+                return normalized ? Number(normalized) : '';
             }
 
             function formatTanggalId(value) {
@@ -295,7 +312,8 @@
                 if (!selected || !selected.value) {
                     proyekNoView.value = '';
                     nominalInput.value = '';
-                    nominalInput.readOnly = false;
+                    nominalInputDisplay.value = '';
+                    nominalInputDisplay.readOnly = false;
                     nominalHelp.innerText = '';
                     sisaTagihanView.value = '';
                     notesInput.value = '';
@@ -315,11 +333,13 @@
 
                 if (hasInvoice) {
                     nominalInput.value = nominal;
-                    nominalInput.readOnly = true;
+                    nominalInputDisplay.value = formatNominalDisplay(nominal);
+                    nominalInputDisplay.readOnly = true;
                     nominalHelp.innerText = 'Nominal proyek tidak bisa diubah karena invoice sudah pernah dibuat.';
                 } else {
-                    nominalInput.readOnly = false;
+                    nominalInputDisplay.readOnly = false;
                     nominalInput.value = nominal > 0 ? nominal : '';
+                    nominalInputDisplay.value = formatNominalDisplay(nominalInput.value);
                     nominalHelp.innerText = 'Isi nominal proyek karena ini invoice pertama.';
                 }
 
@@ -354,6 +374,12 @@
             calculateTotals();
 
             proyekSelect.addEventListener('change', updateProjectInfo);
+
+            nominalInputDisplay.addEventListener('input', function() {
+                const raw = parseNominalDisplay(nominalInputDisplay.value);
+                nominalInput.value = raw;
+                nominalInputDisplay.value = formatNominalDisplay(raw);
+            });
 
             document.addEventListener('input', function(e) {
                 if (
