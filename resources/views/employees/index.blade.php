@@ -341,7 +341,8 @@
                                         <div class="fw-semibold">${fallbackValue(certificate.certificate_name)} <span class="badge bg-${certificate.certificate_type === 'external' ? 'warning' : 'secondary'} text-uppercase">${fallbackValue(certificate.certificate_type)}</span></div>
                                         <small class="text-muted d-block">Penerbit: ${fallbackValue(certificate.issuer)}</small>
                                         <small class="text-muted d-block">Terbit: ${fallbackValue(certificate.issued_at)} • Expired: ${fallbackValue(certificate.expired_at)}</small>
-                                        ${certificate.is_expiring_soon ? '<small class="text-danger fw-semibold">⚠ Expired < 3 bulan, segera perpanjang.</small>' : ''}
+                                        ${certificate.is_expired ? '<small class="text-danger fw-semibold">⚠ Sertifikat sudah expired.</small>' : ''}
+                                        ${!certificate.is_expired && certificate.is_expiring_soon ? '<small class="text-danger fw-semibold">⚠ Akan expired < 3 bulan, segera perpanjang.</small>' : ''}
                                     </div>
                                     ${certificate.file_url ? `<a href="${certificate.file_url}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat</a>` : ''}
                                 </li>`).join('')}
