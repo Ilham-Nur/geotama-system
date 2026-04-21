@@ -26,7 +26,7 @@
     <div class="row">
         <div class="col-lg-10">
             <div class="card-style mb-30">
-                <form action="{{ route('employees.store') }}" method="POST">
+                <form action="{{ route('employees.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @include('employees._form')
                     <div class="d-flex gap-2 mt-4">

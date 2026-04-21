@@ -68,6 +68,12 @@
                             <tbody id="employee-detail-table-body"></tbody>
                         </table>
                     </div>
+                    <h6 class="mb-2">Pendidikan</h6>
+                    <div id="employee-detail-education" class="mb-4"></div>
+                    <h6 class="mb-2">Pengalaman Kerja</h6>
+                    <div id="employee-detail-experiences" class="mb-4"></div>
+                    <h6 class="mb-2">Sertifikat</h6>
+                    <div id="employee-detail-certificates" class="mb-4"></div>
                     <h6 class="mb-2">Arsip Kontrak (Admin)</h6>
                     <div id="employee-detail-contracts" class="mb-4"></div>
                     <h6 class="mb-2">Dokumen Lain</h6>
@@ -196,6 +202,9 @@
                 const tableBody = $('#employee-detail-table-body');
                 const documentsContainer = $('#employee-detail-documents');
                 const contractsContainer = $('#employee-detail-contracts');
+                const educationContainer = $('#employee-detail-education');
+                const experiencesContainer = $('#employee-detail-experiences');
+                const certificatesContainer = $('#employee-detail-certificates');
                 const photoWrapper = $('#employee-detail-photo-wrapper');
                 const modalTitle = $('#employeeDetailModalLabel');
                 const requestUrl = employeeShowUrlTemplate.replace('__ID__', employeeId);
@@ -203,6 +212,9 @@
                 modalTitle.text('Detail Karyawan');
                 tableBody.html('<tr><td class="text-center text-muted py-3" colspan="2">Memuat data...</td></tr>');
                 contractsContainer.html('<p class="text-muted mb-0">Memuat kontrak...</p>');
+                educationContainer.html('<p class="text-muted mb-0">Memuat pendidikan...</p>');
+                experiencesContainer.html('<p class="text-muted mb-0">Memuat pengalaman kerja...</p>');
+                certificatesContainer.html('<p class="text-muted mb-0">Memuat sertifikat...</p>');
                 documentsContainer.html('<p class="text-muted mb-0">Memuat dokumen...</p>');
                 photoWrapper.html('');
                 detailModal.show();
@@ -224,6 +236,10 @@
                             {
                                 label: 'No Telepon',
                                 value: employee.phone
+                            },
+                            {
+                                label: 'Kontak Darurat',
+                                value: [employee.emergency_contact_name, employee.emergency_contact_phone].filter(Boolean).join(' - ')
                             },
                             {
                                 label: 'Tanggal Bergabung',
@@ -250,6 +266,14 @@
                                 value: employee.identity_number
                             },
                             {
+                                label: 'BPJS Ketenagakerjaan',
+                                value: employee.bpjs_ketenagakerjaan_number
+                            },
+                            {
+                                label: 'BPJS Kesehatan',
+                                value: employee.bpjs_kesehatan_number
+                            },
+                            {
                                 label: 'Status Pernikahan',
                                 value: employee.marital_status
                             },
@@ -265,10 +289,16 @@
                                 label: 'Alamat Lengkap',
                                 value: employee.full_address
                             },
+                            {
+                                label: 'Informasi Penting Lainnya',
+                                value: employee.important_information
+                            },
                         ];
 
                         const normalizedDocuments = Array.isArray(employee.documents) ? employee.documents : [];
                         const normalizedContracts = Array.isArray(employee.contracts) ? employee.contracts : [];
+                        const normalizedExperiences = Array.isArray(employee.work_experiences) ? employee.work_experiences : [];
+                        const normalizedCertificates = Array.isArray(employee.certificates) ? employee.certificates : [];
                         const documentsHtml = normalizedDocuments.length ?
                             `<ul class="list-group text-start">${normalizedDocuments.map((document) => `
                                 <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -280,6 +310,44 @@
                                 </li>`).join('')}
                             </ul>` :
                             '<p class="text-muted mb-0 text-start">Tidak ada dokumen.</p>';
+
+
+                        const educationHtml = employee.last_education || employee.last_education_file_url ?
+                            `<div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="fw-semibold">${fallbackValue(employee.last_education)}</div>
+                                    ${employee.last_education_file_url ? `<a href="${employee.last_education_file_url}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">Lihat Berkas (${fallbackValue(employee.last_education_file_name)})</a>` : ''}
+                                </div>
+                            </div>` :
+                            '<p class="text-muted mb-0 text-start">Data pendidikan belum diisi.</p>';
+
+                        const experiencesHtml = normalizedExperiences.length ?
+                            `<ul class="list-group text-start">${normalizedExperiences.map((experience) => `
+                                <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <div class="fw-semibold">${fallbackValue(experience.company_name)}</div>
+                                        <small class="text-muted d-block">${fallbackValue(experience.position)} • ${fallbackValue(experience.start_year)} - ${fallbackValue(experience.end_year)}</small>
+                                        <small class="text-muted d-block">Berkas: ${fallbackValue(experience.certificate_file_name)}</small>
+                                    </div>
+                                    ${experience.certificate_file_url ? `<a href="${experience.certificate_file_url}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat</a>` : ''}
+                                </li>`).join('')}
+                            </ul>` :
+                            '<p class="text-muted mb-0 text-start">Belum ada pengalaman kerja.</p>';
+
+                        const certificatesHtml = normalizedCertificates.length ?
+                            `<ul class="list-group text-start">${normalizedCertificates.map((certificate) => `
+                                <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <div class="fw-semibold">${fallbackValue(certificate.certificate_name)} <span class="badge bg-${certificate.certificate_type === 'external' ? 'warning' : 'secondary'} text-uppercase">${fallbackValue(certificate.certificate_type)}</span></div>
+                                        <small class="text-muted d-block">Penerbit: ${fallbackValue(certificate.issuer)}</small>
+                                        <small class="text-muted d-block">Terbit: ${fallbackValue(certificate.issued_at)} • Expired: ${fallbackValue(certificate.expired_at)}</small>
+                                        ${certificate.is_expiring_soon ? '<small class="text-danger fw-semibold">⚠ Expired < 3 bulan, segera perpanjang.</small>' : ''}
+                                    </div>
+                                    ${certificate.file_url ? `<a href="${certificate.file_url}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat</a>` : ''}
+                                </li>`).join('')}
+                            </ul>` :
+                            '<p class="text-muted mb-0 text-start">Belum ada sertifikat.</p>';
+
 
                         const contractsHtml = normalizedContracts.length ?
                             `<ul class="list-group text-start">${normalizedContracts.map((contract) => `
@@ -310,6 +378,9 @@
 
                         modalTitle.text(`Detail Karyawan: ${fallbackValue(employee.full_name)}`);
                         tableBody.html(fields.map((field) => renderField(field.label, field.value)).join(''));
+                        educationContainer.html(educationHtml);
+                        experiencesContainer.html(experiencesHtml);
+                        certificatesContainer.html(certificatesHtml);
                         contractsContainer.html(contractsHtml);
                         documentsContainer.html(documentsHtml);
                         photoWrapper.html(photoHtml);
@@ -318,6 +389,9 @@
                         modalTitle.text('Detail Karyawan');
                         tableBody.html('<tr><td class="text-center text-danger py-3" colspan="2">Gagal memuat data karyawan.</td></tr>');
                         contractsContainer.html('<p class="text-danger mb-0">Arsip kontrak gagal dimuat.</p>');
+                        educationContainer.html('<p class="text-danger mb-0">Data pendidikan gagal dimuat.</p>');
+                        experiencesContainer.html('<p class="text-danger mb-0">Data pengalaman kerja gagal dimuat.</p>');
+                        certificatesContainer.html('<p class="text-danger mb-0">Data sertifikat gagal dimuat.</p>');
                         documentsContainer.html('<p class="text-danger mb-0">Dokumen gagal dimuat.</p>');
                         photoWrapper.html('');
                     });

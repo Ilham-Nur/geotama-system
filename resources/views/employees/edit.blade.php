@@ -26,7 +26,7 @@
     <div class="row">
         <div class="col-lg-10">
             <div class="card-style mb-30">
-                <form action="{{ route('employees.update', $employee->id) }}" method="POST">
+                <form action="{{ route('employees.update', $employee->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     @include('employees._form', ['employee' => $employee])

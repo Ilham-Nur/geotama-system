@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\EmployeeCertificate;
 use App\Models\EmployeeContract;
+use App\Models\EmployeeWorkExperience;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -37,7 +39,7 @@ class EmployeeController extends Controller
 
     public function show(Employee $employee)
     {
-        $employee->load(['user.roles', 'documents', 'contracts']);
+        $employee->load(['user.roles', 'documents', 'contracts', 'workExperiences', 'certificates']);
 
         return response()->json([
             'id' => $employee->id,
@@ -45,15 +47,23 @@ class EmployeeController extends Controller
             'full_name' => $employee->full_name,
             'position' => $employee->position,
             'phone' => $employee->phone,
+            'emergency_contact_name' => $employee->emergency_contact_name,
+            'emergency_contact_phone' => $employee->emergency_contact_phone,
             'hire_date' => optional($employee->hire_date)->format('d M Y'),
             'employment_status' => $employee->employment_status,
             'gender' => $employee->gender,
             'birth_place' => $employee->birth_place,
             'birth_date' => optional($employee->birth_date)->format('d M Y'),
             'identity_number' => $employee->identity_number,
+            'bpjs_ketenagakerjaan_number' => $employee->bpjs_ketenagakerjaan_number,
+            'bpjs_kesehatan_number' => $employee->bpjs_kesehatan_number,
             'marital_status' => $employee->marital_status,
             'nationality' => $employee->nationality,
             'religion' => $employee->religion,
+            'important_information' => $employee->important_information,
+            'last_education' => $employee->last_education,
+            'last_education_file_url' => $employee->last_education_file_path ? asset('storage/' . $employee->last_education_file_path) : null,
+            'last_education_file_name' => $employee->last_education_file_name,
             'full_address' => $employee->full_address,
             'photo_url' => $employee->photo_path ? asset('storage/' . $employee->photo_path) : null,
             'documents' => $employee->documents
@@ -63,6 +73,38 @@ class EmployeeController extends Controller
                     'file_url' => asset('storage/' . $document->file_path),
                 ])
                 ->values()
+                ->all(),
+            'work_experiences' => $employee->workExperiences
+                ->map(fn($experience) => [
+                    'company_name' => $experience->company_name,
+                    'position' => $experience->position,
+                    'start_year' => $experience->start_year,
+                    'end_year' => $experience->end_year,
+                    'certificate_file_name' => $experience->certificate_file_name,
+                    'certificate_file_url' => $experience->certificate_file_path ? asset('storage/' . $experience->certificate_file_path) : null,
+                ])
+                ->values()
+                ->all(),
+            'certificates' => $employee->certificates
+                ->sortByDesc('created_at')
+                ->values()
+                ->map(function ($certificate) {
+                    $isExpiringSoon = $certificate->certificate_type === 'external'
+                        && $certificate->expired_at
+                        && now()->diffInDays($certificate->expired_at, false) <= 90
+                        && now()->diffInDays($certificate->expired_at, false) >= 0;
+
+                    return [
+                        'certificate_type' => $certificate->certificate_type,
+                        'certificate_name' => $certificate->certificate_name,
+                        'issuer' => $certificate->issuer,
+                        'issued_at' => optional($certificate->issued_at)->format('d M Y'),
+                        'expired_at' => optional($certificate->expired_at)->format('d M Y'),
+                        'file_name' => $certificate->file_name,
+                        'file_url' => $certificate->file_path ? asset('storage/' . $certificate->file_path) : null,
+                        'is_expiring_soon' => $isExpiringSoon,
+                    ];
+                })
                 ->all(),
             'contracts' => $employee->contracts
                 ->sortByDesc('created_at')
@@ -178,12 +220,14 @@ class EmployeeController extends Controller
 
         $user = $this->createOrUpdateUserForEmployee($request);
 
-        Employee::create([
+        $employee = Employee::create([
             'user_id' => $user?->id,
             'employee_code' => $validated['employee_code'],
             'full_name' => $validated['full_name'],
             'position' => $validated['position'] ?? null,
             'phone' => $validated['phone'] ?? null,
+            'emergency_contact_name' => $validated['emergency_contact_name'] ?? null,
+            'emergency_contact_phone' => $validated['emergency_contact_phone'] ?? null,
             'hire_date' => $validated['hire_date'] ?? null,
             'employment_status' => $validated['employment_status'],
             'gender' => $validated['gender'] ?? null,
@@ -191,10 +235,25 @@ class EmployeeController extends Controller
             'birth_date' => $validated['birth_date'] ?? null,
             'full_address' => $validated['full_address'] ?? null,
             'identity_number' => $validated['identity_number'] ?? null,
+            'bpjs_ketenagakerjaan_number' => $validated['bpjs_ketenagakerjaan_number'] ?? null,
+            'bpjs_kesehatan_number' => $validated['bpjs_kesehatan_number'] ?? null,
             'marital_status' => $validated['marital_status'] ?? null,
             'nationality' => $validated['nationality'] ?? null,
             'religion' => $validated['religion'] ?? null,
+            'important_information' => $validated['important_information'] ?? null,
+            'last_education' => $validated['last_education'] ?? null,
         ]);
+
+        if ($request->hasFile('last_education_file')) {
+            $file = $request->file('last_education_file');
+            $employee->update([
+                'last_education_file_path' => $file->store('employee-education', 'public'),
+                'last_education_file_name' => $file->getClientOriginalName(),
+            ]);
+        }
+
+        $this->syncWorkExperiences($request, $employee);
+        $this->syncCertificates($request, $employee);
 
         return redirect()
             ->route('employees.index')
@@ -203,7 +262,7 @@ class EmployeeController extends Controller
 
     public function edit(Employee $employee)
     {
-        $employee->load('user.roles');
+        $employee->load(['user.roles', 'workExperiences', 'certificates']);
         $roles = Role::orderBy('name')->get();
 
         return view('employees.edit', compact('employee', 'roles'));
@@ -221,6 +280,8 @@ class EmployeeController extends Controller
             'full_name' => $validated['full_name'],
             'position' => $validated['position'] ?? null,
             'phone' => $validated['phone'] ?? null,
+            'emergency_contact_name' => $validated['emergency_contact_name'] ?? null,
+            'emergency_contact_phone' => $validated['emergency_contact_phone'] ?? null,
             'hire_date' => $validated['hire_date'] ?? null,
             'employment_status' => $validated['employment_status'],
             'gender' => $validated['gender'] ?? null,
@@ -228,10 +289,29 @@ class EmployeeController extends Controller
             'birth_date' => $validated['birth_date'] ?? null,
             'full_address' => $validated['full_address'] ?? null,
             'identity_number' => $validated['identity_number'] ?? null,
+            'bpjs_ketenagakerjaan_number' => $validated['bpjs_ketenagakerjaan_number'] ?? null,
+            'bpjs_kesehatan_number' => $validated['bpjs_kesehatan_number'] ?? null,
             'marital_status' => $validated['marital_status'] ?? null,
             'nationality' => $validated['nationality'] ?? null,
             'religion' => $validated['religion'] ?? null,
+            'important_information' => $validated['important_information'] ?? null,
+            'last_education' => $validated['last_education'] ?? null,
         ]);
+
+        if ($request->hasFile('last_education_file')) {
+            if ($employee->last_education_file_path && Storage::disk('public')->exists($employee->last_education_file_path)) {
+                Storage::disk('public')->delete($employee->last_education_file_path);
+            }
+
+            $file = $request->file('last_education_file');
+            $employee->update([
+                'last_education_file_path' => $file->store('employee-education', 'public'),
+                'last_education_file_name' => $file->getClientOriginalName(),
+            ]);
+        }
+
+        $this->syncWorkExperiences($request, $employee);
+        $this->syncCertificates($request, $employee);
 
         return redirect()
             ->route('employees.index')
@@ -256,6 +336,8 @@ class EmployeeController extends Controller
             'full_name' => ['required', 'string', 'max:255'],
             'position' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
+            'emergency_contact_name' => ['nullable', 'string', 'max:255'],
+            'emergency_contact_phone' => ['nullable', 'string', 'max:30'],
             'hire_date' => ['nullable', 'date'],
             'employment_status' => ['required', Rule::in(['tetap', 'kontrak', 'magang'])],
             'gender' => ['nullable', 'in:laki-laki,perempuan'],
@@ -263,9 +345,29 @@ class EmployeeController extends Controller
             'birth_date' => ['nullable', 'date'],
             'full_address' => ['nullable', 'string'],
             'identity_number' => ['nullable', 'string', 'max:100'],
+            'bpjs_ketenagakerjaan_number' => ['nullable', 'string', 'max:100'],
+            'bpjs_kesehatan_number' => ['nullable', 'string', 'max:100'],
             'marital_status' => ['nullable', 'in:belum_kawin,kawin,cerai_hidup,cerai_mati'],
             'nationality' => ['nullable', 'string', 'max:100'],
             'religion' => ['nullable', 'string', 'max:100'],
+            'important_information' => ['nullable', 'string'],
+            'last_education' => ['nullable', 'string', 'max:255'],
+            'last_education_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'],
+
+            'work_experiences' => ['nullable', 'array'],
+            'work_experiences.*.company_name' => ['required_with:work_experiences.*.start_year,work_experiences.*.end_year,work_experiences.*.position', 'nullable', 'string', 'max:255'],
+            'work_experiences.*.position' => ['nullable', 'string', 'max:255'],
+            'work_experiences.*.start_year' => ['nullable', 'integer', 'min:1900', 'max:2100'],
+            'work_experiences.*.end_year' => ['nullable', 'integer', 'min:1900', 'max:2100'],
+            'work_experience_files.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'],
+
+            'certificates' => ['nullable', 'array'],
+            'certificates.*.certificate_type' => ['required_with:certificates.*.certificate_name', Rule::in(['internal', 'external'])],
+            'certificates.*.certificate_name' => ['required_with:certificates.*.certificate_type', 'nullable', 'string', 'max:255'],
+            'certificates.*.issuer' => ['nullable', 'string', 'max:255'],
+            'certificates.*.issued_at' => ['nullable', 'date'],
+            'certificates.*.expired_at' => ['nullable', 'date'],
+            'certificate_files.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'],
 
             'create_system_account' => ['nullable', 'boolean'],
             'username' => [Rule::requiredIf($createSystemAccount), 'nullable', 'string', 'max:255'],
@@ -273,6 +375,69 @@ class EmployeeController extends Controller
             'password' => [Rule::requiredIf($createSystemAccount && !$employeeId), 'nullable', 'string', 'min:8', 'confirmed'],
             'role' => [Rule::requiredIf($createSystemAccount), 'nullable', 'exists:roles,name'],
         ]);
+    }
+
+    private function syncWorkExperiences(Request $request, Employee $employee): void
+    {
+        $existing = $employee->workExperiences()->get();
+        foreach ($existing as $item) {
+            if ($item->certificate_file_path && Storage::disk('public')->exists($item->certificate_file_path)) {
+                Storage::disk('public')->delete($item->certificate_file_path);
+            }
+            $item->delete();
+        }
+
+        $rows = $request->input('work_experiences', []);
+        $files = $request->file('work_experience_files', []);
+
+        foreach ($rows as $index => $row) {
+            if (blank($row['company_name'] ?? null)) {
+                continue;
+            }
+
+            $file = $files[$index] ?? null;
+
+            $employee->workExperiences()->create([
+                'company_name' => $row['company_name'],
+                'position' => $row['position'] ?? null,
+                'start_year' => $row['start_year'] ?? null,
+                'end_year' => $row['end_year'] ?? null,
+                'certificate_file_path' => $file ? $file->store('employee-work-experiences', 'public') : null,
+                'certificate_file_name' => $file ? $file->getClientOriginalName() : null,
+            ]);
+        }
+    }
+
+    private function syncCertificates(Request $request, Employee $employee): void
+    {
+        $existing = $employee->certificates()->get();
+        foreach ($existing as $item) {
+            if ($item->file_path && Storage::disk('public')->exists($item->file_path)) {
+                Storage::disk('public')->delete($item->file_path);
+            }
+            $item->delete();
+        }
+
+        $rows = $request->input('certificates', []);
+        $files = $request->file('certificate_files', []);
+
+        foreach ($rows as $index => $row) {
+            if (blank($row['certificate_name'] ?? null)) {
+                continue;
+            }
+
+            $file = $files[$index] ?? null;
+
+            $employee->certificates()->create([
+                'certificate_type' => $row['certificate_type'],
+                'certificate_name' => $row['certificate_name'],
+                'issuer' => $row['issuer'] ?? null,
+                'issued_at' => $row['issued_at'] ?? null,
+                'expired_at' => $row['expired_at'] ?? null,
+                'file_path' => $file ? $file->store('employee-certificates', 'public') : null,
+                'file_name' => $file ? $file->getClientOriginalName() : null,
+            ]);
+        }
     }
 
     private function createOrUpdateUserForEmployee(Request $request, ?Employee $employee = null): ?User

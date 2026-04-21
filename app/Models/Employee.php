@@ -15,6 +15,8 @@ class Employee extends Model
         'full_name',
         'position',
         'phone',
+        'emergency_contact_name',
+        'emergency_contact_phone',
         'hire_date',
         'employment_status',
         'gender',
@@ -22,9 +24,15 @@ class Employee extends Model
         'birth_date',
         'full_address',
         'identity_number',
+        'bpjs_ketenagakerjaan_number',
+        'bpjs_kesehatan_number',
         'marital_status',
         'nationality',
         'religion',
+        'important_information',
+        'last_education',
+        'last_education_file_path',
+        'last_education_file_name',
         'photo_path',
     ];
 
@@ -50,4 +58,15 @@ class Employee extends Model
     {
         return $this->hasMany(EmployeeContract::class);
     }
+
+    public function workExperiences()
+    {
+        return $this->hasMany(EmployeeWorkExperience::class);
+    }
+
+    public function certificates()
+    {
+        return $this->hasMany(EmployeeCertificate::class);
+    }
 }
+

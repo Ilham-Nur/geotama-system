@@ -69,7 +69,7 @@
         <div class="col-lg-8">
             <div class="card-style mb-30">
                 <h6 class="mb-25">Data Profil</h6>
-                <form action="{{ route('profile.update') }}" method="POST">
+                <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -181,6 +181,96 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+                    </div>
+
+
+                    <hr class="my-4">
+                    <h6 class="mb-3">Data Diri Tambahan</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Kontak Darurat (Nama)</label>
+                            <input type="text" name="emergency_contact_name" class="form-control"
+                                value="{{ old('emergency_contact_name', $employee->emergency_contact_name) }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Kontak Darurat (No Telp)</label>
+                            <input type="text" name="emergency_contact_phone" class="form-control"
+                                value="{{ old('emergency_contact_phone', $employee->emergency_contact_phone) }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">No. BPJS Ketenagakerjaan</label>
+                            <input type="text" name="bpjs_ketenagakerjaan_number" class="form-control"
+                                value="{{ old('bpjs_ketenagakerjaan_number', $employee->bpjs_ketenagakerjaan_number) }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">No. BPJS Kesehatan</label>
+                            <input type="text" name="bpjs_kesehatan_number" class="form-control"
+                                value="{{ old('bpjs_kesehatan_number', $employee->bpjs_kesehatan_number) }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Informasi Penting Lainnya</label>
+                            <textarea name="important_information" rows="3" class="form-control">{{ old('important_information', $employee->important_information) }}</textarea>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <h6 class="mb-3">Data Pendidikan</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Ijazah Terakhir</label>
+                            <input type="text" name="last_education" class="form-control" value="{{ old('last_education', $employee->last_education) }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Upload Berkas Ijazah</label>
+                            <input type="file" name="last_education_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                            @if ($employee->last_education_file_path)
+                                <small class="text-muted">File saat ini: <a href="{{ asset('storage/' . $employee->last_education_file_path) }}" target="_blank">{{ $employee->last_education_file_name }}</a></small>
+                            @endif
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">Pengalaman Kerja</h6>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-work-profile">+ Tambah</button>
+                    </div>
+                    <div id="work-profile-wrapper">
+                        @foreach (old('work_experiences', $employee->workExperiences->map(fn($item) => ['company_name' => $item->company_name, 'position' => $item->position, 'start_year' => $item->start_year, 'end_year' => $item->end_year, 'certificate_file_name' => $item->certificate_file_name])->toArray()) as $i => $work)
+                            <div class="border rounded p-3 mb-3 work-item-profile">
+                                <div class="row g-3">
+                                    <div class="col-md-4"><input type="text" name="work_experiences[{{ $i }}][company_name]" class="form-control" placeholder="Nama PT" value="{{ $work['company_name'] ?? '' }}"></div>
+                                    <div class="col-md-4"><input type="text" name="work_experiences[{{ $i }}][position]" class="form-control" placeholder="Posisi" value="{{ $work['position'] ?? '' }}"></div>
+                                    <div class="col-md-2"><input type="number" name="work_experiences[{{ $i }}][start_year]" class="form-control" placeholder="Mulai" value="{{ $work['start_year'] ?? '' }}"></div>
+                                    <div class="col-md-2"><input type="number" name="work_experiences[{{ $i }}][end_year]" class="form-control" placeholder="Selesai" value="{{ $work['end_year'] ?? '' }}"></div>
+                                    <div class="col-md-10"><input type="file" name="work_experience_files[{{ $i }}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></div>
+                                    <div class="col-md-2 text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-row">Hapus</button></div>
+                                </div>
+                                @if (!empty($work['certificate_file_name']))<small class="text-muted">File saat ini: {{ $work['certificate_file_name'] }}</small>@endif
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <hr class="my-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Sertifikat</h6>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-certificate-profile">+ Tambah</button>
+                    </div>
+                    <p class="text-muted small">Sertifikat external yang expired dalam 3 bulan akan ditandai di detail.</p>
+                    <div id="certificate-profile-wrapper">
+                        @foreach (old('certificates', $employee->certificates->map(fn($item) => ['certificate_type' => $item->certificate_type, 'certificate_name' => $item->certificate_name, 'issuer' => $item->issuer, 'issued_at' => optional($item->issued_at)->format('Y-m-d'), 'expired_at' => optional($item->expired_at)->format('Y-m-d'), 'file_name' => $item->file_name])->toArray()) as $i => $certificate)
+                            <div class="border rounded p-3 mb-3 certificate-item-profile">
+                                <div class="row g-3">
+                                    <div class="col-md-3"><select name="certificates[{{ $i }}][certificate_type]" class="form-select"><option value="internal" {{ ($certificate['certificate_type'] ?? '') === 'internal' ? 'selected' : '' }}>Internal</option><option value="external" {{ ($certificate['certificate_type'] ?? '') === 'external' ? 'selected' : '' }}>External</option></select></div>
+                                    <div class="col-md-5"><input type="text" name="certificates[{{ $i }}][certificate_name]" class="form-control" placeholder="Nama sertifikat" value="{{ $certificate['certificate_name'] ?? '' }}"></div>
+                                    <div class="col-md-4"><input type="text" name="certificates[{{ $i }}][issuer]" class="form-control" placeholder="Penerbit" value="{{ $certificate['issuer'] ?? '' }}"></div>
+                                    <div class="col-md-3"><label class="form-label">Tgl Terbit</label><input type="date" name="certificates[{{ $i }}][issued_at]" class="form-control" value="{{ $certificate['issued_at'] ?? '' }}"></div>
+                                    <div class="col-md-3"><label class="form-label">Tgl Expired</label><input type="date" name="certificates[{{ $i }}][expired_at]" class="form-control" value="{{ $certificate['expired_at'] ?? '' }}"></div>
+                                    <div class="col-md-4"><label class="form-label">Berkas</label><input type="file" name="certificate_files[{{ $i }}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></div>
+                                    <div class="col-md-2 text-end d-flex align-items-end justify-content-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-row">Hapus</button></div>
+                                </div>
+                                @if (!empty($certificate['file_name']))<small class="text-muted">File saat ini: {{ $certificate['file_name'] }}</small>@endif
+                            </div>
+                        @endforeach
                     </div>
 
                     <div class="mt-4">
@@ -299,11 +389,31 @@
     <script>
         $(function() {
             const input = document.getElementById('profile-photo-input');
+            const workWrapper = $('#work-profile-wrapper');
+            const certificateWrapper = $('#certificate-profile-wrapper');
+            let workIndex = workWrapper.find('.work-item-profile').length;
+            let certificateIndex = certificateWrapper.find('.certificate-item-profile').length;
             const cropperImage = document.getElementById('cropper-image');
             const preview = document.getElementById('profile-preview');
             const modalEl = document.getElementById('photoCropModal');
             const modal = new bootstrap.Modal(modalEl);
             const saveBtn = document.getElementById('btn-save-cropped-photo');
+
+
+            $('#btn-add-work-profile').on('click', function() {
+                workWrapper.append(`<div class="border rounded p-3 mb-3 work-item-profile"><div class="row g-3"><div class="col-md-4"><input type="text" name="work_experiences[${workIndex}][company_name]" class="form-control" placeholder="Nama PT"></div><div class="col-md-4"><input type="text" name="work_experiences[${workIndex}][position]" class="form-control" placeholder="Posisi"></div><div class="col-md-2"><input type="number" name="work_experiences[${workIndex}][start_year]" class="form-control" placeholder="Mulai"></div><div class="col-md-2"><input type="number" name="work_experiences[${workIndex}][end_year]" class="form-control" placeholder="Selesai"></div><div class="col-md-10"><input type="file" name="work_experience_files[${workIndex}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></div><div class="col-md-2 text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-row">Hapus</button></div></div></div>`);
+                workIndex++;
+            });
+
+            $('#btn-add-certificate-profile').on('click', function() {
+                certificateWrapper.append(`<div class="border rounded p-3 mb-3 certificate-item-profile"><div class="row g-3"><div class="col-md-3"><select name="certificates[${certificateIndex}][certificate_type]" class="form-select"><option value="internal">Internal</option><option value="external">External</option></select></div><div class="col-md-5"><input type="text" name="certificates[${certificateIndex}][certificate_name]" class="form-control" placeholder="Nama sertifikat"></div><div class="col-md-4"><input type="text" name="certificates[${certificateIndex}][issuer]" class="form-control" placeholder="Penerbit"></div><div class="col-md-3"><label class="form-label">Tgl Terbit</label><input type="date" name="certificates[${certificateIndex}][issued_at]" class="form-control"></div><div class="col-md-3"><label class="form-label">Tgl Expired</label><input type="date" name="certificates[${certificateIndex}][expired_at]" class="form-control"></div><div class="col-md-4"><label class="form-label">Berkas</label><input type="file" name="certificate_files[${certificateIndex}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></div><div class="col-md-2 text-end d-flex align-items-end justify-content-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-row">Hapus</button></div></div></div>`);
+                certificateIndex++;
+            });
+
+            $(document).on('click', '.btn-remove-profile-row', function() {
+                $(this).closest('.work-item-profile, .certificate-item-profile').remove();
+            });
+
 
             let cropper = null;
 
