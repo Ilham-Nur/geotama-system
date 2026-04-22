@@ -8,6 +8,7 @@ class Permohonan extends Model
 {
     protected $fillable = [
         'nomor',
+        'client_id',
         'nama_perusahaan',
         'alamat',
         'nama_pic',
@@ -25,6 +26,11 @@ class Permohonan extends Model
     public function items()
     {
         return $this->hasMany(PermohonanItem::class);
+    }
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
     }
 
     public function proyek()

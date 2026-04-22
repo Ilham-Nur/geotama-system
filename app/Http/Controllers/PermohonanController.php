@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Layanan;
+use App\Models\Client;
 use App\Models\Permohonan;
 use App\Models\PermohonanDokumen;
 use App\Models\Proyek;
@@ -25,8 +26,9 @@ class PermohonanController extends Controller
     public function create()
     {
         $layanans = Layanan::orderBy('nama')->get();
+        $clients = Client::orderBy('nama_perusahaan')->get();
 
-        return view('permohonan.create', compact('layanans'));
+        return view('permohonan.create', compact('layanans', 'clients'));
     }
 
     public function store(Request $request)
@@ -37,13 +39,16 @@ class PermohonanController extends Controller
         DB::beginTransaction();
 
         try {
+            $client = $this->resolveClient($request);
+
             $permohonan = Permohonan::create([
                 'nomor' => Permohonan::generateNomor(),
-                'nama_perusahaan' => $request->nama_perusahaan,
-                'alamat' => $request->alamat,
-                'nama_pic' => $request->nama_pic,
-                'no_telp' => $request->no_telp,
-                'email' => $request->email,
+                'client_id' => $client->id,
+                'nama_perusahaan' => $client->nama_perusahaan,
+                'alamat' => $client->alamat,
+                'nama_pic' => $client->nama_pic,
+                'no_telp' => $client->no_telp,
+                'email' => $client->email,
                 'testuji' => $request->testuji,
                 'testuji_external_keterangan' => $request->testuji === 'quality_external'
                     ? $request->testuji_external_keterangan
@@ -103,8 +108,9 @@ class PermohonanController extends Controller
     {
         $permohonan = Permohonan::with(['items.layanans', 'dokumens'])->findOrFail($id);
         $layanans = Layanan::orderBy('nama')->get();
+        $clients = Client::orderBy('nama_perusahaan')->get();
 
-        return view('permohonan.edit', compact('permohonan', 'layanans'));
+        return view('permohonan.edit', compact('permohonan', 'layanans', 'clients'));
     }
 
     public function update(Request $request, $id)
@@ -117,12 +123,15 @@ class PermohonanController extends Controller
         DB::beginTransaction();
 
         try {
+            $client = $this->resolveClient($request);
+
             $permohonan->update([
-                'nama_perusahaan' => $request->nama_perusahaan,
-                'alamat' => $request->alamat,
-                'nama_pic' => $request->nama_pic,
-                'no_telp' => $request->no_telp,
-                'email' => $request->email,
+                'client_id' => $client->id,
+                'nama_perusahaan' => $client->nama_perusahaan,
+                'alamat' => $client->alamat,
+                'nama_pic' => $client->nama_pic,
+                'no_telp' => $client->no_telp,
+                'email' => $client->email,
                 'testuji' => $request->testuji,
                 'testuji_external_keterangan' => $request->testuji === 'quality_external'
                     ? $request->testuji_external_keterangan
@@ -208,10 +217,12 @@ class PermohonanController extends Controller
     protected function validateRequest(Request $request, ?Permohonan $permohonan = null)
     {
         $request->validate([
-            'nama_perusahaan' => 'required|string|max:255',
-            'alamat' => 'required|string',
-            'nama_pic' => 'required|string|max:255',
-            'no_telp' => 'required|string|max:30',
+            'client_id' => 'nullable|exists:clients,id',
+            'client_mode' => 'nullable|in:new,existing',
+            'nama_perusahaan' => 'required_without:client_id|nullable|string|max:255',
+            'alamat' => 'required_without:client_id|nullable|string',
+            'nama_pic' => 'required_without:client_id|nullable|string|max:255',
+            'no_telp' => 'required_without:client_id|nullable|string|max:30',
             'email' => 'nullable|email|max:255',
             'testuji' => 'required|in:quality_internal,quality_external',
             'testuji_external_keterangan' => 'nullable|string|max:255',
@@ -244,6 +255,27 @@ class PermohonanController extends Controller
                 'testuji_external_keterangan' => 'Keterangan quality external wajib diisi.',
             ]);
         }
+
+        if ($request->input('client_mode') === 'existing' && !$request->filled('client_id')) {
+            throw ValidationException::withMessages([
+                'client_id' => 'Silakan pilih client terlebih dahulu.',
+            ]);
+        }
+    }
+
+    protected function resolveClient(Request $request): Client
+    {
+        if ($request->filled('client_id')) {
+            return Client::findOrFail($request->client_id);
+        }
+
+        return Client::create([
+            'nama_perusahaan' => $request->nama_perusahaan,
+            'alamat' => $request->alamat,
+            'nama_pic' => $request->nama_pic,
+            'no_telp' => $request->no_telp,
+            'email' => $request->email,
+        ]);
     }
 
     protected function validateDokumenWajib(Request $request, ?Permohonan $permohonan = null)
