@@ -120,7 +120,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="">Komponen</label>
-                                <input type="number" class="form-control" id="komponen">
+                                <input type="number" class="form-control" id="komponen" readonly>
                             </div>
                         </div>
                     </div>
@@ -396,6 +396,14 @@
                 return Number(String(value).replace(/[^0-9]/g, '')) || 0;
             }
 
+            let pajakManuallyAdjusted = false;
+
+            function syncKomponenFromPermohonanItems() {
+                const totalItemPermohonan = $('#items-table tbody tr').length || 0;
+                $('#komponen').val(totalItemPermohonan);
+                updateConsumableChemical();
+            }
+
             // ==================================================
             // Ambil projectValue dengan fallback
             // ==================================================
@@ -582,15 +590,19 @@
             function hitungSummaryNew() {
                 let project = getProjectValue();
                 let pak = parseRupiah($("#grand-total-display").text());
-                let pajakInput = $("#nilai_pajak").val();
-                let pajak = pajakInput ? parseRupiah(pajakInput) : Math.round(project * 0.02);
+                let pajak = Math.round(project * 0.02);
+
+                if (pajakManuallyAdjusted) {
+                    pajak = parseRupiah($("#nilai_pajak").val());
+                } else {
+                    $("#nilai_pajak").val(formatRupiah(pajak));
+                }
 
                 let margin = project - pak - pajak;
                 let percent = project > 0 ? (margin / project * 100) : 0;
 
                 $("#nilai_project").val(formatRupiah(project));
                 $("#nilai_pak").val(formatRupiah(pak));
-                $("#nilai_pajak").val(formatRupiah(pajak));
                 $("#nilai_margin").val(formatRupiah(margin));
                 $("#margin_percent").val(percent.toFixed(1) + "%");
 
@@ -725,8 +737,15 @@
                 });
 
                 $('#komponen').on('keyup change', function() {
-                    updateConsumableChemical();
+                    syncKomponenFromPermohonanItems();
                     recalcAll();
+                });
+
+                $(document).on('click', '#btn-add-item, .btn-remove-item', function() {
+                    setTimeout(function() {
+                        syncKomponenFromPermohonanItems();
+                        recalcAll();
+                    }, 50);
                 });
 
 
@@ -739,6 +758,7 @@
                 });
 
                 recalcAll();
+                syncKomponenFromPermohonanItems();
             });
 
             function addDefaultItem(categoryId, sectionCode, preset) {
@@ -1046,6 +1066,7 @@
             });
 
             $("#nilai_pajak").on("keyup change", function() {
+                pajakManuallyAdjusted = true;
                 let pajak = parseRupiah($(this).val());
                 $(this).val(formatRupiah(pajak));
                 hitungSummaryNew();

@@ -65,6 +65,11 @@
                         <input type="date" name="date" class="form-control"
                             value="{{ $pak->created_at->format('Y-m-d') }}">
                     </div>
+                    <div class="col-md-6">
+                        <label>Komponen</label>
+                        <input type="number" id="komponen" class="form-control" readonly
+                            value="{{ isset($permohonan->items) ? collect($permohonan->items)->count() : 0 }}">
+                    </div>
                 </div>
 
                 {{-- TABLE --}}
@@ -286,6 +291,13 @@
             return Number(val) || 0;
         }
 
+        let pajakManuallyAdjusted = parseRupiah($('#nilai_pajak').val()) > 0;
+
+        function syncKomponenFromPermohonanItems() {
+            const totalItemPermohonan = $('#items-table tbody tr').length || 0;
+            $('#komponen').val(totalItemPermohonan);
+        }
+
         function formatRupiah(angka) {
             return new Intl.NumberFormat('id-ID').format(angka);
         }
@@ -339,15 +351,18 @@
 
             let project = getProjectValue();
             let pak = parseRupiah($("#grand-total-display").text());
-            let pajakInput = $("#nilai_pajak").val();
-            let pajak = pajakInput ? parseRupiah(pajakInput) : Math.round(project * 0.02);
+            let pajak = Math.round(project * 0.02);
+            if (pajakManuallyAdjusted) {
+                pajak = parseRupiah($("#nilai_pajak").val());
+            } else {
+                $("#nilai_pajak").val(formatRupiah(pajak));
+            }
 
             let margin = project - pak - pajak;
             let percent = project > 0 ? (margin / project * 100) : 0;
 
             $("#nilai_project").val(formatRupiah(project));
             $("#nilai_pak").val(formatRupiah(pak));
-            $("#nilai_pajak").val(formatRupiah(pajak));
             $("#nilai_margin").val(formatRupiah(margin));
             $("#margin_percent").val(percent.toFixed(1) + "%");
 
@@ -364,6 +379,7 @@
             $('#project_value_display').val(formatRupiah(val));
 
             recalcAll();
+            syncKomponenFromPermohonanItems();
         });
 
         /* =========================
@@ -415,6 +431,7 @@
             newRow.insertBefore($(this).closest('tr'));
 
             recalcAll(); // 🔥 update total
+            syncKomponenFromPermohonanItems();
         });
 
         /* =========================
@@ -432,6 +449,13 @@
             $(this).closest('tr').remove();
 
             recalcAll();
+            syncKomponenFromPermohonanItems();
+        });
+
+        $(document).on('click', '#btn-add-item, .btn-remove-item', function() {
+            setTimeout(function() {
+                syncKomponenFromPermohonanItems();
+            }, 50);
         });
 
         /* =========================
@@ -459,6 +483,7 @@
         });
 
         $('#nilai_pajak').on('keyup change', function() {
+            pajakManuallyAdjusted = true;
             let pajak = parseRupiah($(this).val());
             $(this).val(formatRupiah(pajak));
             hitungSummaryNew();

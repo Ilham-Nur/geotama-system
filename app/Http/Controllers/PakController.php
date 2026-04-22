@@ -165,7 +165,9 @@ class PakController extends Controller
 
             $permohonanData = $this->buildPermohonanData($request);
             $projectValue = $this->parseCurrency($request->project_value);
-            $tax = $this->parseCurrency($request->nilai_pajak);
+            $tax = $request->filled('nilai_pajak')
+                ? $this->parseCurrency($request->nilai_pajak)
+                : (int) round($projectValue * 0.02);
 
             $pak = Pak::create([
                 'pak_number' => $request->project_number,
@@ -333,7 +335,9 @@ class PakController extends Controller
             $permohonanData = $this->buildPermohonanData($request, $oldData);
 
             $projectValue = $this->parseCurrency($request->project_value);
-            $tax = $this->parseCurrency($request->nilai_pajak);
+            $tax = $request->filled('nilai_pajak')
+                ? $this->parseCurrency($request->nilai_pajak)
+                : (int) round($projectValue * 0.02);
             $totalCost = $this->parseCurrency($request->nilai_pak_raw);
             $margin = $this->parseCurrency($request->nilai_margin_raw);
 
