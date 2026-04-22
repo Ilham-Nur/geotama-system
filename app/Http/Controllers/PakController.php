@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pak;
 use App\Models\Category;
+use App\Models\Client;
 use App\Models\Layanan;
 use App\Models\Permohonan;
 use App\Models\PermohonanItem;
@@ -41,9 +42,10 @@ class PakController extends Controller
     {
         $layanans = Layanan::orderBy('nama')->get();
         $categories = Category::orderBy('order')->get();
+        $clients = Client::orderBy('nama_perusahaan')->get();
         $newPakNo = Pak::generateNumber();
 
-        return view('pak.create', compact('categories', 'newPakNo', 'layanans'));
+        return view('pak.create', compact('categories', 'newPakNo', 'layanans', 'clients'));
     }
 
     // =========================
@@ -52,13 +54,17 @@ class PakController extends Controller
     private function buildPermohonanData(Request $request, $oldData = null)
     {
         $data = [];
+        $client = $this->resolveClient($request);
+
+        $data['client_id'] = $client->id;
+        $data['client_mode'] = $request->input('client_mode', 'existing');
+        $data['nama_perusahaan'] = $client->nama_perusahaan;
+        $data['nama_pic'] = $client->nama_pic;
+        $data['no_telp'] = $client->no_telp;
+        $data['email'] = $client->email;
+        $data['alamat'] = $client->alamat;
 
         $fields = [
-            'nama_perusahaan',
-            'nama_pic',
-            'no_telp',
-            'email',
-            'alamat',
             'nama_proyek',
             'lokasi',
             'testuji',
@@ -127,6 +133,25 @@ class PakController extends Controller
         $data['items'] = $items;
 
         return $data;
+    }
+
+    private function resolveClient(Request $request): Client
+    {
+        if ($request->input('client_mode') === 'existing') {
+            if (!$request->filled('client_id')) {
+                throw new \Exception('Silakan pilih client terlebih dahulu.');
+            }
+
+            return Client::findOrFail($request->client_id);
+        }
+
+        return Client::create([
+            'nama_perusahaan' => $request->nama_perusahaan,
+            'nama_pic' => $request->nama_pic,
+            'no_telp' => $request->no_telp,
+            'email' => $request->email,
+            'alamat' => $request->alamat,
+        ]);
     }
 
     // =========================
@@ -280,12 +305,14 @@ class PakController extends Controller
 
         $categories = Category::all();
         $layanans = Layanan::all();
+        $clients = Client::orderBy('nama_perusahaan')->get();
 
         return view('pak.edit', compact(
             'pak',
             'categories',
             'permohonan',
-            'layanans'
+            'layanans',
+            'clients'
         ));
     }
     // =========================
@@ -399,6 +426,7 @@ class PakController extends Controller
             // =========================
             $permohonan = Permohonan::create([
                 'nomor' => Permohonan::generateNomor(),
+                'client_id' => $data['client_id'] ?? null,
                 'nama_perusahaan' => $data['nama_perusahaan'] ?? null,
                 'alamat' => $data['alamat'] ?? null,
                 'nama_pic' => $data['nama_pic'] ?? null,
