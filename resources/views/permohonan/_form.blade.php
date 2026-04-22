@@ -18,7 +18,6 @@
             </label>
         </div>
         <input type="hidden" name="client_mode" id="client_mode" value="{{ $clientMode }}">
-        <small class="text-muted d-block">Default pilih client yang sudah ada. Aktifkan switch jika ingin input client baru.</small>
         <small class="text-danger field-error" data-field="client_mode"></small>
     </div>
 
@@ -35,7 +34,6 @@
                 </option>
             @endforeach
         </select>
-        <small class="text-muted d-block">Pilih data client yang sudah pernah dibuat.</small>
         <small class="text-danger field-error" data-field="client_id"></small>
     </div>
 
@@ -43,7 +41,6 @@
         <label>Nama Perusahaan</label>
         <input type="text" name="nama_perusahaan" class="form-control"
             value="{{ old('nama_perusahaan', $permohonan->nama_perusahaan ?? '') }}">
-        <small class="text-muted d-block">Isi nama perusahaan client.</small>
         <small class="text-danger field-error" data-field="nama_perusahaan"></small>
     </div>
 
@@ -51,7 +48,6 @@
         <label>Nama PIC</label>
         <input type="text" name="nama_pic" class="form-control"
             value="{{ old('nama_pic', $permohonan->nama_pic ?? '') }}">
-        <small class="text-muted d-block">Nama PIC yang bisa dihubungi.</small>
         <small class="text-danger field-error" data-field="nama_pic"></small>
     </div>
 
@@ -59,21 +55,18 @@
         <label>No Telp</label>
         <input type="text" name="no_telp" class="form-control"
             value="{{ old('no_telp', $permohonan->no_telp ?? '') }}">
-        <small class="text-muted d-block">Contoh: 0812xxxx atau +62xxxx.</small>
         <small class="text-danger field-error" data-field="no_telp"></small>
     </div>
 
     <div class="col-md-6 mb-3">
         <label>Email</label>
         <input type="email" name="email" class="form-control" value="{{ old('email', $permohonan->email ?? '') }}">
-        <small class="text-muted d-block">Opsional, isi jika ada email aktif.</small>
         <small class="text-danger field-error" data-field="email"></small>
     </div>
 
     <div class="col-md-12 mb-3">
         <label>Alamat Perusahaan</label>
         <textarea name="alamat" class="form-control" rows="3">{{ old('alamat', $permohonan->alamat ?? '') }}</textarea>
-        <small class="text-muted d-block">Alamat lengkap perusahaan client.</small>
         <small class="text-danger field-error" data-field="alamat"></small>
     </div>
 
