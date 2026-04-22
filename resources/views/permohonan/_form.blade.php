@@ -2,28 +2,28 @@
     $isEdit = isset($permohonan);
     $existingDokumens = $isEdit ? $permohonan->dokumens->keyBy('jenis') : collect();
     $selectedClientId = old('client_id', $permohonan->client_id ?? '');
-    $clientMode = old('client_mode', $selectedClientId ? 'existing' : 'new');
+    $clientMode = old('client_mode', $selectedClientId ? 'existing' : 'existing');
 @endphp
 
 <div id="form-alert" class="alert d-none mb-3"></div>
 
 <div class="row">
     <div class="col-md-12 mb-3">
-        <label class="d-block">Sumber Data Client</label>
+        <label class="d-block">Data Client</label>
         <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" role="switch" id="client_mode_switch"
-                {{ $clientMode === 'existing' ? 'checked' : '' }}>
+                {{ $clientMode === 'new' ? 'checked' : '' }}>
             <label class="form-check-label" for="client_mode_switch">
-                Gunakan Client Existing
+                Buat data client baru
             </label>
         </div>
         <input type="hidden" name="client_mode" id="client_mode" value="{{ $clientMode }}">
-        <small class="text-muted d-block">Switch OFF = Input Client Baru, Switch ON = Pilih Client Existing</small>
+        <small class="text-muted d-block">Default pilih client yang sudah ada. Aktifkan switch jika ingin input client baru.</small>
         <small class="text-danger field-error" data-field="client_mode"></small>
     </div>
 
     <div class="col-md-12 mb-3" id="client_select_wrapper">
-        <label>Pilih Client Existing</label>
+        <label>Pilih client</label>
         <select name="client_id" id="client_id" class="form-control">
             <option value="">-- Pilih Client --</option>
             @foreach ($clients as $client)
@@ -35,6 +35,7 @@
                 </option>
             @endforeach
         </select>
+        <small class="text-muted d-block">Pilih data client yang sudah pernah dibuat.</small>
         <small class="text-danger field-error" data-field="client_id"></small>
     </div>
 
@@ -42,6 +43,7 @@
         <label>Nama Perusahaan</label>
         <input type="text" name="nama_perusahaan" class="form-control"
             value="{{ old('nama_perusahaan', $permohonan->nama_perusahaan ?? '') }}">
+        <small class="text-muted d-block">Isi nama perusahaan client.</small>
         <small class="text-danger field-error" data-field="nama_perusahaan"></small>
     </div>
 
@@ -49,6 +51,7 @@
         <label>Nama PIC</label>
         <input type="text" name="nama_pic" class="form-control"
             value="{{ old('nama_pic', $permohonan->nama_pic ?? '') }}">
+        <small class="text-muted d-block">Nama PIC yang bisa dihubungi.</small>
         <small class="text-danger field-error" data-field="nama_pic"></small>
     </div>
 
@@ -56,18 +59,21 @@
         <label>No Telp</label>
         <input type="text" name="no_telp" class="form-control"
             value="{{ old('no_telp', $permohonan->no_telp ?? '') }}">
+        <small class="text-muted d-block">Contoh: 0812xxxx atau +62xxxx.</small>
         <small class="text-danger field-error" data-field="no_telp"></small>
     </div>
 
     <div class="col-md-6 mb-3">
         <label>Email</label>
         <input type="email" name="email" class="form-control" value="{{ old('email', $permohonan->email ?? '') }}">
+        <small class="text-muted d-block">Opsional, isi jika ada email aktif.</small>
         <small class="text-danger field-error" data-field="email"></small>
     </div>
 
     <div class="col-md-12 mb-3">
         <label>Alamat Perusahaan</label>
         <textarea name="alamat" class="form-control" rows="3">{{ old('alamat', $permohonan->alamat ?? '') }}</textarea>
+        <small class="text-muted d-block">Alamat lengkap perusahaan client.</small>
         <small class="text-danger field-error" data-field="alamat"></small>
     </div>
 
@@ -383,7 +389,7 @@
             const clientSwitch = document.getElementById('client_mode_switch');
             const hiddenClientMode = document.getElementById('client_mode');
             if (!clientSwitch || !hiddenClientMode) return;
-            hiddenClientMode.value = clientSwitch.checked ? 'existing' : 'new';
+            hiddenClientMode.value = clientSwitch.checked ? 'new' : 'existing';
             toggleClientMode();
         }
 
