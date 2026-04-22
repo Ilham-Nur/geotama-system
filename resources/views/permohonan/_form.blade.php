@@ -8,10 +8,24 @@
 <div id="form-alert" class="alert d-none mb-3"></div>
 
 <div class="row">
-    <div class="col-md-6 mb-3">
-        <label>Pilih Client</label>
+    <div class="col-md-12 mb-3">
+        <label class="d-block">Sumber Data Client</label>
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="client_mode_switch"
+                {{ $clientMode === 'existing' ? 'checked' : '' }}>
+            <label class="form-check-label" for="client_mode_switch">
+                Gunakan Client Existing
+            </label>
+        </div>
+        <input type="hidden" name="client_mode" id="client_mode" value="{{ $clientMode }}">
+        <small class="text-muted d-block">Switch OFF = Input Client Baru, Switch ON = Pilih Client Existing</small>
+        <small class="text-danger field-error" data-field="client_mode"></small>
+    </div>
+
+    <div class="col-md-12 mb-3" id="client_select_wrapper">
+        <label>Pilih Client Existing</label>
         <select name="client_id" id="client_id" class="form-control">
-            <option value="">-- Buat Client Baru --</option>
+            <option value="">-- Pilih Client --</option>
             @foreach ($clients as $client)
                 <option value="{{ $client->id }}" data-nama_perusahaan="{{ $client->nama_perusahaan }}"
                     data-alamat="{{ $client->alamat }}" data-nama_pic="{{ $client->nama_pic }}"
@@ -22,15 +36,6 @@
             @endforeach
         </select>
         <small class="text-danger field-error" data-field="client_id"></small>
-    </div>
-
-    <div class="col-md-6 mb-3">
-        <label>Sumber Data Client</label>
-        <select name="client_mode" id="client_mode" class="form-control">
-            <option value="new" {{ $clientMode === 'new' ? 'selected' : '' }}>Input Client Baru</option>
-            <option value="existing" {{ $clientMode === 'existing' ? 'selected' : '' }}>Pilih Client Existing</option>
-        </select>
-        <small class="text-danger field-error" data-field="client_mode"></small>
     </div>
 
     <div class="col-md-6 mb-3">
@@ -343,13 +348,19 @@
         }
 
         function toggleClientMode() {
-            const mode = document.getElementById('client_mode')?.value || 'new';
+            const hiddenClientMode = document.getElementById('client_mode');
+            const clientSwitch = document.getElementById('client_mode_switch');
+            const mode = hiddenClientMode?.value || (clientSwitch?.checked ? 'existing' : 'new');
             const isExisting = mode === 'existing';
             const clientSelect = document.getElementById('client_id');
+            const clientSelectWrapper = document.getElementById('client_select_wrapper');
             const fields = ['nama_perusahaan', 'alamat', 'nama_pic', 'no_telp', 'email'];
 
             if (clientSelect) {
                 clientSelect.disabled = !isExisting;
+            }
+            if (clientSelectWrapper) {
+                clientSelectWrapper.style.display = isExisting ? 'block' : 'none';
             }
 
             fields.forEach(function(fieldName) {
@@ -366,6 +377,14 @@
             if (isExisting) {
                 fillClientData();
             }
+        }
+
+        function syncClientModeFromSwitch() {
+            const clientSwitch = document.getElementById('client_mode_switch');
+            const hiddenClientMode = document.getElementById('client_mode');
+            if (!clientSwitch || !hiddenClientMode) return;
+            hiddenClientMode.value = clientSwitch.checked ? 'existing' : 'new';
+            toggleClientMode();
         }
 
         function fillClientData() {
@@ -387,7 +406,7 @@
         });
         toggleExternalKeterangan();
 
-        $('#client_mode').on('change', toggleClientMode);
+        $('#client_mode_switch').on('change', syncClientModeFromSwitch);
         $('#client_id').on('change', fillClientData);
         toggleClientMode();
 
