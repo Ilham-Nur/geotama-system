@@ -34,7 +34,7 @@
     </div>
 
     <div class="col-md-12 mb-3">
-        <label>Alamat Perusaaan</label>
+        <label>Alamat Perusahaan</label>
         <textarea name="alamat" class="form-control" rows="3">{{ old('alamat', $permohonan->alamat ?? '') }}</textarea>
         <small class="text-danger field-error" data-field="alamat"></small>
     </div>
