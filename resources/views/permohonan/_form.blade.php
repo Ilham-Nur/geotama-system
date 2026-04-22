@@ -34,7 +34,7 @@
     </div>
 
     <div class="col-md-12 mb-3">
-        <label>Alamat</label>
+        <label>Alamat Perusaaan</label>
         <textarea name="alamat" class="form-control" rows="3">{{ old('alamat', $permohonan->alamat ?? '') }}</textarea>
         <small class="text-danger field-error" data-field="alamat"></small>
     </div>
@@ -47,7 +47,7 @@
     </div>
 
     <div class="col-md-6 mb-3">
-        <label>Lokasi</label>
+        <label>Lokasi Inspeksi</label>
         <textarea name="lokasi" class="form-control" rows="2">{{ old('lokasi', $permohonan->lokasi ?? '') }}</textarea>
         <small class="text-danger field-error" data-field="lokasi"></small>
     </div>
