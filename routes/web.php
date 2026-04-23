@@ -301,6 +301,14 @@ Route::middleware('auth')->group(function () {
     Route::put('/quotation/{quotation}', [QuotationController::class, 'update'])
         ->middleware('permission:quotation.edit')
         ->name('quotation.update');
+
+    Route::delete('/quotation/{quotation}', [QuotationController::class, 'destroy'])
+        ->middleware('permission:quotation.delete')
+        ->name('quotation.destroy');
+
+    Route::get('/quotation/{quotation}/export-pdf', [QuotationController::class, 'exportPdf'])
+        ->middleware('permission:quotation.export_pdf')
+        ->name('quotation.export-pdf');
 });
 
 Route::get('/scan/aset/{asset}', [AssetController::class, 'publicShow'])->name('assets.public-show');

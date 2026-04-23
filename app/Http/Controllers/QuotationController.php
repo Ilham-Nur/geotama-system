@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Quotation;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -129,4 +130,22 @@ class QuotationController extends Controller
 
         return redirect()->route('quotation.index')->with('success', 'Quotation berhasil diperbarui.');
     }
+
+    public function destroy(Quotation $quotation)
+    {
+        $quotation->delete();
+
+        return redirect()->route('quotation.index')->with('success', 'Quotation berhasil dihapus.');
+    }
+
+    public function exportPdf(Quotation $quotation)
+    {
+        $quotation->load(['client', 'items', 'terms']);
+
+        $pdf = Pdf::loadView('quotation.pdf', compact('quotation'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->stream($quotation->no_quo . '.pdf');
+    }
 }
+

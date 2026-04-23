@@ -60,14 +60,33 @@
                                     <td>{{ $quotation->client->nama_perusahaan ?? '-' }}</td>
                                     <td>Rp {{ number_format((float) $quotation->grand_total_quo, 0, ',', '.') }}</td>
                                     <td>
-                                        @can('quotation.edit')
-                                            <a href="{{ route('quotation.edit', $quotation->id) }}" class="text-primary"
-                                                title="Edit">
-                                                <i class="lni lni-pencil"></i>
-                                            </a>
-                                        @else
-                                            -
-                                        @endcan
+                                        <div class="action d-flex align-items-center gap-2">
+                                            @can('quotation.export_pdf')
+                                                <a href="{{ route('quotation.export-pdf', $quotation->id) }}" class="text-warning"
+                                                    title="Export PDF" target="_blank">
+                                                    <i class="lni lni-download"></i>
+                                                </a>
+                                            @endcan
+
+                                            @can('quotation.edit')
+                                                <a href="{{ route('quotation.edit', $quotation->id) }}" class="text-primary"
+                                                    title="Edit">
+                                                    <i class="lni lni-pencil"></i>
+                                                </a>
+                                            @endcan
+
+                                            @can('quotation.delete')
+                                                <form action="{{ route('quotation.destroy', $quotation->id) }}" method="POST"
+                                                    class="d-inline form-delete-quotation">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-danger border-0 bg-transparent p-0 btn-delete-quotation"
+                                                        title="Hapus">
+                                                        <i class="lni lni-trash-can"></i>
+                                                    </button>
+                                                </form>
+                                            @endcan
+                                        </div>
                                     </td>
                                 </tr>
                             @empty
@@ -87,6 +106,24 @@
     <script>
         $(document).ready(function() {
             $('#tableQuotation').DataTable();
+
+            $('.btn-delete-quotation').on('click', function(e) {
+                e.preventDefault();
+                const form = $(this).closest('form');
+
+                Swal.fire({
+                    title: 'Hapus quotation ini?',
+                    text: 'Data yang dihapus tidak bisa dikembalikan.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, hapus',
+                    cancelButtonText: 'Batal',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.trigger('submit');
+                    }
+                });
+            });
         });
     </script>
 @endpush

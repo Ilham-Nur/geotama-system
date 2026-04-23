@@ -69,6 +69,8 @@ class RolePermissionSeeder extends Seeder
             'quotation.view',
             'quotation.create',
             'quotation.edit',
+            'quotation.delete',
+            'quotation.export_pdf',
 
             // Assets
             'assets.view',
@@ -130,6 +132,8 @@ class RolePermissionSeeder extends Seeder
             'quotation.view',
             'quotation.create',
             'quotation.edit',
+            'quotation.delete',
+            'quotation.export_pdf',
 
             'assets.view',
             'assets.create',
