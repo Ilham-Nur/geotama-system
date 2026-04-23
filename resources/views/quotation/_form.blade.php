@@ -36,8 +36,8 @@
             <select id="previous_quotation_id" class="form-select">
                 <option value="">-- Pilih No Quotation --</option>
                 @foreach ($previousQuotations ?? [] as $previousQuotation)
-                    <option value="{{ $previousQuotation->id }}"
-                        data-quotation='@json([
+                    @php
+                        $quotationPayload = [
                             'client_id' => $previousQuotation->client_id,
                             'items' => $previousQuotation->items
                                 ->map(function ($item) {
@@ -58,7 +58,9 @@
                                 })
                                 ->values()
                                 ->all(),
-                        ])'>
+                        ];
+                    @endphp
+                    <option value="{{ $previousQuotation->id }}" data-quotation='{{ json_encode($quotationPayload) }}'>
                         {{ $previousQuotation->no_quo }}
                     </option>
                 @endforeach
