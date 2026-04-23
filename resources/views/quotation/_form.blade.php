@@ -30,6 +30,43 @@
 @endphp
 
 <div class="row">
+    @if (!$isEdit)
+        <div class="col-md-12 mb-3">
+            <label class="form-label">Gunakan Quotation Sebelumnya (by No Quotation)</label>
+            <select id="previous_quotation_id" class="form-select">
+                <option value="">-- Pilih No Quotation --</option>
+                @foreach ($previousQuotations ?? [] as $previousQuotation)
+                    <option value="{{ $previousQuotation->id }}"
+                        data-quotation='@json([
+                            'client_id' => $previousQuotation->client_id,
+                            'items' => $previousQuotation->items
+                                ->map(function ($item) {
+                                    return [
+                                        'description' => $item->description,
+                                        'satuan' => $item->satuan,
+                                        'qty' => $item->qty,
+                                        'total' => $item->total,
+                                    ];
+                                })
+                                ->values()
+                                ->all(),
+                            'terms' => $previousQuotation->terms
+                                ->map(function ($term) {
+                                    return [
+                                        'name' => $term->name,
+                                    ];
+                                })
+                                ->values()
+                                ->all(),
+                        ])'>
+                        {{ $previousQuotation->no_quo }}
+                    </option>
+                @endforeach
+            </select>
+            <small class="text-muted">Pilih quotation sebelumnya untuk auto-isi client, item, dan terms.</small>
+        </div>
+    @endif
+
     <div class="col-md-6 mb-3">
         <label class="form-label">No Quotation</label>
         <input type="text" name="no_quo" class="form-control @error('no_quo') is-invalid @enderror"
@@ -51,7 +88,7 @@
 
     <div class="col-md-12 mb-3">
         <label class="form-label">Client</label>
-        <select name="client_id" class="form-select @error('client_id') is-invalid @enderror">
+        <select name="client_id" id="client_id" class="form-select @error('client_id') is-invalid @enderror">
             <option value="">-- Pilih Client --</option>
             @foreach ($clients as $client)
                 <option value="{{ $client->id }}"
@@ -175,19 +212,31 @@
                 });
             }
 
-            $('#btn-add-item').on('click', function() {
-                const index = itemTableBody.find('tr').length;
-                const row = `
+            function getItemRow(index, item = {}) {
+                return `
                     <tr>
-                        <td><textarea name="items[${index}][description]" class="form-control" rows="2" required></textarea></td>
-                        <td><input type="text" name="items[${index}][satuan]" class="form-control"></td>
-                        <td><input type="number" step="0.01" min="0.01" name="items[${index}][qty]" class="form-control" required></td>
-                        <td><input type="number" step="0.01" min="0" name="items[${index}][total]" class="form-control item-total" required></td>
+                        <td><textarea name="items[${index}][description]" class="form-control" rows="2" required>${item.description ?? ''}</textarea></td>
+                        <td><input type="text" name="items[${index}][satuan]" class="form-control" value="${item.satuan ?? ''}"></td>
+                        <td><input type="number" step="0.01" min="0.01" name="items[${index}][qty]" class="form-control" value="${item.qty ?? ''}" required></td>
+                        <td><input type="number" step="0.01" min="0" name="items[${index}][total]" class="form-control item-total" value="${item.total ?? ''}" required></td>
                         <td><button type="button" class="btn btn-sm btn-danger btn-remove-item">Hapus</button></td>
                     </tr>
                 `;
+            }
 
-                itemTableBody.append(row);
+            function getTermRow(index, term = {}) {
+                return `
+                    <div class="input-group mb-2 term-row">
+                        <input type="text" name="terms[${index}][name]" class="form-control"
+                            value="${term.name ?? ''}" placeholder="Contoh: Harga belum termasuk PPN">
+                        <button type="button" class="btn btn-outline-danger btn-remove-term">Hapus</button>
+                    </div>
+                `;
+            }
+
+            $('#btn-add-item').on('click', function() {
+                const index = itemTableBody.find('tr').length;
+                itemTableBody.append(getItemRow(index));
             });
 
             itemTableBody.on('click', '.btn-remove-item', function() {
@@ -204,15 +253,7 @@
 
             $('#btn-add-term').on('click', function() {
                 const index = termsWrapper.find('.term-row').length;
-                const row = `
-                    <div class="input-group mb-2 term-row">
-                        <input type="text" name="terms[${index}][name]" class="form-control"
-                            placeholder="Contoh: Harga belum termasuk PPN">
-                        <button type="button" class="btn btn-outline-danger btn-remove-term">Hapus</button>
-                    </div>
-                `;
-
-                termsWrapper.append(row);
+                termsWrapper.append(getTermRow(index));
             });
 
             termsWrapper.on('click', '.btn-remove-term', function() {
@@ -223,6 +264,48 @@
 
                 $(this).closest('.term-row').remove();
                 reindexTerms();
+            });
+
+            $('#previous_quotation_id').on('change', function() {
+                const selected = $(this).find(':selected');
+                const payload = selected.data('quotation');
+
+                if (!payload) {
+                    return;
+                }
+
+                $('#client_id').val(payload.client_id ?? '').trigger('change');
+
+                const items = Array.isArray(payload.items) && payload.items.length ? payload.items : [{
+                    description: '',
+                    satuan: '',
+                    qty: '',
+                    total: ''
+                }];
+
+                itemTableBody.empty();
+                items.forEach((item, index) => {
+                    itemTableBody.append(getItemRow(index, item));
+                });
+
+                const terms = Array.isArray(payload.terms) && payload.terms.length ? payload.terms : [{
+                    name: ''
+                }];
+
+                termsWrapper.empty();
+                terms.forEach((term, index) => {
+                    termsWrapper.append(getTermRow(index, term));
+                });
+
+                refreshGrandTotal();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Template quotation dimuat',
+                    text: 'Data client, item, dan terms berhasil diisi otomatis.',
+                    timer: 1600,
+                    showConfirmButton: false,
+                });
             });
 
             refreshGrandTotal();

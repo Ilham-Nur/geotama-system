@@ -22,10 +22,14 @@ class QuotationController extends Controller
     public function create()
     {
         $clients = Client::orderBy('nama_perusahaan')->get();
+        $previousQuotations = Quotation::with(['items', 'terms'])
+            ->orderByDesc('id')
+            ->get(['id', 'no_quo', 'client_id']);
 
         return view('quotation.create', [
             'clients' => $clients,
             'generatedNoQuotation' => Quotation::generateNoQuotation(),
+            'previousQuotations' => $previousQuotations,
         ]);
     }
 
