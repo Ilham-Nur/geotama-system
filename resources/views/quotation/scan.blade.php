@@ -41,7 +41,7 @@
             font-size: 1.4rem;
             font-weight: 700;
             margin: 0;
-            color: #025222;
+            color: #0b3d91;
         }
 
         .doc-table {
