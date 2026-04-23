@@ -283,8 +283,24 @@ Route::middleware('auth')->group(function () {
         ->name('pembayaran.store');
 
     Route::get('/quotation', [QuotationController::class, 'index'])
-        // ->middleware('permission:quotation.view')
+        ->middleware('permission:quotation.view')
         ->name('quotation.index');
+
+    Route::get('/quotation/create', [QuotationController::class, 'create'])
+        ->middleware('permission:quotation.create')
+        ->name('quotation.create');
+
+    Route::post('/quotation', [QuotationController::class, 'store'])
+        ->middleware('permission:quotation.create')
+        ->name('quotation.store');
+
+    Route::get('/quotation/{quotation}/edit', [QuotationController::class, 'edit'])
+        ->middleware('permission:quotation.edit')
+        ->name('quotation.edit');
+
+    Route::put('/quotation/{quotation}', [QuotationController::class, 'update'])
+        ->middleware('permission:quotation.edit')
+        ->name('quotation.update');
 });
 
 Route::get('/scan/aset/{asset}', [AssetController::class, 'publicShow'])->name('assets.public-show');

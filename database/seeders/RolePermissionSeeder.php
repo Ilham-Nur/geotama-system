@@ -65,6 +65,11 @@ class RolePermissionSeeder extends Seeder
             'pembayaran.create',
             'pembayaran.store',
 
+            // Quotation
+            'quotation.view',
+            'quotation.create',
+            'quotation.edit',
+
             // Assets
             'assets.view',
             'assets.create',
@@ -121,6 +126,10 @@ class RolePermissionSeeder extends Seeder
             'pembayaran.view',
             'pembayaran.create',
             'pembayaran.store',
+
+            'quotation.view',
+            'quotation.create',
+            'quotation.edit',
 
             'assets.view',
             'assets.create',
