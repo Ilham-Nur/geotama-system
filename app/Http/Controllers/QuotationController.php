@@ -148,6 +148,10 @@ class QuotationController extends Controller
         $scanUrl = route('quotation.public-show', $quotation->id);
 
         $pdf = Pdf::loadView('quotation.pdf', compact('quotation', 'scanUrl'))
+            ->setOptions([
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+            ])
             ->setPaper('a4', 'portrait');
 
         return $pdf->stream($quotation->no_quo . '.pdf');
