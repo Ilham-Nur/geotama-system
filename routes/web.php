@@ -12,7 +12,9 @@ use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SuratTugasController;
 use App\Http\Controllers\UserController;
+use Symfony\Component\Routing\Router;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -309,6 +311,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/quotation/{quotation}/export-pdf', [QuotationController::class, 'exportPdf'])
         ->middleware('permission:quotation.export_pdf')
         ->name('quotation.export-pdf');
+
+    Route::get('/surat-tugas', [SuratTugasController::class, 'index'])
+        ->middleware('permission:surat_tugas.view')
+        ->name('surat-tugas.index');
 });
 
 Route::get('/scan/aset/{asset}', [AssetController::class, 'publicShow'])->name('assets.public-show');
