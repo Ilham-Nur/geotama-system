@@ -7,8 +7,8 @@ use App\Models\Quotation;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class QuotationController extends Controller
 {
@@ -186,20 +186,16 @@ class QuotationController extends Controller
     private function ensureQrCodePath(Quotation $quotation, bool $forceRegenerate = false): string
     {
         $scanUrl = route('quotation.public-show', $quotation->id);
-        $fileName = 'quotation-' . $quotation->id . '.png';
+        $fileName = 'quotation-' . $quotation->id . '.svg';
         $storagePath = 'quotation/qr/' . $fileName;
 
         if ($forceRegenerate || !$quotation->qr_code_path || !Storage::disk('public')->exists($quotation->qr_code_path)) {
-            $response = Http::timeout(20)->get('https://api.qrserver.com/v1/create-qr-code/', [
-                'size' => '300x300',
-                'data' => $scanUrl,
-            ]);
+            $qrSvg = QrCode::format('svg')
+                ->size(300)
+                ->margin(1)
+                ->generate($scanUrl);
 
-            if ($response->failed()) {
-                abort(500, 'Gagal generate QR Code quotation.');
-            }
-
-            Storage::disk('public')->put($storagePath, $response->body());
+            Storage::disk('public')->put($storagePath, $qrSvg);
 
             $quotation->update([
                 'qr_code_path' => $storagePath,
@@ -219,6 +215,8 @@ class QuotationController extends Controller
 
         $content = Storage::disk('public')->get($path);
 
-        return 'data:image/png;base64,' . base64_encode($content);
+        $mime = str_ends_with(strtolower($path), '.svg') ? 'image/svg+xml' : 'image/png';
+
+        return 'data:' . $mime . ';base64,' . base64_encode($content);
     }
 }
