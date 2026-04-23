@@ -175,7 +175,7 @@ class QuotationController extends Controller
         $quotation->load(['client', 'items', 'terms']);
 
         $approval = [
-            'approver_name' => 'Authorized Signatory',
+            'approver_name' => 'Adam Saputra',
             'approver_position' => 'Management Representative',
             'approval_date' => optional($quotation->updated_at)->format('d F Y H:i') ?? '-',
         ];

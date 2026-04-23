@@ -10,7 +10,7 @@
 
     <style>
         body {
-            background-color: #025222;
+            background-color: #0b3d91;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             padding: 10px;
         }
@@ -180,6 +180,10 @@
             <tr>
                 <td><strong>Customer</strong></td>
                 <td>: {{ $quotation->client->nama_perusahaan ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td><strong>Nilai Quotation</strong></td>
+                <td>: Rp {{ number_format((float) $quotation->grand_total_quo, 0, ',', '.') }}</td>
             </tr>
             <tr>
                 <td><strong>Perihal</strong></td>
