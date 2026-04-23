@@ -157,7 +157,13 @@ class QuotationController extends Controller
     {
         $quotation->load(['client', 'items', 'terms']);
 
-        return view('quotation.scan', compact('quotation'));
+        $approval = [
+            'approver_name' => 'Authorized Signatory',
+            'approver_position' => 'Management Representative',
+            'approval_date' => optional($quotation->updated_at)->format('d F Y H:i') ?? '-',
+        ];
+
+        return view('quotation.scan', compact('quotation', 'approval'));
     }
 }
 
