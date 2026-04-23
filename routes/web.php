@@ -10,6 +10,7 @@ use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PermohonanController;
 use App\Http\Controllers\ProyekController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 
@@ -280,6 +281,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/pembayaran', [PembayaranController::class, 'store'])
         ->middleware('permission:pembayaran.store')
         ->name('pembayaran.store');
+
+    Route::get('/quotation', [QuotationController::class, 'index'])
+        // ->middleware('permission:quotation.view')
+        ->name('quotation.index');
 });
 
 Route::get('/scan/aset/{asset}', [AssetController::class, 'publicShow'])->name('assets.public-show');
