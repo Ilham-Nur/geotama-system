@@ -252,6 +252,19 @@
             </tbody>
         </table>
 
+        <div style="font-weight: bold; margin-bottom: 6px;">
+            TERBILANG :
+        </div>
+
+        @php
+            use App\Support\Terbilang;
+        @endphp
+
+        <div
+            style="padding: 5px; text-align: center; background-color: #c5c5c5; color: #484749; font-weight: bold; width: 50%;">
+            {{ ucwords(Terbilang::make($quotation->grand_total_quo)) }} Rupiah
+        </div>
+
         <div class="section-title">Terms & Conditions</div>
 
         @if ($quotation->terms->isNotEmpty())
@@ -272,18 +285,22 @@
             <table>
                 <tr>
                     <td width="70%">
+                        <div class="qr-box">
+                            @if ($qrBase64)
+                                <img src="{{ $qrBase64 }}">
+                            @else
+                                <div class="muted" style="border:1px solid #ddd; padding: 44px 8px;">
+                                    QR belum tersedia
+                                </div>
+                            @endif
+                        </div>
+                        <br>
                         Hormat kami,<br>
                         PT Geotama Global Intijaya
                     </td>
-                    <td width="30%" class="qr-box">
-                        @if ($qrBase64)
-                            <img src="{{ $qrBase64 }}">
-                        @else
-                            <div class="muted" style="border:1px solid #ddd; padding: 44px 8px;">
-                                QR belum tersedia
-                            </div>
-                        @endif
-                        <div class="muted">Scan untuk lihat TTD digital</div>
+                    <td width="30%" >
+
+                        {{-- <div class="muted">Scan untuk lihat TTD digital</div> --}}
                     </td>
                 </tr>
             </table>
