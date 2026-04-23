@@ -1,58 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <title>{{ $quotation->no_quo }}</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; color: #111; }
-        h2, h4 { margin: 0 0 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #777; padding: 6px; vertical-align: top; }
-        .no-border td { border: none; padding: 2px 0; }
-        .text-right { text-align: right; }
-        .section { margin-top: 18px; }
-        ul { margin: 8px 0 0 18px; padding: 0; }
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 12px;
+            color: #222;
+            margin: 0;
+        }
+
+        .page {
+            padding: 0 24px;
+        }
+
+        .header-space {
+            height: 100px;
+            border-bottom: 1px dashed #b5b5b5;
+            margin-bottom: 14px;
+        }
+
+        .footer-space {
+            height: 70px;
+            border-top: 1px dashed #b5b5b5;
+            margin-top: 20px;
+        }
+
+        .row {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .left,
+        .right {
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        .left {
+            width: 58%;
+        }
+
+        .right {
+            width: 40%;
+            text-align: right;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .meta td {
+            padding: 2px 0;
+        }
+
+        .items th,
+        .items td {
+            border: 1px solid #777;
+            padding: 6px;
+        }
+
+        .items th {
+            text-align: center;
+            background: #f5f5f5;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .section-title {
+            margin: 12px 0 6px;
+            font-weight: bold;
+        }
+
+        ol,
+        ul {
+            margin: 6px 0 0 18px;
+            padding: 0;
+        }
+
+        .signature-wrapper {
+            margin-top: 24px;
+        }
+
+        .qr-box {
+            width: 120px;
+            text-align: center;
+        }
+
+        .qr-box img {
+            width: 110px;
+            height: 110px;
+            border: 1px solid #ddd;
+            padding: 4px;
+        }
+
+        .muted {
+            color: #7d7d7d;
+            font-size: 10px;
+        }
     </style>
 </head>
 
 <body>
-    <h2>QUOTATION</h2>
+    @php
+        $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . urlencode($scanUrl);
+    @endphp
 
-    <table class="no-border">
-        <tr>
-            <td width="20%"><strong>No Quotation</strong></td>
-            <td width="2%">:</td>
-            <td>{{ $quotation->no_quo }}</td>
-        </tr>
-        <tr>
-            <td><strong>Tanggal</strong></td>
-            <td>:</td>
-            <td>{{ optional($quotation->tanggal)->format('d-m-Y') }}</td>
-        </tr>
-        <tr>
-            <td><strong>Client</strong></td>
-            <td>:</td>
-            <td>{{ $quotation->client->nama_perusahaan ?? '-' }}</td>
-        </tr>
-    </table>
+    <div class="page">
+        <div class="header-space"></div>
 
-    <div class="section">
-        <h4>Item Quotation</h4>
-        <table>
+        <div class="row">
+            <div class="left">
+                <strong>Kepada Yth</strong><br>
+                {{ $quotation->client->nama_perusahaan ?? '-' }}<br>
+                {{ $quotation->client->alamat ?? '-' }}
+            </div>
+            <div class="right">
+                <table class="meta">
+                    <tr>
+                        <td><strong>Tanggal</strong></td>
+                        <td>: {{ optional($quotation->tanggal)->format('d-m-Y') }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Nomor</strong></td>
+                        <td>: {{ $quotation->no_quo }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Perihal</strong></td>
+                        <td>: Penawaran Jasa</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <ol>
+            <li>Berikut kami sampaikan penawaran jasa untuk kebutuhan pekerjaan yang diajukan.</li>
+            <li class="section-title">Rincian biaya pekerjaan:</li>
+        </ol>
+
+        <table class="items">
             <thead>
                 <tr>
                     <th width="5%">No</th>
                     <th>Description</th>
                     <th width="15%">Satuan</th>
-                    <th width="10%">Qty</th>
-                    <th width="20%">Total</th>
+                    <th width="12%">Qty</th>
+                    <th width="22%">Total</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($quotation->items as $item)
                     <tr>
-                        <td>{{ $loop->iteration }}</td>
+                        <td class="text-right">{{ $loop->iteration }}</td>
                         <td>{{ $item->description }}</td>
                         <td>{{ $item->satuan ?? '-' }}</td>
                         <td class="text-right">{{ number_format((float) $item->qty, 2, ',', '.') }}</td>
@@ -69,10 +173,8 @@
                 </tr>
             </tbody>
         </table>
-    </div>
 
-    <div class="section">
-        <h4>Terms</h4>
+        <div class="section-title">Terms & Conditions</div>
         @if($quotation->terms->isNotEmpty())
             <ul>
                 @foreach($quotation->terms as $term)
@@ -82,6 +184,25 @@
         @else
             <p>-</p>
         @endif
+
+        <p style="margin-top: 16px;">Demikian penawaran dari kami, atas perhatian dan kerjasamanya kami ucapkan terima kasih.</p>
+
+        <div class="signature-wrapper">
+            <table>
+                <tr>
+                    <td width="70%">
+                        Hormat kami,<br>
+                        PT Geotama Global Intijaya
+                    </td>
+                    <td width="30%" class="qr-box">
+                        <img src="{{ $qrUrl }}" alt="QR Digital Signature">
+                        <div class="muted">Scan untuk lihat TTD digital</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="footer-space"></div>
     </div>
 </body>
 

@@ -145,11 +145,19 @@ class QuotationController extends Controller
     public function exportPdf(Quotation $quotation)
     {
         $quotation->load(['client', 'items', 'terms']);
+        $scanUrl = route('quotation.public-show', $quotation->id);
 
-        $pdf = Pdf::loadView('quotation.pdf', compact('quotation'))
+        $pdf = Pdf::loadView('quotation.pdf', compact('quotation', 'scanUrl'))
             ->setPaper('a4', 'portrait');
 
         return $pdf->stream($quotation->no_quo . '.pdf');
+    }
+
+    public function publicShow(Quotation $quotation)
+    {
+        $quotation->load(['client', 'items', 'terms']);
+
+        return view('quotation.scan', compact('quotation'));
     }
 }
 

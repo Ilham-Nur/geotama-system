@@ -313,4 +313,6 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/scan/aset/{asset}', [AssetController::class, 'publicShow'])->name('assets.public-show');
 
+Route::get('/scan/quotation/{quotation}', [QuotationController::class, 'publicShow'])->name('quotation.public-show');
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
