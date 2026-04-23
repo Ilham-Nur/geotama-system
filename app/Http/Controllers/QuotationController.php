@@ -7,6 +7,8 @@ use App\Models\Quotation;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class QuotationController extends Controller
 {
@@ -48,7 +50,7 @@ class QuotationController extends Controller
             'terms.*.name' => ['required', 'string', 'max:255'],
         ]);
 
-        DB::transaction(function () use ($validated) {
+        $quotation = DB::transaction(function () use ($validated) {
             $grandTotal = collect($validated['items'])->sum(function ($item) {
                 return (float) $item['total'];
             });
@@ -74,7 +76,11 @@ class QuotationController extends Controller
                     'name' => $term['name'],
                 ]);
             }
+
+            return $quotation;
         });
+
+        $this->ensureQrCodePath($quotation);
 
         return redirect()->route('quotation.index')->with('success', 'Quotation berhasil dibuat.');
     }
@@ -132,11 +138,17 @@ class QuotationController extends Controller
             }
         });
 
+        $this->ensureQrCodePath($quotation, true);
+
         return redirect()->route('quotation.index')->with('success', 'Quotation berhasil diperbarui.');
     }
 
     public function destroy(Quotation $quotation)
     {
+        if ($quotation->qr_code_path && Storage::disk('public')->exists($quotation->qr_code_path)) {
+            Storage::disk('public')->delete($quotation->qr_code_path);
+        }
+
         $quotation->delete();
 
         return redirect()->route('quotation.index')->with('success', 'Quotation berhasil dihapus.');
@@ -145,9 +157,10 @@ class QuotationController extends Controller
     public function exportPdf(Quotation $quotation)
     {
         $quotation->load(['client', 'items', 'terms']);
-        $scanUrl = route('quotation.public-show', $quotation->id);
+        $qrCodePath = $this->ensureQrCodePath($quotation);
+        $qrBase64 = $this->qrPathToBase64($qrCodePath);
 
-        $pdf = Pdf::loadView('quotation.pdf', compact('quotation', 'scanUrl'))
+        $pdf = Pdf::loadView('quotation.pdf', compact('quotation', 'qrBase64'))
             ->setOptions([
                 'isRemoteEnabled' => true,
                 'isHtml5ParserEnabled' => true,
@@ -169,5 +182,43 @@ class QuotationController extends Controller
 
         return view('quotation.scan', compact('quotation', 'approval'));
     }
-}
 
+    private function ensureQrCodePath(Quotation $quotation, bool $forceRegenerate = false): string
+    {
+        $scanUrl = route('quotation.public-show', $quotation->id);
+        $fileName = 'quotation-' . $quotation->id . '.png';
+        $storagePath = 'quotation/qr/' . $fileName;
+
+        if ($forceRegenerate || !$quotation->qr_code_path || !Storage::disk('public')->exists($quotation->qr_code_path)) {
+            $response = Http::timeout(20)->get('https://api.qrserver.com/v1/create-qr-code/', [
+                'size' => '300x300',
+                'data' => $scanUrl,
+            ]);
+
+            if ($response->failed()) {
+                abort(500, 'Gagal generate QR Code quotation.');
+            }
+
+            Storage::disk('public')->put($storagePath, $response->body());
+
+            $quotation->update([
+                'qr_code_path' => $storagePath,
+            ]);
+
+            return $storagePath;
+        }
+
+        return $quotation->qr_code_path;
+    }
+
+    private function qrPathToBase64(?string $path): string
+    {
+        if (!$path || !Storage::disk('public')->exists($path)) {
+            return '';
+        }
+
+        $content = Storage::disk('public')->get($path);
+
+        return 'data:image/png;base64,' . base64_encode($content);
+    }
+}

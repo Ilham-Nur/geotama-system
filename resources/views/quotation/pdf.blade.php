@@ -107,10 +107,6 @@
 </head>
 
 <body>
-    @php
-        $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . urlencode($scanUrl);
-    @endphp
-
     <div class="page">
         <div class="header-space"></div>
 
@@ -195,7 +191,11 @@
                         PT Geotama Global Intijaya
                     </td>
                     <td width="30%" class="qr-box">
-                        <img src="{{ $qrUrl }}" alt="QR Digital Signature">
+                        @if ($qrBase64)
+                            <img src="{{ $qrBase64 }}" alt="QR Digital Signature">
+                        @else
+                            <div class="muted" style="border:1px solid #ddd; padding: 44px 8px;">QR belum tersedia</div>
+                        @endif
                         <div class="muted">Scan untuk lihat TTD digital</div>
                     </td>
                 </tr>

@@ -11,6 +11,7 @@ class Quotation extends Model
         'tanggal',
         'client_id',
         'grand_total_quo',
+        'qr_code_path',
     ];
 
     protected $casts = [
