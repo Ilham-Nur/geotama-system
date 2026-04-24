@@ -315,6 +315,26 @@ Route::middleware('auth')->group(function () {
     Route::get('/surat-tugas', [SuratTugasController::class, 'index'])
         ->middleware('permission:surat_tugas.view')
         ->name('surat-tugas.index');
+
+    Route::get('/surat-tugas/create', [SuratTugasController::class, 'create'])
+        ->middleware('permission:surat_tugas.create')
+        ->name('surat-tugas.create');
+
+    Route::post('/surat-tugas', [SuratTugasController::class, 'store'])
+        ->middleware('permission:surat_tugas.create')
+        ->name('surat-tugas.store');
+
+    Route::get('/surat-tugas/{suratTugas}/edit', [SuratTugasController::class, 'edit'])
+        ->middleware('permission:surat_tugas.edit')
+        ->name('surat-tugas.edit');
+
+    Route::put('/surat-tugas/{suratTugas}', [SuratTugasController::class, 'update'])
+        ->middleware('permission:surat_tugas.edit')
+        ->name('surat-tugas.update');
+
+    Route::delete('/surat-tugas/{suratTugas}', [SuratTugasController::class, 'destroy'])
+        ->middleware('permission:surat_tugas.delete')
+        ->name('surat-tugas.destroy');
 });
 
 Route::get('/scan/aset/{asset}', [AssetController::class, 'publicShow'])->name('assets.public-show');
