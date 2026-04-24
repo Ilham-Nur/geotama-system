@@ -14,8 +14,7 @@
         <select name="proyek_id" class="form-control @error('proyek_id') is-invalid @enderror" required>
             <option value="">-- Pilih Proyek --</option>
             @foreach ($proyeks as $proyek)
-                <option value="{{ $proyek->id }}"
-                    @selected(old('proyek_id', $suratTugas->proyek_id ?? '') == $proyek->id)>
+                <option value="{{ $proyek->id }}" @selected(old('proyek_id', $suratTugas->proyek_id ?? '') == $proyek->id)>
                     {{ $proyek->no_proyek }}
                 </option>
             @endforeach
@@ -79,25 +78,7 @@
                 <th style="width: 80px;">Aksi</th>
             </tr>
         </thead>
-        <tbody>
-            @php
-                $rows = old('items', $formItems ?? [['deskripsi' => '', 'qty' => 1, 'total' => 0]]);
-            @endphp
-
-            @foreach ($rows as $index => $item)
-                <tr>
-                    <td><input type="text" name="items[{{ $index }}][deskripsi]" class="form-control"
-                            value="{{ $item['deskripsi'] ?? '' }}" required></td>
-                    <td><input type="number" step="0.01" min="0" name="items[{{ $index }}][qty]" class="form-control"
-                            value="{{ $item['qty'] ?? 1 }}" required></td>
-                    <td><input type="number" step="0.01" min="0" name="items[{{ $index }}][total]"
-                            class="form-control input-total" value="{{ $item['total'] ?? 0 }}" required></td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-sm btn-danger btn-remove-item">X</button>
-                    </td>
-                </tr>
-            @endforeach
-        </tbody>
+        <tbody></tbody>
         <tfoot>
             <tr>
                 <th colspan="2" class="text-end">Grand Total</th>
@@ -117,26 +98,59 @@
     <script>
         $(function() {
             const tbody = $('#tableBiayaItem tbody');
+            const fallbackItems = [{
+                deskripsi: '',
+                qty: 1,
+                total: 0
+            }];
+            const initialItems = @json(old('items', $formItems ?? [['deskripsi' => '', 'qty' => 1, 'total' => 0]]));
 
             function formatRupiah(value) {
                 return 'Rp ' + Number(value || 0).toLocaleString('id-ID');
             }
 
+
+            function escapeAttr(value) {
+                return String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+            }
+
             function updateGrandTotal() {
                 let total = 0;
-                $('.input-total').each(function() {
+                tbody.find('.input-total').each(function() {
                     total += parseFloat($(this).val() || 0);
                 });
                 $('#grandTotalText').text(formatRupiah(total));
             }
 
+            function renderRows(items) {
+                tbody.empty();
+
+                const rows = Array.isArray(items) && items.length ? items : fallbackItems;
+
+                rows.forEach((item, index) => {
+                    tbody.append(`
+                        <tr>
+                            <td><input type="text" name="items[${index}][deskripsi]" class="form-control" value="${escapeAttr(item.deskripsi)}" required></td>
+                            <td><input type="number" step="0.01" min="0" name="items[${index}][qty]" class="form-control" value="${escapeAttr(item.qty ?? 1)}" required></td>
+                            <td><input type="number" step="0.01" min="0" name="items[${index}][total]" class="form-control input-total" value="${escapeAttr(item.total ?? 0)}" required></td>
+                            <td class="text-center"><button type="button" class="btn btn-sm btn-danger btn-remove-item">X</button></td>
+                        </tr>
+                    `);
+                });
+
+                updateGrandTotal();
+            }
+
             function reindexItems() {
                 tbody.find('tr').each(function(index) {
                     $(this).find('input').each(function() {
-                        const oldName = $(this).attr('name');
-                        if (!oldName) return;
-                        const newName = oldName.replace(/items\[\d+\]/, `items[${index}]`);
-                        $(this).attr('name', newName);
+                        const name = $(this).attr('name');
+                        if (!name) return;
+                        $(this).attr('name', name.replace(/items\[\d+\]/, `items[${index}]`));
                     });
                 });
             }
@@ -155,9 +169,8 @@
             });
 
             $(document).on('click', '.btn-remove-item', function() {
-                if (tbody.find('tr').length <= 1) {
-                    return;
-                }
+                if (tbody.find('tr').length <= 1) return;
+
                 $(this).closest('tr').remove();
                 reindexItems();
                 updateGrandTotal();
@@ -165,7 +178,7 @@
 
             $(document).on('input', '.input-total', updateGrandTotal);
 
-            updateGrandTotal();
+            renderRows(initialItems);
         });
     </script>
 @endpush
