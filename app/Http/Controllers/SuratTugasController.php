@@ -15,12 +15,17 @@ class SuratTugasController extends Controller
             ->latest()
             ->paginate(10);
 
+        return view('surat-tugas.index', compact('suratTugas'));
+    }
+
+    public function create()
+    {
         $proyekList = Proyek::query()
             ->select(['id', 'no_proyek'])
             ->orderByDesc('id')
             ->get();
 
-        return view('surat-tugas.index', compact('suratTugas', 'proyekList'));
+        return view('surat-tugas.create', compact('proyekList'));
     }
 
     public function store(Request $request)
@@ -53,6 +58,18 @@ class SuratTugasController extends Controller
         });
 
         return redirect()->route('surat-tugas.index')->with('success', 'Surat tugas berhasil ditambahkan.');
+    }
+
+    public function edit(SuratTugas $suratTugas)
+    {
+        $suratTugas->load('biayaItems');
+
+        $proyekList = Proyek::query()
+            ->select(['id', 'no_proyek'])
+            ->orderByDesc('id')
+            ->get();
+
+        return view('surat-tugas.edit', compact('suratTugas', 'proyekList'));
     }
 
     public function update(Request $request, SuratTugas $suratTugas)
