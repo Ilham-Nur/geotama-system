@@ -81,11 +81,14 @@
         </thead>
         <tbody>
             @php
-                $oldItems = old('items');
-                $formItems = $oldItems ?? (($suratTugas?->biayaItems?->toArray()) ?: [['deskripsi' => '', 'qty' => 1, 'total' => 0]]);
+                $defaultItems = [['deskripsi' => '', 'qty' => 1, 'total' => 0]];
+                $existingItems = $suratTugas && $suratTugas->relationLoaded('biayaItems')
+                    ? $suratTugas->biayaItems->toArray()
+                    : [];
+                $items = old('items', !empty($existingItems) ? $existingItems : $defaultItems);
             @endphp
 
-            @foreach ($formItems as $index => $item)
+            @foreach ($items as $index => $item)
                 <tr>
                     <td><input type="text" name="items[{{ $index }}][deskripsi]" class="form-control"
                             value="{{ $item['deskripsi'] ?? '' }}" required></td>
