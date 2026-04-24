@@ -11,7 +11,12 @@ class SuratTugasController extends Controller
 {
     public function index()
     {
-        $suratTugas = SuratTugas::with(['proyek:id,no_proyek', 'biayaItems'])
+        $suratTugas = SuratTugas::with([
+            'biayaItems',
+            'proyek:id,no_proyek,permohonan_id',
+            'proyek.permohonan:id,nama_perusahaan,alamat,lokasi,testuji',
+            'proyek.users:id,name',
+        ])
             ->latest()
             ->paginate(10);
 

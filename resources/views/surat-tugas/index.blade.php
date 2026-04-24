@@ -41,9 +41,7 @@
                                 <th>Tgl Berangkat</th>
                                 <th>Tgl Kembali</th>
                                 <th>Transportasi</th>
-                                <th>Keterangan</th>
                                 <th>Grand Total</th>
-                                <th>Item Biaya</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -54,14 +52,14 @@
                                     <td>{{ $surat->tanggal_berangkat?->format('d-m-Y') }}</td>
                                     <td>{{ $surat->tanggal_kembali?->format('d-m-Y') }}</td>
                                     <td>{{ $surat->transportasi }}</td>
-                                    <td>{{ $surat->keterangan ?? '-' }}</td>
                                     <td>Rp {{ number_format($surat->grand_total, 0, ',', '.') }}</td>
-                                    <td>{{ $surat->biayaItems->count() }} item</td>
                                     <td>
                                         <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
+                                                data-bs-target="#detailSuratModal{{ $surat->id }}">Detail</button>
+
                                             @can('surat_tugas.edit')
-                                                <a href="{{ route('surat-tugas.edit', $surat) }}"
-                                                    class="btn btn-sm btn-warning">Edit</a>
+                                                <a href="{{ route('surat-tugas.edit', $surat) }}" class="btn btn-sm btn-warning">Edit</a>
                                             @endcan
 
                                             @can('surat_tugas.delete')
@@ -77,7 +75,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="text-center text-muted">Belum ada data surat tugas.</td>
+                                    <td colspan="6" class="text-center text-muted">Belum ada data surat tugas.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -90,6 +88,106 @@
             </div>
         </div>
     </div>
+
+    @foreach ($suratTugas as $surat)
+        <div class="modal fade" id="detailSuratModal{{ $surat->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Detail Surat Tugas - {{ $surat->proyek?->no_proyek ?? '-' }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        @php
+                            $permohonan = $surat->proyek?->permohonan;
+                        @endphp
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Nama Perusahaan</label>
+                                <div class="fw-semibold">{{ $permohonan?->nama_perusahaan ?? '-' }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">PC Proyek</label>
+                                <div class="fw-semibold">{{ $surat->proyek?->users?->pluck('name')->join(', ') ?: '-' }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Alamat</label>
+                                <div class="fw-semibold">{{ $permohonan?->alamat ?? '-' }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Lokasi</label>
+                                <div class="fw-semibold">{{ $permohonan?->lokasi ?? '-' }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Test Uji</label>
+                                <div class="fw-semibold">
+                                    @if ($permohonan?->testuji === 'quality_internal')
+                                        Quality Internal
+                                    @elseif ($permohonan?->testuji === 'quality_external')
+                                        Quality External
+                                    @else
+                                        -
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label text-muted">Tanggal Berangkat</label>
+                                <div class="fw-semibold">{{ $surat->tanggal_berangkat?->format('d-m-Y') }}</div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label text-muted">Tanggal Kembali</label>
+                                <div class="fw-semibold">{{ $surat->tanggal_kembali?->format('d-m-Y') }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Transportasi</label>
+                                <div class="fw-semibold">{{ $surat->transportasi }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-muted">Keterangan</label>
+                                <div class="fw-semibold">{{ $surat->keterangan ?? '-' }}</div>
+                            </div>
+                        </div>
+
+                        <h6 class="mb-2">Detail Biaya</h6>
+                        <div class="table-wrapper table-responsive mb-3">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Deskripsi</th>
+                                        <th>Qty</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($surat->biayaItems as $item)
+                                        <tr>
+                                            <td>{{ $item->deskripsi }}</td>
+                                            <td>{{ $item->qty }}</td>
+                                            <td>Rp {{ number_format($item->total, 0, ',', '.') }}</td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted">Belum ada item biaya.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="2" class="text-end">Grand Total</th>
+                                        <th>Rp {{ number_format($surat->grand_total, 0, ',', '.') }}</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
 @endsection
 
 @push('scripts')
