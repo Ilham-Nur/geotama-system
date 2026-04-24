@@ -14,25 +14,27 @@
         }
 
         @page {
-            margin: 120px 25px 90px 25px;
+            margin: 170px 25px 90px 25px;
         }
 
         /* HEADER FIX */
         .header {
             position: fixed;
-            top: -100px;
-            left: 0;
+            top: -170px;
+            left: -180;
             right: 0;
-            height: 100px;
+            height: 140px;
+            width: 180%;
         }
 
         /* FOOTER FIX */
         .footer {
             position: fixed;
             bottom: -70px;
-            left: 0;
+            left: -190;
             right: 0;
-            height: 70px;
+            height: 90px;
+            width: 180%;
         }
 
         /* WATERMARK FIX (NO BACKGROUND!) */
@@ -160,8 +162,8 @@
             return 'data:image/png;base64,' . base64_encode($data);
         }
 
-        $headerBase64 = base64Image('template/assets/header_snipingtool.png');
-        $footerBase64 = base64Image('template/assets/footer_geotama.png');
+        $headerBase64 = base64Image('template/assets/images/header_snipingtool.png');
+        $footerBase64 = base64Image('template/assets/images/footer_snipingtool.png');
         $watermarkBase64 = base64Image('template/assets/images/logo/logo-geotama-removebg-preview.png');
 
     @endphp
@@ -169,14 +171,14 @@
     <!-- HEADER -->
     <div class="header">
         @if ($headerBase64)
-            <img src="{{ $headerBase64 }}" style="width:100%; height:100px; object-fit:cover;">
+            <img src="{{ $headerBase64 }}" style="width:100%; height:110px; object-fit:cover;">
         @endif
     </div>
 
     <!-- FOOTER -->
     <div class="footer">
         @if ($footerBase64)
-            <img src="{{ $footerBase64 }}" style="width:100%; height:70px; object-fit:cover;">
+            <img src="{{ $footerBase64 }}" style="width:100%; height:110px; object-fit:cover;">
         @endif
     </div>
 
