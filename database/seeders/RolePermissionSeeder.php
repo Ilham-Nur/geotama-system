@@ -72,6 +72,13 @@ class RolePermissionSeeder extends Seeder
             'quotation.delete',
             'quotation.export_pdf',
 
+
+            // Surat Tugas
+            'surat_tugas.view',
+            'surat_tugas.create',
+            'surat_tugas.edit',
+            'surat_tugas.delete',
+
             // Assets
             'assets.view',
             'assets.create',
@@ -135,6 +142,11 @@ class RolePermissionSeeder extends Seeder
             'quotation.delete',
             'quotation.export_pdf',
 
+            'surat_tugas.view',
+            'surat_tugas.create',
+            'surat_tugas.edit',
+            'surat_tugas.delete',
+
             'assets.view',
             'assets.create',
             'assets.edit',
@@ -149,11 +161,13 @@ class RolePermissionSeeder extends Seeder
             'proyek.view',
             'invoice.view',
             'pembayaran.view',
+            'surat_tugas.view',
         ]);
 
         $magang->syncPermissions([
             'dashboard.view',
             'pak.view',
+            'surat_tugas.view',
         ]);
     }
 }
