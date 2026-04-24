@@ -94,6 +94,10 @@
     <button type="submit" class="btn btn-primary">Simpan</button>
 </div>
 
+@php
+    $initialItemsForJs = old('items', isset($formItems) ? $formItems : [['deskripsi' => '', 'qty' => 1, 'total' => 0]]);
+@endphp
+
 @push('scripts')
     <script>
         $(function() {
@@ -103,7 +107,7 @@
                 qty: 1,
                 total: 0
             }];
-            const initialItems = @json(old('items', $formItems ?? [['deskripsi' => '', 'qty' => 1, 'total' => 0]]));
+            const initialItems = @json($initialItemsForJs);
 
             function formatRupiah(value) {
                 return 'Rp ' + Number(value || 0).toLocaleString('id-ID');
