@@ -22,7 +22,9 @@ class SuratTugasController extends Controller
     {
         $proyeks = Proyek::orderBy('no_proyek')->get();
 
-        return view('surat-tugas.create', compact('proyeks'));
+        $formItems = [['deskripsi' => '', 'qty' => 1, 'total' => 0]];
+
+        return view('surat-tugas.create', compact('proyeks', 'formItems'));
     }
 
     public function store(Request $request)
@@ -70,7 +72,9 @@ class SuratTugasController extends Controller
         $suratTugas->load('biayaItems');
         $proyeks = Proyek::orderBy('no_proyek')->get();
 
-        return view('surat-tugas.edit', compact('suratTugas', 'proyeks'));
+        $formItems = $suratTugas->biayaItems->toArray();
+
+        return view('surat-tugas.edit', compact('suratTugas', 'proyeks', 'formItems'));
     }
 
     public function update(Request $request, SuratTugas $suratTugas)
