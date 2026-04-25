@@ -21,17 +21,26 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f5f7fb;
             padding: 24px;
+
+            /* BACKGROUND IMAGE */
+            background:
+                url('{{ asset('template/assets/images/backgroundlogin.png') }}');
+
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .auth-card {
             width: 100%;
             max-width: 460px;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
             border-radius: 16px;
             padding: 32px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            color: #fff;
         }
 
         .auth-logo {

@@ -5,8 +5,8 @@
 @section('content')
     <div class="auth-card">
         <div class="auth-logo">
-            <h3>GEOTAMA-SYSTEM</h3>
-            <p>Silakan login untuk masuk ke sistem</p>
+            <h3 class="text-white">GEOTAMA-SYSTEM</h3>
+            <p class="text-white">Silakan login untuk masuk ke sistem</p>
         </div>
 
         @if (session('success'))
