@@ -44,7 +44,7 @@
             left: 45%;
             width: 640px;
             transform: translate(-50%, -50%);
-            opacity: 0.05;
+            opacity: 0.10;
             z-index: -1;
         }
 
@@ -171,7 +171,7 @@
     <!-- HEADER -->
     <div class="header">
         @if ($headerBase64)
-            <img src="{{ $headerBase64 }}" style="width:100%; height:110px; object-fit:cover;">
+            <img src="{{ $headerBase64 }}" style="width:100%; height:140px; object-fit:cover;">
         @endif
     </div>
 
