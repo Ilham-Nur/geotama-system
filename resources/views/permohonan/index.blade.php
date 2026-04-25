@@ -82,7 +82,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($permohonans as $row)
+                            @foreach($permohonans as $row)
                                 <tr>
                                     {{-- <td>{{ $loop->iteration }}</td> --}}
                                     <td>{{ $row->nomor }}</td>
@@ -130,11 +130,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center">Belum ada data permohonan.</td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -147,7 +143,11 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#tablePermohonan').DataTable();
+            $('#tablePermohonan').DataTable({
+                language: {
+                    emptyTable: 'Belum ada data permohonan.'
+                }
+            });
         });
     </script>
 @endpush

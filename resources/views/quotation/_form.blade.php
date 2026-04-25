@@ -1,5 +1,8 @@
 @php
     $isEdit = isset($quotation);
+    $selectedClient = $isEdit ? $quotation->client : null;
+    $selectedClientId = old('client_id', $quotation->client_id ?? '');
+    $clientMode = old('client_mode', $selectedClientId ? 'existing' : 'existing');
 
     $oldItems = old('items');
     if ($oldItems) {
@@ -89,17 +92,75 @@
     </div>
 
     <div class="col-md-12 mb-3">
+        <label class="d-block">Data Client</label>
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="client_mode_switch"
+                {{ $clientMode === 'new' ? 'checked' : '' }}>
+            <label class="form-check-label" for="client_mode_switch">
+                Buat data client baru
+            </label>
+        </div>
+        <input type="hidden" name="client_mode" id="client_mode" value="{{ $clientMode }}">
+    </div>
+
+    <div class="col-md-12 mb-3" id="client_select_wrapper">
         <label class="form-label">Client</label>
         <select name="client_id" id="client_id" class="form-select @error('client_id') is-invalid @enderror">
             <option value="">-- Pilih Client --</option>
             @foreach ($clients as $client)
-                <option value="{{ $client->id }}"
-                    {{ (string) old('client_id', $quotation->client_id ?? '') === (string) $client->id ? 'selected' : '' }}>
+                <option value="{{ $client->id }}" data-nama_perusahaan="{{ $client->nama_perusahaan }}"
+                    data-alamat="{{ $client->alamat }}" data-nama_pic="{{ $client->nama_pic }}"
+                    data-no_telp="{{ $client->no_telp }}" data-email="{{ $client->email }}"
+                    {{ (string) $selectedClientId === (string) $client->id ? 'selected' : '' }}>
                     {{ $client->nama_perusahaan }} - {{ $client->nama_pic }}
                 </option>
             @endforeach
         </select>
         @error('client_id')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label class="form-label">Nama Perusahaan</label>
+        <input type="text" name="nama_perusahaan" class="form-control @error('nama_perusahaan') is-invalid @enderror"
+            value="{{ old('nama_perusahaan', $selectedClient->nama_perusahaan ?? '') }}">
+        @error('nama_perusahaan')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label class="form-label">Nama PIC</label>
+        <input type="text" name="nama_pic" class="form-control @error('nama_pic') is-invalid @enderror"
+            value="{{ old('nama_pic', $selectedClient->nama_pic ?? '') }}">
+        @error('nama_pic')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label class="form-label">No Telp</label>
+        <input type="text" name="no_telp" class="form-control @error('no_telp') is-invalid @enderror"
+            value="{{ old('no_telp', $selectedClient->no_telp ?? '') }}">
+        @error('no_telp')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+            value="{{ old('email', $selectedClient->email ?? '') }}">
+        @error('email')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+
+    <div class="col-md-12 mb-3">
+        <label class="form-label">Alamat Perusahaan</label>
+        <textarea name="alamat" class="form-control @error('alamat') is-invalid @enderror" rows="3">{{ old('alamat', $selectedClient->alamat ?? '') }}</textarea>
+        @error('alamat')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
@@ -236,6 +297,56 @@
                 `;
             }
 
+            function fillClientData() {
+                const clientSelect = document.getElementById('client_id');
+                if (!clientSelect) return;
+                const option = clientSelect.options[clientSelect.selectedIndex];
+                if (!option || !option.value) return;
+
+                ['nama_perusahaan', 'alamat', 'nama_pic', 'no_telp', 'email'].forEach(function(field) {
+                    const el = document.querySelector(`[name="${field}"]`);
+                    if (el) {
+                        el.value = option.dataset[field] || '';
+                    }
+                });
+            }
+
+            function toggleClientMode() {
+                const hiddenClientMode = document.getElementById('client_mode');
+                const clientSwitch = document.getElementById('client_mode_switch');
+                const mode = hiddenClientMode?.value || (clientSwitch?.checked ? 'new' : 'existing');
+                const isExisting = mode === 'existing';
+                const clientSelect = document.getElementById('client_id');
+                const clientSelectWrapper = document.getElementById('client_select_wrapper');
+                const fields = ['nama_perusahaan', 'alamat', 'nama_pic', 'no_telp', 'email'];
+
+                if (clientSelect) {
+                    clientSelect.disabled = !isExisting;
+                }
+                if (clientSelectWrapper) {
+                    clientSelectWrapper.style.display = isExisting ? 'block' : 'none';
+                }
+
+                fields.forEach(function(fieldName) {
+                    const field = document.querySelector(`[name="${fieldName}"]`);
+                    if (!field) return;
+                    field.readOnly = isExisting;
+                    field.classList.toggle('bg-light', isExisting);
+                });
+
+                if (isExisting) {
+                    fillClientData();
+                }
+            }
+
+            function syncClientModeFromSwitch() {
+                const clientSwitch = document.getElementById('client_mode_switch');
+                const hiddenClientMode = document.getElementById('client_mode');
+                if (!clientSwitch || !hiddenClientMode) return;
+                hiddenClientMode.value = clientSwitch.checked ? 'new' : 'existing';
+                toggleClientMode();
+            }
+
             $('#btn-add-item').on('click', function() {
                 const index = itemTableBody.find('tr').length;
                 itemTableBody.append(getItemRow(index));
@@ -310,6 +421,9 @@
                 });
             });
 
+            $('#client_mode_switch').on('change', syncClientModeFromSwitch);
+            $('#client_id').on('change', fillClientData);
+            toggleClientMode();
             refreshGrandTotal();
         });
     </script>

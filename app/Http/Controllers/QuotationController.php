@@ -8,6 +8,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class QuotationController extends Controller
@@ -41,6 +42,12 @@ class QuotationController extends Controller
             'no_quo' => ['required', 'string', 'max:255', 'unique:quotations,no_quo'],
             'tanggal' => ['required', 'date'],
             'client_id' => ['nullable', 'exists:clients,id'],
+            'client_mode' => ['nullable', 'in:new,existing'],
+            'nama_perusahaan' => ['required_without:client_id', 'nullable', 'string', 'max:255'],
+            'alamat' => ['required_without:client_id', 'nullable', 'string'],
+            'nama_pic' => ['required_without:client_id', 'nullable', 'string', 'max:255'],
+            'no_telp' => ['required_without:client_id', 'nullable', 'string', 'max:30'],
+            'email' => ['required_without:client_id', 'nullable', 'email', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.description' => ['required', 'string'],
             'items.*.satuan' => ['nullable', 'string', 'max:100'],
@@ -50,7 +57,9 @@ class QuotationController extends Controller
             'terms.*.name' => ['required', 'string', 'max:255'],
         ]);
 
-        $quotation = DB::transaction(function () use ($validated) {
+        $client = $this->resolveClient($request);
+
+        $quotation = DB::transaction(function () use ($validated, $client) {
             $grandTotal = collect($validated['items'])->sum(function ($item) {
                 return (float) $item['total'];
             });
@@ -58,7 +67,7 @@ class QuotationController extends Controller
             $quotation = Quotation::create([
                 'no_quo' => $validated['no_quo'],
                 'tanggal' => $validated['tanggal'],
-                'client_id' => $validated['client_id'] ?? null,
+                'client_id' => $client?->id,
                 'grand_total_quo' => $grandTotal,
             ]);
 
@@ -99,6 +108,12 @@ class QuotationController extends Controller
             'no_quo' => ['required', 'string', 'max:255', 'unique:quotations,no_quo,' . $quotation->id],
             'tanggal' => ['required', 'date'],
             'client_id' => ['nullable', 'exists:clients,id'],
+            'client_mode' => ['nullable', 'in:new,existing'],
+            'nama_perusahaan' => ['required_without:client_id', 'nullable', 'string', 'max:255'],
+            'alamat' => ['required_without:client_id', 'nullable', 'string'],
+            'nama_pic' => ['required_without:client_id', 'nullable', 'string', 'max:255'],
+            'no_telp' => ['required_without:client_id', 'nullable', 'string', 'max:30'],
+            'email' => ['required_without:client_id', 'nullable', 'email', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.description' => ['required', 'string'],
             'items.*.satuan' => ['nullable', 'string', 'max:100'],
@@ -108,7 +123,9 @@ class QuotationController extends Controller
             'terms.*.name' => ['required', 'string', 'max:255'],
         ]);
 
-        DB::transaction(function () use ($validated, $quotation) {
+        $client = $this->resolveClient($request);
+
+        DB::transaction(function () use ($validated, $quotation, $client) {
             $grandTotal = collect($validated['items'])->sum(function ($item) {
                 return (float) $item['total'];
             });
@@ -116,7 +133,7 @@ class QuotationController extends Controller
             $quotation->update([
                 'no_quo' => $validated['no_quo'],
                 'tanggal' => $validated['tanggal'],
-                'client_id' => $validated['client_id'] ?? null,
+                'client_id' => $client?->id,
                 'grand_total_quo' => $grandTotal,
             ]);
 
@@ -218,5 +235,36 @@ class QuotationController extends Controller
         $mime = str_ends_with(strtolower($path), '.svg') ? 'image/svg+xml' : 'image/png';
 
         return 'data:' . $mime . ';base64,' . base64_encode($content);
+    }
+
+    private function resolveClient(Request $request): ?Client
+    {
+        if ($request->filled('client_id')) {
+            return Client::findOrFail($request->client_id);
+        }
+
+        if ($request->input('client_mode') === 'existing') {
+            throw ValidationException::withMessages([
+                'client_id' => 'Silakan pilih client terlebih dahulu.',
+            ]);
+        }
+
+        if (
+            !$request->filled('nama_perusahaan')
+            && !$request->filled('nama_pic')
+            && !$request->filled('no_telp')
+            && !$request->filled('email')
+            && !$request->filled('alamat')
+        ) {
+            return null;
+        }
+
+        return Client::create([
+            'nama_perusahaan' => $request->nama_perusahaan,
+            'alamat' => $request->alamat,
+            'nama_pic' => $request->nama_pic,
+            'no_telp' => $request->no_telp,
+            'email' => $request->email,
+        ]);
     }
 }

@@ -53,7 +53,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($quotations as $quotation)
+                            @foreach ($quotations as $quotation)
                                 <tr>
                                     <td>{{ $quotation->no_quo }}</td>
                                     <td>{{ optional($quotation->tanggal)->format('d-m-Y') }}</td>
@@ -89,11 +89,7 @@
                                         </div>
                                     </td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center">Belum ada data quotation.</td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -105,7 +101,11 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#tableQuotation').DataTable();
+            $('#tableQuotation').DataTable({
+                language: {
+                    emptyTable: 'Belum ada data quotation.'
+                }
+            });
 
             $('.btn-delete-quotation').on('click', function(e) {
                 e.preventDefault();

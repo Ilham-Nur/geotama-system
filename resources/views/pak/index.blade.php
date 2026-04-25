@@ -81,7 +81,7 @@
                     </thead>
 
                     <tbody>
-                        @forelse($paks as $row)
+                        @foreach($paks as $row)
                             @php
                                 $raw = $row->permohonan_data;
 
@@ -175,13 +175,7 @@
 
                             </tr>
 
-                        @empty
-                            <tr>
-                                <td colspan="8" class="text-center text-muted">
-                                    Tidak ada data PAK
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
 
                 </table>
@@ -199,7 +193,11 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#tablePAK').DataTable();
+            $('#tablePAK').DataTable({
+                language: {
+                    emptyTable: 'Tidak ada data PAK'
+                }
+            });
         });
 
 
