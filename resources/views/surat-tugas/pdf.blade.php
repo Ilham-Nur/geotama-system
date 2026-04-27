@@ -17,9 +17,20 @@
             margin: 0;
         }
 
+        .watermark {
+            position: fixed;
+            top: 29%;
+            left: 45%;
+            width: 640px;
+            transform: translate(-50%, -50%);
+            opacity: 0.10;
+            z-index: -1;
+        }
+
         .first-page {
             min-height: 1120px;
             position: relative;
+            z-index: 1;
         }
 
         .first-header img {
@@ -263,11 +274,19 @@
 
         $headerBase64 = localBase64Image('template/assets/images/header_snipingtool.png');
         $footerBase64 = localBase64Image('template/assets/images/footer_snipingtool-removebg.png');
+        $watermarkBase64 = localBase64Image('template/assets/images/logo/logo-geotama-removebg-preview.png');
         $permohonan = $suratTugas->proyek?->permohonan;
         $pics = $suratTugas->proyek?->users ?? collect();
     @endphp
 
     <div class="first-page">
+        <!-- WATERMARK -->
+        @if ($watermarkBase64)
+            <img src="{{ $watermarkBase64 }}" class="watermark">
+        @endif
+
+
+
         <div class="first-header">
             @if ($headerBase64)
                 <img src="{{ $headerBase64 }}" alt="Header">
