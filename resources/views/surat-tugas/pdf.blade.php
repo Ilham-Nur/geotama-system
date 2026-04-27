@@ -23,7 +23,7 @@
 
         .first-header img {
             width: 100%;
-            height: 115px;
+            height: 140px;
             object-fit: cover;
         }
 
@@ -36,12 +36,12 @@
 
         .first-footer img {
             width: 100%;
-            height: 85px;
+            height: 110px;
             object-fit: cover;
         }
 
         .first-content {
-            padding: 18px 6px 120px;
+            padding: 18px 6px 140px;
         }
 
         h1,
@@ -119,19 +119,12 @@
             padding: 0 4px 10px;
         }
 
-        .account-header img {
-            width: 100%;
-            height: 95px;
-            object-fit: cover;
-            margin-bottom: 10px;
-        }
-
         .account-title {
             text-align: center;
             font-size: 13px;
             letter-spacing: .4px;
             font-weight: bold;
-            margin: 4px 0 8px;
+            margin: 8px 0 8px;
         }
 
         .account-title-line {
@@ -264,7 +257,6 @@
 
         $headerBase64 = localBase64Image('template/assets/images/header_snipingtool.png');
         $footerBase64 = localBase64Image('template/assets/images/footer_snipingtool-removebg.png');
-        $accountHeaderBase64 = localBase64Image('template/assets/images/header_snipingtool.png');
         $permohonan = $suratTugas->proyek?->permohonan;
         $pics = $suratTugas->proyek?->users ?? collect();
     @endphp
@@ -337,11 +329,6 @@
             $namaProyek = $permohonan?->nama_proyek ?? '-';
         @endphp
         <div class="page-break account-page">
-            <div class="account-header">
-                @if ($accountHeaderBase64)
-                    <img src="{{ $accountHeaderBase64 }}" alt="Header Pertanggungjawaban">
-                @endif
-            </div>
             <div class="account-title">PERTANGGUNG JAWABAN<br>PELAKSANAAN PERJALANAN SURVEY</div>
             <div class="account-title-line"></div>
 
