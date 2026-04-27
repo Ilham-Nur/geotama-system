@@ -116,14 +116,51 @@
         }
 
         .account-page {
-            padding: 10px 4px;
+            padding: 0 4px 10px;
+        }
+
+        .account-header img {
+            width: 100%;
+            height: 95px;
+            object-fit: cover;
+            margin-bottom: 10px;
         }
 
         .account-title {
             text-align: center;
-            font-size: 16px;
+            font-size: 13px;
+            letter-spacing: .4px;
             font-weight: bold;
-            margin-bottom: 14px;
+            margin: 4px 0 8px;
+        }
+
+        .account-title-line {
+            border-top: 2px solid #7a8ea5;
+            margin-bottom: 12px;
+        }
+
+        .statement-table td {
+            padding: 4px 0;
+            vertical-align: top;
+            font-size: 11px;
+        }
+
+        .statement-table .no {
+            width: 6%;
+            text-align: center;
+        }
+
+        .statement-table .field {
+            width: 38%;
+        }
+
+        .statement-table .colon {
+            width: 4%;
+            text-align: center;
+        }
+
+        .statement-table .content {
+            width: 52%;
         }
 
         table {
@@ -131,15 +168,40 @@
             border-collapse: collapse;
         }
 
-        .biaya-table th,
-        .biaya-table td {
-            border: 1px solid #777;
-            padding: 6px;
+        .biaya-list {
+            margin-top: 4px;
         }
 
-        .biaya-table th {
-            background: #f3f3f3;
+        .biaya-list td {
+            padding: 2px 0;
+            font-size: 11px;
+        }
+
+        .biaya-list .dash {
+            width: 4%;
             text-align: center;
+        }
+
+        .biaya-list .item-name {
+            width: 54%;
+        }
+
+        .biaya-list .rp {
+            width: 8%;
+            text-align: center;
+        }
+
+        .biaya-list .amount {
+            width: 34%;
+            text-align: right;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+
+        .summary-line {
+            border-top: 1.5px solid #777;
+            margin-top: 4px;
+            padding-top: 4px;
         }
 
         .text-right {
@@ -147,7 +209,7 @@
         }
 
         .terbilang {
-            margin-top: 8px;
+            margin-top: 12px;
             font-weight: bold;
         }
 
@@ -202,6 +264,7 @@
 
         $headerBase64 = localBase64Image('template/assets/images/header_snipingtool.png');
         $footerBase64 = localBase64Image('template/assets/images/footer_snipingtool-removebg.png');
+        $accountHeaderBase64 = localBase64Image('template/assets/images/header_snipingtool.png');
         $permohonan = $suratTugas->proyek?->permohonan;
         $pics = $suratTugas->proyek?->users ?? collect();
     @endphp
@@ -274,45 +337,89 @@
             $namaProyek = $permohonan?->nama_proyek ?? '-';
         @endphp
         <div class="page-break account-page">
+            <div class="account-header">
+                @if ($accountHeaderBase64)
+                    <img src="{{ $accountHeaderBase64 }}" alt="Header Pertanggungjawaban">
+                @endif
+            </div>
             <div class="account-title">PERTANGGUNG JAWABAN<br>PELAKSANAAN PERJALANAN SURVEY</div>
+            <div class="account-title-line"></div>
 
-            <div class="section"><span class="label">Nama</span><span class="value">: {{ $pic->name }}</span></div>
-            <div class="section"><span class="label">No Surat Tugas</span><span class="value">: {{ $suratTugas->id }}-{{ $suffix }}</span></div>
-            <div class="section"><span class="label">Tugas ke</span><span class="value">: {{ $permohonan?->lokasi ?? '-' }}</span></div>
-            <div class="section"><span class="label">Berangkat</span><span class="value">: {{ optional($suratTugas->tanggal_berangkat)->format('d-m-Y') }}</span></div>
-            <div class="section"><span class="label">Kembali</span><span class="value">: {{ optional($suratTugas->tanggal_kembali)->format('d-m-Y') }}</span></div>
-            <div class="section"><span class="label">Telah dilaksanakan survey</span><span class="value">: Pengujian NDT ({{ $namaPerusahaan }} - {{ $namaProyek }})</span></div>
-
-            <table class="biaya-table" style="margin-top: 12px;">
-                <thead>
-                    <tr>
-                        <th width="8%">No</th>
-                        <th>Rincian Biaya</th>
-                        <th width="12%">Qty</th>
-                        <th width="25%">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($suratTugas->biayaItems as $item)
-                        <tr>
-                            <td class="text-right">{{ $loop->iteration }}</td>
-                            <td>{{ $item->deskripsi }}</td>
-                            <td class="text-right">{{ $item->qty }}</td>
-                            <td class="text-right">Rp {{ number_format((float) $item->total, 0, ',', '.') }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="text-right">Tidak ada rincian biaya.</td>
-                        </tr>
-                    @endforelse
-                    <tr>
-                        <td colspan="3" class="text-right"><strong>Grand Total</strong></td>
-                        <td class="text-right"><strong>Rp {{ number_format((float) $suratTugas->grand_total, 0, ',', '.') }}</strong></td>
-                    </tr>
-                </tbody>
+            <table class="statement-table">
+                <tr>
+                    <td class="no">1</td>
+                    <td class="field">Nama</td>
+                    <td class="colon">:</td>
+                    <td class="content">{{ $pic->name }}</td>
+                </tr>
+                <tr>
+                    <td class="no">2</td>
+                    <td class="field">No. Surat Tugas</td>
+                    <td class="colon">:</td>
+                    <td class="content">{{ $suffix }}. {{ $suratTugas->id }}</td>
+                </tr>
+                <tr>
+                    <td class="no">3</td>
+                    <td class="field">Tugas ke</td>
+                    <td class="colon">:</td>
+                    <td class="content">{{ $permohonan?->lokasi ?? '-' }}</td>
+                </tr>
+                <tr>
+                    <td class="no">4</td>
+                    <td class="field">Berangkat Tanggal</td>
+                    <td class="colon">:</td>
+                    <td class="content">{{ optional($suratTugas->tanggal_berangkat)->translatedFormat('d F Y') }}</td>
+                </tr>
+                <tr>
+                    <td class="no">5</td>
+                    <td class="field">Kembali Tanggal</td>
+                    <td class="colon">:</td>
+                    <td class="content">{{ optional($suratTugas->tanggal_kembali)->translatedFormat('d F Y') }}</td>
+                </tr>
+                <tr>
+                    <td class="no">6</td>
+                    <td class="field">Telah dilaksanakan Survey</td>
+                    <td class="colon">:</td>
+                    <td class="content"><strong>Pengujian NDT {{ $namaPerusahaan }} ({{ $namaProyek }})</strong></td>
+                </tr>
+                <tr>
+                    <td class="no">7</td>
+                    <td class="field">Terlampir Form ST</td>
+                    <td class="colon">:</td>
+                    <td class="content">Form ST-1 / Form ST-2 yang telah diisi oleh petugas</td>
+                </tr>
+                <tr>
+                    <td class="no">8</td>
+                    <td class="field">Perincian biaya dikeluarkan</td>
+                    <td class="colon">:</td>
+                    <td class="content">
+                        <table class="biaya-list">
+                            @forelse ($suratTugas->biayaItems as $item)
+                                <tr>
+                                    <td class="dash">-</td>
+                                    <td class="item-name">{{ $item->deskripsi }}</td>
+                                    <td class="rp">Rp</td>
+                                    <td class="amount">{{ number_format((float) $item->total, 2, ',', '.') }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td class="dash">-</td>
+                                    <td class="item-name">Belum ada rincian biaya</td>
+                                    <td class="rp"></td>
+                                    <td class="amount">0,00</td>
+                                </tr>
+                            @endforelse
+                            <tr>
+                                <td colspan="2" class="text-right summary-line"><strong>Jumlah</strong></td>
+                                <td class="rp summary-line">Rp</td>
+                                <td class="amount summary-line"><strong>{{ number_format((float) $suratTugas->grand_total, 2, ',', '.') }}</strong></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
             </table>
 
-            <div class="terbilang">Terbilang: {{ ucwords(Terbilang::make($suratTugas->grand_total)) }} Rupiah</div>
+            <div class="terbilang">Terbilang : <em>{{ strtoupper(Terbilang::make($suratTugas->grand_total)) }} RUPIAH</em></div>
 
             <div class="sign">
                 <div class="right">
