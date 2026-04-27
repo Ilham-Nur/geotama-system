@@ -4,19 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Surat Tugas {{ $suratTugas->id }}</title>
+
     <style>
         @page {
             margin: 170px 25px 90px 25px;
         }
 
-
         body {
             font-family: DejaVu Sans, sans-serif;
+            font-size: 13px;
             color: #222;
-            font-size: 11px;
             margin: 0;
         }
 
+        /* WATERMARK */
         .watermark {
             position: fixed;
             top: 29%;
@@ -27,27 +28,22 @@
             z-index: -1;
         }
 
-        .first-page {
-            min-height: 1120px;
-            position: relative;
-            z-index: 1;
-        }
-
+        /* HEADER (FIXED - VERSI BENAR) */
         .first-header img {
             position: fixed;
             top: -170px;
-            left: -180;
+            left: -240px;
             right: 0;
-            height: 140px;
             width: 180%;
+            height: 140px;
         }
 
+        /* FOOTER (FIXED - VERSI BENAR) */
         .first-footer {
             position: fixed;
             bottom: -70px;
-            left: -190;
+            left: -190px;
             right: 0;
-            height: 90px;
             width: 180%;
         }
 
@@ -58,39 +54,31 @@
         }
 
         .first-content {
-            padding: 18px 6px 140px;
+            padding: 30px 40px 140px;
         }
 
-        h1,
-        h2,
-        h3,
-        h4,
-        p {
-            margin: 0;
-        }
-
+        /* TITLE */
         .title {
             text-align: center;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
-            margin-bottom: 20px;
+            letter-spacing: 3px;
+            margin-bottom: 25px;
         }
 
         .section {
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .label {
-            font-weight: bold;
-            width: 150px;
             display: inline-block;
+            width: 180px;
             vertical-align: top;
         }
 
         .value {
             display: inline-block;
-            width: calc(100% - 160px);
-            vertical-align: top;
+            width: calc(100% - 170px);
         }
 
         .list-pic {
@@ -98,79 +86,41 @@
             padding-left: 18px;
         }
 
-        .list-pic li {
-            margin-bottom: 4px;
+        /* SIGNATURE */
+        .sign {
+            margin-top: 70px;
+            width: 100%;
         }
 
-        .barcode-box {
-            margin-top: 18px;
-            border: 1px solid #d8d8d8;
-            border-radius: 8px;
-            padding: 10px;
+        .sign .right {
+            width: 40%;
+            margin-left: auto;
+            text-align: left;
         }
 
-        .barcode-img {
-            margin-top: 10px;
-            text-align: center;
+        .name {
+            margin-top: 40px;
+            font-weight: bold;
+            text-decoration: underline;
         }
 
-        .barcode-img img {
-            width: 110px;
-            height: 110px;
-            border: 1px solid #d8d8d8;
-            padding: 4px;
-        }
-
-        .barcode-note {
-            margin-top: 8px;
-            text-align: center;
-            font-size: 10px;
-            color: #666;
-        }
-
+        /* PAGE BREAK */
         .page-break {
             page-break-before: always;
+            padding: 20px 40px;
         }
 
-        .account-page {
-            padding: 0 4px 10px;
-        }
-
+        /* HALAMAN 2 */
         .account-title {
             text-align: center;
-            font-size: 13px;
-            letter-spacing: .4px;
+            font-size: 15px;
             font-weight: bold;
-            margin: 8px 0 8px;
+            margin: 10px 0;
         }
 
         .account-title-line {
-            border-top: 2px solid #7a8ea5;
-            margin-bottom: 12px;
-        }
-
-        .statement-table td {
-            padding: 4px 0;
-            vertical-align: top;
-            font-size: 11px;
-        }
-
-        .statement-table .no {
-            width: 6%;
-            text-align: center;
-        }
-
-        .statement-table .field {
-            width: 38%;
-        }
-
-        .statement-table .colon {
-            width: 4%;
-            text-align: center;
-        }
-
-        .statement-table .content {
-            width: 52%;
+            border-top: 2px solid #000;
+            margin-bottom: 15px;
         }
 
         table {
@@ -178,190 +128,193 @@
             border-collapse: collapse;
         }
 
-        .biaya-list {
-            margin-top: 4px;
+        .statement-table td {
+            padding: 8px 0;
+            vertical-align: top;
         }
 
-        .biaya-list td {
-            padding: 2px 0;
-            font-size: 11px;
+        .no {
+            width: 6%;
+            text-align: center;
         }
 
-        .biaya-list .dash {
+        .field {
+            width: 38%;
+        }
+
+        .colon {
             width: 4%;
             text-align: center;
         }
 
-        .biaya-list .item-name {
+        .content {
+            width: 52%;
+        }
+
+        /* BIAYA */
+        .biaya-list td {
+            padding: 3px 0;
+        }
+
+        .dash {
+            width: 4%;
+        }
+
+        .item-name {
             width: 54%;
         }
 
-        .biaya-list .rp {
+        .rp {
             width: 8%;
             text-align: center;
         }
 
-        .biaya-list .amount {
+        .amount {
             width: 34%;
             text-align: right;
-            text-decoration: underline;
-            font-weight: 500;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
         }
 
         .summary-line {
-            border-top: 1.5px solid #777;
-            margin-top: 4px;
-            padding-top: 4px;
-        }
-
-        .text-right {
-            text-align: right;
+            border-top: 2px solid #000;
         }
 
         .terbilang {
-            margin-top: 12px;
+            margin-top: 15px;
             font-weight: bold;
-        }
-
-        .sign {
-            margin-top: 30px;
-            width: 100%;
-        }
-
-        .sign .right {
-            width: 45%;
-            margin-left: auto;
-            text-align: left;
-        }
-
-        .name {
-            margin-top: 60px;
-            font-weight: bold;
-            text-decoration: underline;
         }
     </style>
 </head>
 
 <body>
+
     @php
         use App\Support\Terbilang;
 
-        function localBase64Image($relativePath)
+        function localBase64Image($path)
         {
-            $fullPath = public_path($relativePath);
-
+            $fullPath = public_path($path);
             if (!file_exists($fullPath)) {
                 return null;
             }
-
-            $img = imagecreatefromstring(file_get_contents($fullPath));
-
-            if (!$img) {
-                return null;
-            }
-
-            imagealphablending($img, false);
-            imagesavealpha($img, true);
-
-            ob_start();
-            imagepng($img);
-            $data = ob_get_clean();
-
-            imagedestroy($img);
-
-            return 'data:image/png;base64,' . base64_encode($data);
+            return 'data:image/png;base64,' . base64_encode(file_get_contents($fullPath));
         }
 
         $headerBase64 = localBase64Image('template/assets/images/header_snipingtool.png');
         $footerBase64 = localBase64Image('template/assets/images/footer_snipingtool-removebg.png');
         $watermarkBase64 = localBase64Image('template/assets/images/logo/logo-geotama-removebg-preview.png');
+
         $permohonan = $suratTugas->proyek?->permohonan;
         $pics = $suratTugas->proyek?->users ?? collect();
     @endphp
 
+    <!-- ================= HALAMAN 1 ================= -->
     <div class="first-page">
-        <!-- WATERMARK -->
+
         @if ($watermarkBase64)
             <img src="{{ $watermarkBase64 }}" class="watermark">
         @endif
 
-
-
         <div class="first-header">
             @if ($headerBase64)
-                <img src="{{ $headerBase64 }}" alt="Header">
+                <img src="{{ $headerBase64 }}">
             @endif
         </div>
 
         <div class="first-content">
+
             <div class="title">SURAT TUGAS</div>
 
-            <div class="section">
-                <span class="label">Ditugaskan kepada</span>
-                <span class="value">:
-                    <ol class="list-pic">
-                        @forelse($pics as $pic)
-                            <li>
-                                {{ $pic->name }}
-                                @if ($pic->employee?->position)
-                                    ({{ $pic->employee->position }})
-                                @endif
-                            </li>
-                        @empty
-                            <li>-</li>
-                        @endforelse
-                    </ol>
-                </span>
-            </div>
+            <table style="width:100%; border-collapse:collapse; font-size:13px;">
 
-            <div class="section"><span class="label">Untuk pergi ke</span><span class="value">:
-                    {{ $permohonan?->lokasi ?? '-' }}</span></div>
-            <div class="section"><span class="label">Keperluan dinas survey</span><span class="value">: Pengujian NDT
-                    {{ $permohonan?->nama_perusahaan ? '(' . $permohonan->nama_perusahaan . ' - ' . ($permohonan->nama_proyek ?? '-') . ')' : '' }}</span>
-            </div>
-            <div class="section"><span class="label">Berangkat</span><span class="value">:
-                    {{ optional($suratTugas->tanggal_berangkat)->format('d-m-Y') }}</span></div>
-            <div class="section"><span class="label">Kembali</span><span class="value">:
-                    {{ optional($suratTugas->tanggal_kembali)->format('d-m-Y') }}</span></div>
-            <div class="section"><span class="label">Sarana transportasi</span><span class="value">:
-                    {{ $suratTugas->transportasi }}</span></div>
-            <div class="section"><span class="label">Keterangan</span><span class="value">:
-                    {{ $suratTugas->keterangan ?? '-' }}</span></div>
+                <tr>
+                    <td style="width:30%; vertical-align:top;">Ditugaskan kepada</td>
+                    <td style="width:3%;">:</td>
+                    <td>
+                        @foreach ($pics as $pic)
+                            {{ $pic->name }}@if (!$loop->last)
+                                ,
+                            @endif
+                        @endforeach
+                    </td>
+                </tr>
 
-            <div class="barcode-box">
-                <div><strong>Dikeluarkan di</strong> : Batam</div>
-                <div><strong>Pada tanggal</strong> : {{ optional($suratTugas->created_at)->format('d F Y') }}</div>
-                <div><strong>PT. GEOTAMA GLOBAL INTI JAYA</strong></div>
+                <tr>
+                    <td>Untuk pergi ke</td>
+                    <td>:</td>
+                    <td>{{ $permohonan->lokasi ?? '-' }}</td>
+                </tr>
 
-                <div class="barcode-img">
+                <tr>
+                    <td>Keperluan</td>
+                    <td>:</td>
+                    <td>Pengujian NDT {{ $permohonan->nama_perusahaan ?? '' }}</td>
+                </tr>
+
+                <tr>
+                    <td>Berangkat</td>
+                    <td>:</td>
+                    <td>{{ optional($suratTugas->tanggal_berangkat)->format('d F Y') }}</td>
+                </tr>
+
+                <tr>
+                    <td>Kembali</td>
+                    <td>:</td>
+                    <td>{{ optional($suratTugas->tanggal_kembali)->format('d F Y') }}</td>
+                </tr>
+
+                <tr>
+                    <td>Transportasi</td>
+                    <td>:</td>
+                    <td>{{ $suratTugas->transportasi }}</td>
+                </tr>
+
+                <tr>
+                    <td>Keterangan</td>
+                    <td>:</td>
+                    <td>{{ $suratTugas->keterangan }}</td>
+                </tr>
+
+            </table>
+
+            <!-- SIGN + BARCODE -->
+            <div class="sign">
+                <div class="right">
+                    Dikeluarkan di : Batam<br>
+                    Pada Tanggal : {{ optional($suratTugas->created_at)->format('d F Y') }}<br>
+                    <strong>PT. GEOTAMA GLOBAL INTI JAYA</strong>
+
+                    <br><br>
+
                     @if ($qrBase64)
-                        <img src="{{ $qrBase64 }}" alt="Barcode Surat Tugas">
-                    @else
-                        <div>[BARCODE]</div>
+                        <img src="{{ $qrBase64 }}" style="width:90px;">
                     @endif
-                </div>
 
-                <div class="barcode-note">
-                    Scan barcode untuk melihat halaman tanda tangan digital surat tugas.
+                    <div class="name">WAHYUDI KUSUMA</div>
+                    <div style="font-size:10px;">DIRECTOR</div>
                 </div>
             </div>
+
         </div>
 
         <div class="first-footer">
             @if ($footerBase64)
-                <img src="{{ $footerBase64 }}" alt="Footer">
+                <img src="{{ $footerBase64 }}">
             @endif
         </div>
+
     </div>
 
+    <!-- ================= HALAMAN 2 ================= -->
     @foreach ($pics as $pic)
-        @php
-            $suffix = chr(64 + $loop->iteration);
-            $namaPerusahaan = $permohonan?->nama_perusahaan ?? '-';
-            $namaProyek = $permohonan?->nama_proyek ?? '-';
-        @endphp
-        <div class="page-break account-page">
-            <div class="account-title">PERTANGGUNG JAWABAN<br>PELAKSANAAN PERJALANAN SURVEY</div>
+        <div class="page-break">
+
+            <div class="account-title">
+                PERTANGGUNG JAWABAN<br>
+                PELAKSANAAN PERJALANAN SURVEY
+            </div>
+
             <div class="account-title-line"></div>
 
             <table class="statement-table">
@@ -373,67 +326,55 @@
                 </tr>
                 <tr>
                     <td class="no">2</td>
-                    <td class="field">No. Surat Tugas</td>
+                    <td class="field">No Surat</td>
                     <td class="colon">:</td>
-                    <td class="content">{{ $suffix }}. {{ $suratTugas->id }}</td>
+                    <td class="content">{{ $suratTugas->id }}</td>
                 </tr>
                 <tr>
                     <td class="no">3</td>
                     <td class="field">Tugas ke</td>
                     <td class="colon">:</td>
-                    <td class="content">{{ $permohonan?->lokasi ?? '-' }}</td>
+                    <td class="content">{{ $permohonan->lokasi ?? '-' }}</td>
                 </tr>
                 <tr>
                     <td class="no">4</td>
-                    <td class="field">Berangkat Tanggal</td>
+                    <td class="field">Berangkat</td>
                     <td class="colon">:</td>
-                    <td class="content">{{ optional($suratTugas->tanggal_berangkat)->translatedFormat('d F Y') }}</td>
+                    <td class="content">{{ optional($suratTugas->tanggal_berangkat)->format('d F Y') }}</td>
                 </tr>
                 <tr>
                     <td class="no">5</td>
-                    <td class="field">Kembali Tanggal</td>
+                    <td class="field">Kembali</td>
                     <td class="colon">:</td>
-                    <td class="content">{{ optional($suratTugas->tanggal_kembali)->translatedFormat('d F Y') }}</td>
+                    <td class="content">{{ optional($suratTugas->tanggal_kembali)->format('d F Y') }}</td>
                 </tr>
                 <tr>
                     <td class="no">6</td>
-                    <td class="field">Telah dilaksanakan Survey</td>
+                    <td class="field">Survey</td>
                     <td class="colon">:</td>
-                    <td class="content"><strong>Pengujian NDT {{ $namaPerusahaan }} ({{ $namaProyek }})</strong>
-                    </td>
+                    <td class="content"><strong>Pengujian NDT {{ $permohonan->nama_perusahaan }}</strong></td>
                 </tr>
-                <tr>
-                    <td class="no">7</td>
-                    <td class="field">Terlampir Form ST</td>
-                    <td class="colon">:</td>
-                    <td class="content">Form ST-1 / Form ST-2 yang telah diisi oleh petugas</td>
-                </tr>
+
                 <tr>
                     <td class="no">8</td>
-                    <td class="field">Perincian biaya dikeluarkan</td>
+                    <td class="field">Biaya</td>
                     <td class="colon">:</td>
                     <td class="content">
                         <table class="biaya-list">
-                            @forelse ($suratTugas->biayaItems as $item)
+                            @foreach ($suratTugas->biayaItems as $item)
                                 <tr>
                                     <td class="dash">-</td>
                                     <td class="item-name">{{ $item->deskripsi }}</td>
                                     <td class="rp">Rp</td>
-                                    <td class="amount">{{ number_format((float) $item->total, 2, ',', '.') }}</td>
+                                    <td class="amount">{{ number_format($item->total, 2, ',', '.') }}</td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td class="dash">-</td>
-                                    <td class="item-name">Belum ada rincian biaya</td>
-                                    <td class="rp"></td>
-                                    <td class="amount">0,00</td>
-                                </tr>
-                            @endforelse
+                            @endforeach
+
                             <tr>
-                                <td colspan="2" class="text-right summary-line"><strong>Jumlah</strong></td>
+                                <td colspan="2" class="summary-line"><strong>Jumlah</strong></td>
                                 <td class="rp summary-line">Rp</td>
                                 <td class="amount summary-line">
-                                    <strong>{{ number_format((float) $suratTugas->grand_total, 2, ',', '.') }}</strong>
+                                    <strong>{{ number_format($suratTugas->grand_total, 2, ',', '.') }}</strong>
                                 </td>
                             </tr>
                         </table>
@@ -441,18 +382,20 @@
                 </tr>
             </table>
 
-            <div class="terbilang">Terbilang : <em>{{ strtoupper(Terbilang::make($suratTugas->grand_total)) }}
-                    RUPIAH</em></div>
+            <div class="terbilang">
+                Terbilang : {{ strtoupper(Terbilang::make($suratTugas->grand_total)) }} RUPIAH
+            </div>
 
             <div class="sign">
                 <div class="right">
-                    Batam, {{ optional($suratTugas->created_at)->format('d F Y') }}<br>
-                    <br>
+                    Batam, {{ optional($suratTugas->created_at)->format('d F Y') }}<br><br>
                     <div class="name">{{ $pic->name }}</div>
                 </div>
             </div>
+
         </div>
     @endforeach
+
 </body>
 
 </html>
