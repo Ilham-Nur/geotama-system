@@ -163,7 +163,7 @@
         }
 
         $headerBase64 = base64Image('template/assets/images/header_snipingtool.png');
-        $footerBase64 = base64Image('template/assets/images/footer_snipingtool.png');
+        $footerBase64 = base64Image('template/assets/images/footer_snipingtool-removebg.png');
         $watermarkBase64 = base64Image('template/assets/images/logo/logo-geotama-removebg-preview.png');
 
     @endphp
