@@ -6,8 +6,9 @@
     <title>Surat Tugas {{ $suratTugas->id }}</title>
     <style>
         @page {
-            margin: 24px;
+            margin: 170px 25px 90px 25px;
         }
+
 
         body {
             font-family: DejaVu Sans, sans-serif;
@@ -22,16 +23,21 @@
         }
 
         .first-header img {
-            width: 100%;
+            position: fixed;
+            top: -170px;
+            left: -180;
+            right: 0;
             height: 140px;
-            object-fit: cover;
+            width: 180%;
         }
 
         .first-footer {
-            position: absolute;
-            bottom: 0;
-            left: 0;
+            position: fixed;
+            bottom: -70px;
+            left: -190;
             right: 0;
+            height: 90px;
+            width: 180%;
         }
 
         .first-footer img {
@@ -289,12 +295,19 @@
                 </span>
             </div>
 
-            <div class="section"><span class="label">Untuk pergi ke</span><span class="value">: {{ $permohonan?->lokasi ?? '-' }}</span></div>
-            <div class="section"><span class="label">Keperluan dinas survey</span><span class="value">: Pengujian NDT {{ $permohonan?->nama_perusahaan ? '(' . $permohonan->nama_perusahaan . ' - ' . ($permohonan->nama_proyek ?? '-') . ')' : '' }}</span></div>
-            <div class="section"><span class="label">Berangkat</span><span class="value">: {{ optional($suratTugas->tanggal_berangkat)->format('d-m-Y') }}</span></div>
-            <div class="section"><span class="label">Kembali</span><span class="value">: {{ optional($suratTugas->tanggal_kembali)->format('d-m-Y') }}</span></div>
-            <div class="section"><span class="label">Sarana transportasi</span><span class="value">: {{ $suratTugas->transportasi }}</span></div>
-            <div class="section"><span class="label">Keterangan</span><span class="value">: {{ $suratTugas->keterangan ?? '-' }}</span></div>
+            <div class="section"><span class="label">Untuk pergi ke</span><span class="value">:
+                    {{ $permohonan?->lokasi ?? '-' }}</span></div>
+            <div class="section"><span class="label">Keperluan dinas survey</span><span class="value">: Pengujian NDT
+                    {{ $permohonan?->nama_perusahaan ? '(' . $permohonan->nama_perusahaan . ' - ' . ($permohonan->nama_proyek ?? '-') . ')' : '' }}</span>
+            </div>
+            <div class="section"><span class="label">Berangkat</span><span class="value">:
+                    {{ optional($suratTugas->tanggal_berangkat)->format('d-m-Y') }}</span></div>
+            <div class="section"><span class="label">Kembali</span><span class="value">:
+                    {{ optional($suratTugas->tanggal_kembali)->format('d-m-Y') }}</span></div>
+            <div class="section"><span class="label">Sarana transportasi</span><span class="value">:
+                    {{ $suratTugas->transportasi }}</span></div>
+            <div class="section"><span class="label">Keterangan</span><span class="value">:
+                    {{ $suratTugas->keterangan ?? '-' }}</span></div>
 
             <div class="barcode-box">
                 <div><strong>Dikeluarkan di</strong> : Batam</div>
@@ -367,7 +380,8 @@
                     <td class="no">6</td>
                     <td class="field">Telah dilaksanakan Survey</td>
                     <td class="colon">:</td>
-                    <td class="content"><strong>Pengujian NDT {{ $namaPerusahaan }} ({{ $namaProyek }})</strong></td>
+                    <td class="content"><strong>Pengujian NDT {{ $namaPerusahaan }} ({{ $namaProyek }})</strong>
+                    </td>
                 </tr>
                 <tr>
                     <td class="no">7</td>
@@ -399,14 +413,17 @@
                             <tr>
                                 <td colspan="2" class="text-right summary-line"><strong>Jumlah</strong></td>
                                 <td class="rp summary-line">Rp</td>
-                                <td class="amount summary-line"><strong>{{ number_format((float) $suratTugas->grand_total, 2, ',', '.') }}</strong></td>
+                                <td class="amount summary-line">
+                                    <strong>{{ number_format((float) $suratTugas->grand_total, 2, ',', '.') }}</strong>
+                                </td>
                             </tr>
                         </table>
                     </td>
                 </tr>
             </table>
 
-            <div class="terbilang">Terbilang : <em>{{ strtoupper(Terbilang::make($suratTugas->grand_total)) }} RUPIAH</em></div>
+            <div class="terbilang">Terbilang : <em>{{ strtoupper(Terbilang::make($suratTugas->grand_total)) }}
+                    RUPIAH</em></div>
 
             <div class="sign">
                 <div class="right">
