@@ -335,10 +335,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/surat-tugas/{suratTugas}', [SuratTugasController::class, 'destroy'])
         ->middleware('permission:surat_tugas.delete')
         ->name('surat-tugas.destroy');
+
+    Route::get('/surat-tugas/{suratTugas}/export-pdf', [SuratTugasController::class, 'exportPdf'])
+        ->middleware('permission:surat_tugas.view')
+        ->name('surat-tugas.export-pdf');
 });
 
 Route::get('/scan/aset/{asset}', [AssetController::class, 'publicShow'])->name('assets.public-show');
 
 Route::get('/scan/quotation/{quotation}', [QuotationController::class, 'publicShow'])->name('quotation.public-show');
+Route::get('/scan/surat-tugas/{suratTugas}', [SuratTugasController::class, 'publicShow'])->name('surat-tugas.public-show');
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

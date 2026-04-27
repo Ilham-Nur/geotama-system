@@ -57,6 +57,8 @@
                                         <div class="d-flex gap-2">
                                             <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
                                                 data-bs-target="#detailSuratModal{{ $surat->id }}">Detail</button>
+                                            <a href="{{ route('surat-tugas.export-pdf', $surat) }}" class="btn btn-sm btn-danger"
+                                                target="_blank">PDF</a>
 
                                             @can('surat_tugas.edit')
                                                 <a href="{{ route('surat-tugas.edit', $surat) }}" class="btn btn-sm btn-warning">Edit</a>

@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Proyek;
 use App\Models\SuratTugas;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class SuratTugasController extends Controller
 {
@@ -16,6 +18,7 @@ class SuratTugasController extends Controller
             'proyek:id,no_proyek,permohonan_id',
             'proyek.permohonan:id,nama_perusahaan,alamat,lokasi,testuji',
             'proyek.users:id,name',
+            'proyek.users.employee:id,user_id,position',
         ])
             ->latest()
             ->paginate(10);
@@ -115,5 +118,56 @@ class SuratTugasController extends Controller
         $suratTugas->delete();
 
         return redirect()->route('surat-tugas.index')->with('success', 'Surat tugas berhasil dihapus.');
+    }
+
+    public function exportPdf(SuratTugas $suratTugas)
+    {
+        $suratTugas->load([
+            'biayaItems',
+            'proyek:id,no_proyek,permohonan_id',
+            'proyek.permohonan:id,nama_perusahaan,nama_proyek,lokasi',
+            'proyek.users:id,name',
+            'proyek.users.employee:id,user_id,position',
+        ]);
+
+        $scanUrl = route('surat-tugas.public-show', $suratTugas->id);
+        $qrBase64 = $this->generateQrCodeBase64($scanUrl);
+
+        $pdf = Pdf::loadView('surat-tugas.pdf', compact('suratTugas', 'qrBase64'))
+            ->setOptions([
+                'isRemoteEnabled' => true,
+                'isHtml5ParserEnabled' => true,
+            ])
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->stream('surat-tugas-' . $suratTugas->id . '.pdf');
+    }
+
+    public function publicShow(SuratTugas $suratTugas)
+    {
+        $suratTugas->load([
+            'proyek:id,no_proyek,permohonan_id',
+            'proyek.permohonan:id,nama_perusahaan,nama_proyek,lokasi',
+            'proyek.users:id,name',
+            'proyek.users.employee:id,user_id,position',
+        ]);
+
+        $approval = [
+            'approver_name' => 'Adam Saputra',
+            'approver_position' => 'Management Representative',
+            'approval_date' => optional($suratTugas->updated_at)->format('d F Y H:i') ?? '-',
+        ];
+
+        return view('surat-tugas.scan', compact('suratTugas', 'approval'));
+    }
+
+    private function generateQrCodeBase64(string $url): string
+    {
+        $qrSvg = QrCode::format('svg')
+            ->size(300)
+            ->margin(1)
+            ->generate($url);
+
+        return 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
     }
 }
