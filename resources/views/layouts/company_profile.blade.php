@@ -75,7 +75,7 @@
         .nav-logo-icon {
             width: 38px;
             height: 38px;
-            background: var(--blue-accent);
+            background: black;
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -592,54 +592,173 @@
         }
 
         /* ─── GALLERY ─── */
-        .gallery {
+        .gallery-section {
             background: var(--off-white);
+            padding: 72px 5%;
         }
 
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: auto auto;
-            gap: 16px;
+        .section-label {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--blue-accent);
+            margin-bottom: 10px;
+            font-family: var(--font);
         }
 
-        .gallery-item {
-            background: var(--gray-light);
+        .section-title {
+            font-family: var(--font-cond);
+            font-size: 38px;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.1;
+            margin-bottom: 10px;
+        }
+
+        .section-subtitle {
+            font-size: 15px;
+            color: var(--text-body);
+            font-weight: 300;
+            line-height: 1.7;
+            max-width: 500px;
+            margin-bottom: 36px;
+            font-family: var(--font);
+        }
+
+        .gallery-filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .filter-btn {
+            font-family: var(--font);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 7px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--gray-mid);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--blue-accent);
+            color: var(--blue-accent);
+        }
+
+        .filter-btn.active {
+            background: var(--navy);
+            border-color: var(--navy);
+            color: white;
+        }
+
+        .masonry-grid {
+            columns: 3;
+            column-gap: 12px;
+        }
+
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: 12px;
+            position: relative;
             border-radius: 8px;
-            border: 2px dashed var(--border);
+            overflow: hidden;
+            cursor: pointer;
+            background: var(--gray-light);
+            border: 1px solid var(--border);
+            display: block;
+        }
+
+        .masonry-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .masonry-item .placeholder {
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: var(--gray-mid);
-            font-size: 13px;
-            font-weight: 500;
             gap: 8px;
-            transition: border-color 0.2s;
+            color: var(--gray-mid);
+            font-family: var(--font);
+            font-size: 12px;
+            font-weight: 500;
+            padding: 40px 16px;
+            box-sizing: border-box;
+            text-align: center;
         }
 
-        .gallery-item:hover {
-            border-color: #A0BCE0;
-        }
-
-        .gallery-item:first-child {
-            grid-column: 1 / 3;
-            grid-row: 1;
-            height: 260px;
-        }
-
-        .gallery-item:nth-child(2) {
-            height: 260px;
-        }
-
-        .gallery-item:nth-child(3),
-        .gallery-item:nth-child(4),
-        .gallery-item:nth-child(5) {
-            height: 180px;
-        }
-
-        .gallery-item svg {
+        .masonry-item .placeholder svg {
             opacity: 0.35;
+        }
+
+        .masonry-item .item-tag {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: var(--navy);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-family: var(--font);
+        }
+
+        .masonry-item .item-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(13, 43, 85, 0);
+            transition: background 0.25s;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-end;
+            padding: 14px;
+        }
+
+        .masonry-item:hover .item-overlay {
+            background: rgba(13, 43, 85, 0.35);
+        }
+
+        .masonry-item .overlay-label {
+            font-family: var(--font);
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.25s;
+            letter-spacing: 0.3px;
+        }
+
+        .masonry-item:hover .overlay-label {
+            opacity: 1;
+        }
+
+        .gallery-note {
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--gray-mid);
+            font-style: italic;
+            font-family: var(--font);
+        }
+
+        .gallery-note svg {
+            opacity: 0.5;
+            flex-shrink: 0;
         }
 
         /* ─── CLIENTS ─── */
@@ -925,7 +1044,7 @@
     <!-- NAVBAR -->
     <nav>
         <a href="#" class="nav-logo">
-            <div class="nav-logo-icon"><img
+            <div class="nav-logo-icon"><img style="width: 30px; height: auto;"
                     src="{{ asset('/template/assets/images/logo/logo-geotama-removebg-preview.png') }}"
                     alt="Geotama Logo"></div>
             <span class="nav-logo-text">GEO<span>TAMA</span></span>
@@ -1004,7 +1123,7 @@
                 </p>
                 <p class="section-subtitle" style="margin-top: 16px;">
                     Dengan tim yang berpengalaman dan bersertifikat, kami memastikan setiap inspeksi dilakukan secara
-                    presisi tanpa merusak material yang diuji — menjaga integritas struktur dan keamanan aset klien
+                    presisi tanpa merusak material yang diuji. menjaga integritas struktur dan keamanan aset klien
                     kami.
                 </p>
                 <div class="about-highlights">
@@ -1154,59 +1273,164 @@
         </div>
     </section>
 
-    <!-- GALLERY -->
-    <section class="gallery" id="gallery">
-        <div class="section-header">
-            <p class="section-label">Galeri Kerja</p>
-            <h2 class="section-title">Dokumentasi Proyek Kami</h2>
-            <p class="section-subtitle">Foto-foto kegiatan inspeksi dan pengujian di lapangan oleh tim Geotama.</p>
+    <section id="gallery" class="gallery-section">
+        <p class="section-label">Galeri Kerja</p>
+        <h2 class="section-title">Dokumentasi Proyek Kami</h2>
+        <p class="section-subtitle">Foto-foto kegiatan inspeksi dan pengujian NDT di lapangan oleh tim Geotama — tampil
+            sesuai ukuran asli foto.</p>
+
+        {{-- <div class="gallery-filter">
+            <button class="filter-btn active">Semua</button>
+            <button class="filter-btn">MT</button>
+            <button class="filter-btn">PT</button>
+            <button class="filter-btn">UT</button>
+        </div> --}}
+
+        <div class="masonry-grid">
+
+            <div class="masonry-item">
+                <img src="{{ asset('/template/assets/images/dokumentasi/foto_utama.JPG') }}"
+                    alt="Tim Geotama di lapangan"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="placeholder" style="display:none">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                    Foto tim lapangan
+                </div>
+                <div class="item-overlay"><span class="overlay-label">Tim Lapangan</span></div>
+            </div>
+
+            <div class="masonry-item">
+
+                <span class="item-tag">MT</span>
+                <img src="{{ asset('/template/assets/images/dokumentasi/foto_mt.JPG') }}"
+                    alt="Tim Geotama di lapangan"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="placeholder" style="display:none">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                    Inspeksi MT
+                </div>
+                <div class="item-overlay"><span class="overlay-label">Magnetic Particle Testing</span></div>
+            </div>
+
+            <div class="masonry-item">
+                <span class="item-tag">PT</span>
+                <div class="placeholder" style="padding:48px 16px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                    Inspeksi PT
+                </div>
+                <div class="item-overlay"><span class="overlay-label">Penetrant Testing</span></div>
+            </div>
+
+            <div class="masonry-item">
+                <span class="item-tag">UT</span>
+                <div class="placeholder" style="padding:70px 16px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                    Inspeksi UT
+                </div>
+                <div class="item-overlay"><span class="overlay-label">Ultrasonic Testing</span></div>
+            </div>
+
+            <div class="masonry-item">
+
+                <span class="item-tag">MT</span>
+                <img src="{{ asset('/template/assets/images/dokumentasi/foto_mt2.JPG') }}"
+                    alt="Tim Geotama di lapangan"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                {{-- <div class="placeholder" style="padding:52px 16px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                    Inspeksi MT
+                </div> --}}
+                <div class="item-overlay"><span class="overlay-label">Magnetic Particle Testing</span></div>
+            </div>
+
+            <div class="masonry-item">
+                <span class="item-tag">PT</span>
+                <div class="placeholder" style="padding:65px 16px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                    Inspeksi PT
+                </div>
+                <div class="item-overlay"><span class="overlay-label">Penetrant Testing</span></div>
+            </div>
+
+            <div class="masonry-item">
+                <span class="item-tag">UT</span>
+                <div class="placeholder" style="padding:55px 16px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                    Inspeksi UT
+                </div>
+                <div class="item-overlay"><span class="overlay-label">Ultrasonic Testing</span></div>
+            </div>
+
+            <div class="masonry-item">
+                <div class="placeholder" style="padding:58px 16px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                    Foto tim lapangan
+                </div>
+                <div class="item-overlay"><span class="overlay-label">Tim Lapangan</span></div>
+            </div>
+
+            <div class="masonry-item">
+                <div class="placeholder" style="padding:44px 16px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="M21 15l-5-5L5 21" />
+                    </svg>
+                    Foto tim lapangan
+                </div>
+                <div class="item-overlay"><span class="overlay-label">Tim Lapangan</span></div>
+            </div>
+
         </div>
-        <div class="gallery-grid">
-            <div class="gallery-item">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <path d="M21 15l-5-5L5 21" />
-                </svg>
-                <span>Foto utama proyek (landscape)</span>
-            </div>
-            <div class="gallery-item">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <path d="M21 15l-5-5L5 21" />
-                </svg>
-                <span>Foto kerja lapangan</span>
-            </div>
-            <div class="gallery-item">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <path d="M21 15l-5-5L5 21" />
-                </svg>
-                <span>Inspeksi MT</span>
-            </div>
-            <div class="gallery-item">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <path d="M21 15l-5-5L5 21" />
-                </svg>
-                <span>Inspeksi PT</span>
-            </div>
-            <div class="gallery-item">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <path d="M21 15l-5-5L5 21" />
-                </svg>
-                <span>Inspeksi UT</span>
-            </div>
+
+        <div class="gallery-note">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.5">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4M12 16h.01" />
+            </svg>
+            Galeri menggunakan layout masonry — setiap foto tampil sesuai ukuran aslinya tanpa dipotong.
         </div>
     </section>
 
