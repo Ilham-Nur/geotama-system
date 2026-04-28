@@ -1543,19 +1543,19 @@
             <div class="contact-form-box">
                 <div class="form-row">
                     <label class="form-label">Nama Lengkap</label>
-                    <input type="text" class="form-input" placeholder="Masukkan nama Anda">
+                    <input type="text" id="nama" class="form-input" placeholder="Masukkan nama Anda">
                 </div>
                 <div class="form-row">
                     <label class="form-label">Perusahaan</label>
-                    <input type="text" class="form-input" placeholder="Nama perusahaan">
+                    <input type="text" id="perusahaan" class="form-input" placeholder="Nama perusahaan">
                 </div>
                 <div class="form-row">
                     <label class="form-label">Email</label>
-                    <input type="email" class="form-input" placeholder="email@perusahaan.com">
+                    <input type="email" id="email" class="form-input" placeholder="email@perusahaan.com">
                 </div>
                 <div class="form-row">
                     <label class="form-label">Layanan yang Dibutuhkan</label>
-                    <select class="form-input" style="cursor: pointer;">
+                    <select id="layanan" class="form-input" style="cursor: pointer;">
                         <option value="" style="background: #1A3F73;">Pilih layanan NDT</option>
                         <option style="background: #1A3F73;">Magnetic Particle Testing (MT)</option>
                         <option style="background: #1A3F73;">Penetrant Testing (PT)</option>
@@ -1565,10 +1565,12 @@
                 </div>
                 <div class="form-row">
                     <label class="form-label">Pesan / Keterangan Proyek</label>
-                    <textarea class="form-input" placeholder="Ceritakan kebutuhan inspeksi Anda..."></textarea>
+                    <textarea id="pesan" class="form-input" placeholder="Ceritakan kebutuhan inspeksi Anda..."></textarea>
                 </div>
-                <button class="btn-primary" style="width: 100%; padding: 14px; font-size: 15px; border: none;">Kirim
-                    Permintaan</button>
+                <button onclick="kirimWA()" class="btn-primary"
+                    style="width: 100%; padding: 14px; font-size: 15px; border: none;">
+                    Kirim via WhatsApp
+                </button>
             </div>
         </div>
     </section>
@@ -1615,6 +1617,37 @@
                 }
             });
         });
+    </script>
+
+    <script>
+        function kirimWA() {
+
+            let nama = document.getElementById('nama').value;
+            let perusahaan = document.getElementById('perusahaan').value;
+            let email = document.getElementById('email').value;
+            let layanan = document.getElementById('layanan').value;
+            let pesan = document.getElementById('pesan').value;
+
+            // validasi sederhana
+            if (!nama || !email) {
+                alert("Nama dan Email wajib diisi!");
+                return;
+            }
+
+            let noWA = "6281270062718";
+
+            let text = `Halo Geotama,%0A%0A
+            Nama: ${nama}%0A
+            Perusahaan: ${perusahaan}%0A
+            Email: ${email}%0A
+            Layanan: ${layanan}%0A
+            Pesan: ${pesan}%0A%0A
+            Saya ingin konsultasi NDT.`;
+
+            let url = `https://wa.me/${noWA}?text=${text}`;
+
+            window.open(url, '_blank');
+        }
     </script>
 
 </body>
