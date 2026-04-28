@@ -119,6 +119,21 @@
             color: var(--white);
         }
 
+
+        .nav-login {
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: var(--white) !important;
+            padding: 8px 18px;
+            border-radius: 5px;
+            font-weight: 600 !important;
+            transition: background 0.2s, border-color 0.2s !important;
+        }
+
+        .nav-login:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
         .nav-cta {
             background: var(--blue-accent);
             color: var(--white) !important;
@@ -921,6 +936,13 @@
             <li><a href="#gallery">Proyek</a></li>
             <li><a href="#clients">Klien</a></li>
             <li><a href="#contact" class="nav-cta">Hubungi Kami</a></li>
+            <li>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="nav-login">Dashboard</a>
+                @else
+                    <a href="{{ route('login') }}" class="nav-login">Login</a>
+                @endauth
+            </li>
         </ul>
     </nav>
 

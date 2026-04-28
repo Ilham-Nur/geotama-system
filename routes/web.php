@@ -17,7 +17,7 @@ use App\Http\Controllers\UserController;
 use Symfony\Component\Routing\Router;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('layouts.company_profile');
 })->name('company-profile');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
