@@ -1123,7 +1123,7 @@
                     <div class="hero-stat-label">Total Klien</div>
                 </div>
                 <div>
-                    <div class="hero-stat-num">10<span>+</span></div>
+                    <div class="hero-stat-num">4<span>+</span></div>
                     <div class="hero-stat-label">Tahun Pengalaman</div>
                 </div>
                 <div>
