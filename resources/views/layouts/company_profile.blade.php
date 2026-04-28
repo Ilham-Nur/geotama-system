@@ -1446,7 +1446,15 @@
                 <div class="clients-count-label">Klien Terlayani</div>
             </div>
         </div>
-        <div class="clients-grid" id="clientGrid"></div>
+        <div class="clients-grid">
+            @for ($i = 1; $i <= 18; $i++)
+                <div class="client-logo-placeholder">
+                    <img src="{{ asset('template/assets/images/clients/client_' . $i . '.jpg') }}"
+                        alt="Client {{ $i }}" style="max-height:50px; max-width:100%; object-fit:contain;"
+                        onerror="this.src='{{ asset('template/assets/images/clients/client_' . $i . '.png') }}'">
+                </div>
+            @endfor
+        </div>
         <p class="clients-note">* Logo klien akan ditampilkan setelah aset diterima</p>
     </section>
 
