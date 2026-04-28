@@ -2,12 +2,31 @@
 <html lang="id">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geotama - NDT Services</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap"
-        rel="stylesheet">
+    <title>Jasa NDT Batam | Geotama Global Intijaya</title>
+
+    <meta name="description"
+        content="Geotama menyediakan jasa Non Destructive Testing (NDT) di Batam seperti MT, PT, UT untuk industri kapal dan konstruksi. Profesional dan bersertifikat.">
+
+    <meta name="keywords"
+        content="NDT Batam, jasa NDT Batam, ultrasonic testing Batam, penetrant test Batam, magnetic test Batam">
+
+    <meta name="author" content="Geotama Global Intijaya">
+    <meta name="robots" content="index, follow">
+
+    <link rel="canonical" href="{{ url('/') }}">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Jasa NDT Batam - Geotama">
+    <meta property="og:description"
+        content="Layanan inspeksi NDT profesional di Batam untuk industri kapal dan konstruksi.">
+    <meta property="og:image" content="{{ asset('template/assets/images/dokumentasi/foto_utama.JPG') }}">
+    <meta property="og:url" content="{{ url('/') }}">
+    <meta property="og:type" content="website">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ asset('template/assets/images/icon-geotama.ico') }}" type="image/x-icon" />
+
+
     <style>
         *,
         *::before,
@@ -963,7 +982,7 @@
         .footer-logo-icon {
             width: 30px;
             height: 30px;
-            background: var(--blue-accent);
+            background: black;
             border-radius: 5px;
             display: flex;
             align-items: center;
@@ -1037,6 +1056,24 @@
             }
         }
     </style>
+
+    {{-- <script type="application/ld+json">
+    @json([
+      "@context" => "https://schema.org",
+      "@type" => "Organization",
+      "name" => "Geotama Global Intijaya",
+      "url" => url('/'),
+      "logo" => asset('template/assets/images/logo/logo-geotama-removebg-preview.png'),
+      "address" => [
+        "@type" => "PostalAddress",
+        "addressLocality" => "Batam",
+        "addressRegion" => "Kepulauan Riau",
+        "addressCountry" => "Indonesia"
+      ]
+    ])
+    </script> --}}
+
+
 </head>
 
 <body>
@@ -1046,7 +1083,7 @@
         <a href="#" class="nav-logo">
             <div class="nav-logo-icon"><img style="width: 30px; height: auto;"
                     src="{{ asset('/template/assets/images/logo/logo-geotama-removebg-preview.png') }}"
-                    alt="Geotama Logo"></div>
+                    alt="Geotama Logo" loading="lazy"></div>
             <span class="nav-logo-text">GEO<span>TAMA</span></span>
         </a>
         <ul class="nav-links">
@@ -1071,7 +1108,7 @@
         <div class="hero-bg-glow"></div>
         <div class="hero-content">
             <div class="hero-badge">Non-Destructive Testing Specialist</div>
-            <h1>Inspeksi Presisi,<br><span>Hasil Terpercaya</span></h1>
+            <h1>Jasa NDT Batam Profesional<br><span>Inspeksi Presisi & Hasil Terpercaya</span></h1>
             <p class="hero-desc">
                 Geotama menyediakan layanan Non-Destructive Testing (NDT) profesional untuk industri galangan kapal dan
                 konstruksi di Batam. Pengalaman sejak 2022 dengan standar nasional.
@@ -1276,8 +1313,7 @@
     <section id="gallery" class="gallery-section">
         <p class="section-label">Galeri Kerja</p>
         <h2 class="section-title">Dokumentasi Proyek Kami</h2>
-        <p class="section-subtitle">Foto-foto kegiatan inspeksi dan pengujian NDT di lapangan oleh tim Geotama — tampil
-            sesuai ukuran asli foto.</p>
+        <p class="section-subtitle">Foto-foto kegiatan inspeksi dan pengujian NDT di lapangan oleh tim Geotama.</p>
 
         {{-- <div class="gallery-filter">
             <button class="filter-btn active">Semua</button>
@@ -1291,7 +1327,7 @@
             <div class="masonry-item">
                 <img src="{{ asset('/template/assets/images/dokumentasi/foto_utama.JPG') }}"
                     alt="Tim Geotama di lapangan"
-                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
                 <div class="placeholder" style="display:none">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1.5">
@@ -1309,7 +1345,7 @@
                 <span class="item-tag">MT</span>
                 <img src="{{ asset('/template/assets/images/dokumentasi/foto_mt.JPG') }}"
                     alt="Tim Geotama di lapangan"
-                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
                 <div class="placeholder" style="display:none">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1.5">
@@ -1355,7 +1391,7 @@
                 <span class="item-tag">MT</span>
                 <img src="{{ asset('/template/assets/images/dokumentasi/foto_mt2.JPG') }}"
                     alt="Tim Geotama di lapangan"
-                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
                 {{-- <div class="placeholder" style="padding:52px 16px;">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1.5">
@@ -1424,14 +1460,14 @@
 
         </div>
 
-        <div class="gallery-note">
+        {{-- <div class="gallery-note">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="1.5">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 8v4M12 16h.01" />
             </svg>
             Galeri menggunakan layout masonry — setiap foto tampil sesuai ukuran aslinya tanpa dipotong.
-        </div>
+        </div> --}}
     </section>
 
     <!-- CLIENTS -->
@@ -1451,11 +1487,12 @@
                 <div class="client-logo-placeholder">
                     <img src="{{ asset('template/assets/images/clients/client_' . $i . '.jpg') }}"
                         alt="Client {{ $i }}" style="max-height:50px; max-width:100%; object-fit:contain;"
-                        onerror="this.src='{{ asset('template/assets/images/clients/client_' . $i . '.png') }}'">
+                        onerror="this.src='{{ asset('template/assets/images/clients/client_' . $i . '.png') }}'"
+                        loading="lazy">
                 </div>
             @endfor
         </div>
-        <p class="clients-note">* Logo klien akan ditampilkan setelah aset diterima</p>
+        {{-- <p class="clients-note">* Logo klien akan ditampilkan setelah aset diterima</p> --}}
     </section>
 
     <!-- CONTACT -->
@@ -1487,7 +1524,7 @@
                     </div>
                     <div>
                         <div class="contact-item-label">Telepon / WhatsApp</div>
-                        <div class="contact-item-val">+62 — (tambahkan nomor)</div>
+                        <div class="contact-item-val">+6281270062718</div>
                     </div>
                 </div>
                 <div class="contact-item">
@@ -1539,10 +1576,13 @@
     <!-- FOOTER -->
     <footer>
         <a href="#" class="footer-brand">
-            <div class="footer-logo-icon">GT</div>
+            <div class="footer-logo-icon"><img style="width: 20px; height: auto;"
+                    src="{{ asset('/template/assets/images/logo/logo-geotama-removebg-preview.png') }}"
+                    alt="Geotama Logo" loading="lazy"></div>
+            </div>
             <span class="footer-brand-name">GEOTAMA</span>
         </a>
-        <span class="footer-copy">© 2025 Geotama. Semua hak dilindungi.</span>
+        <span class="footer-copy">© 2026 Geotama. Semua hak dilindungi.</span>
         <ul class="footer-links">
             <li><a href="#about">Tentang</a></li>
             <li><a href="#services">Layanan</a></li>
