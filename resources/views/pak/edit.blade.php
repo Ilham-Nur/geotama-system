@@ -278,8 +278,8 @@
 @push('scripts')
     <script>
         /* =========================
-                                       HELPER
-                                    ========================= */
+                                                       HELPER
+                                                    ========================= */
         function parseRupiah(val) {
             if (!val) return 0;
 
@@ -414,7 +414,9 @@
                 let name = $(this).attr('name');
 
                 if (name) {
-                    name = name.replace(/\[\d+\]/, '[' + index + ']');
+                    name = name.replace(/\[(\d+)\]\[(\d+)\]/, function(match, catId, oldIndex) {
+                        return '[' + catId + '][' + index + ']';
+                    });
                     $(this).attr('name', name);
                 }
 
@@ -434,8 +436,15 @@
             newRow.insertBefore($(this).closest('tr'));
 
             recalcAll(); // 🔥 update total
+            renumberCategory(cat);
             syncKomponenFromPermohonanItems();
         });
+
+        function renumberCategory(cat) {
+            $('tr.item-row[data-category="' + cat + '"]').each(function(i) {
+                $(this).find('.numbering').text(i + 1);
+            });
+        }
 
         /* =========================
            REMOVE ROW
@@ -452,6 +461,7 @@
             $(this).closest('tr').remove();
 
             recalcAll();
+            renumberCategory(cat);
             syncKomponenFromPermohonanItems();
         });
 
