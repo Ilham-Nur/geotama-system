@@ -498,6 +498,9 @@
                 let qty = Number($row.find('.unit_qty').val()) || 0;
                 let cost = parseRupiah($row.find('.unit_cost_display').val());
 
+                // 🔥 FIX: sync ke hidden input
+                $row.find('.unit_cost').val(cost);
+
                 let total = qty * cost;
 
                 $row.find('.total_cost').val(total);
@@ -706,6 +709,11 @@
                 recalcAll();
             });
 
+            $(document).on('input', '.unit_cost_display', function() {
+                let val = parseRupiah($(this).val());
+                $(this).closest('tr').find('.unit_cost').val(val);
+            });
+
 
             $(document).on('input', '.unit_qty, .unit_cost_display', function() {
                 let $r = $(this).closest('tr.item-row');
@@ -715,8 +723,13 @@
 
             $(document).on('blur', '.unit_cost_display', function() {
                 let v = parseRupiah($(this).val());
+
                 $(this).val(formatRupiah(v));
-                let $r = $(this).closest('tr.item-row');
+
+                // 🔥 FIX penting
+                $(this).closest('tr').find('.unit_cost').val(v);
+
+                let $r = $(this).closest('tr');
                 recalcRow($r);
                 recalcAll();
             });

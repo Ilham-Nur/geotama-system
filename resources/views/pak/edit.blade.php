@@ -278,8 +278,8 @@
 @push('scripts')
     <script>
         /* =========================
-                           HELPER
-                        ========================= */
+                                       HELPER
+                                    ========================= */
         function parseRupiah(val) {
             if (!val) return 0;
 
@@ -308,6 +308,9 @@
         function recalcRow(row) {
             let qty = parseFloat(row.find('.unit_qty').val()) || 0;
             let cost = parseRupiah(row.find('.unit_cost_display').val());
+
+            // 🔥 FIX WAJIB
+            row.find('.unit_cost').val(cost);
 
             let total = qty * cost;
 
@@ -464,7 +467,11 @@
         $(document).on('blur', '.unit_cost_display', function() {
 
             let val = parseRupiah($(this).val());
+
             $(this).val(formatRupiah(val));
+
+            // 🔥 FIX WAJIB
+            $(this).closest('tr').find('.unit_cost').val(val);
 
             recalcAll();
         });
@@ -480,6 +487,11 @@
             $(this).val(formatRupiah(val));
 
             recalcAll();
+        });
+
+        $(document).on('input', '.unit_cost_display', function() {
+            let val = parseRupiah($(this).val());
+            $(this).closest('tr').find('.unit_cost').val(val);
         });
 
         $('#nilai_pajak').on('keyup change', function() {
