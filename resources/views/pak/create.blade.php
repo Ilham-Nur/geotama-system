@@ -971,17 +971,17 @@
                     operational_needs: "Sarung tangan",
                     description: "-",
                     qty: 0.5,
-                    unit_cost: 32000
+                    unit_cost: 40000
                 }, {
                     operational_needs: "Marker",
                     description: "-",
                     qty: 2,
-                    unit_cost: 10000
+                    unit_cost: 40000
                 }, {
                     operational_needs: "Majun",
                     description: "-",
                     qty: 1,
-                    unit_cost: 50000
+                    unit_cost: 10000
                 }],
                 D: [{
                         operational_needs: "Gedung",
