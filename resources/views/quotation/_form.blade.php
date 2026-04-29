@@ -3,6 +3,7 @@
     $selectedClient = $isEdit ? $quotation->client : null;
     $selectedClientId = old('client_id', $quotation->client_id ?? '');
     $clientMode = old('client_mode', $selectedClientId ? 'existing' : 'existing');
+    $discountValue = old('discount', $quotation->discount ?? 0);
 
     $oldItems = old('items');
     if ($oldItems) {
@@ -42,6 +43,7 @@
                     @php
                         $quotationPayload = [
                             'client_id' => $previousQuotation->client_id,
+                            'discount' => (float) $previousQuotation->discount,
                             'items' => $previousQuotation->items
                                 ->map(function ($item) {
                                     return [
@@ -68,7 +70,7 @@
                     </option>
                 @endforeach
             </select>
-            <small class="text-muted">Pilih quotation sebelumnya untuk auto-isi client, item, dan terms.</small>
+            <small class="text-muted">Pilih quotation sebelumnya untuk auto-isi client, item, terms, dan discount.</small>
         </div>
     @endif
 
@@ -216,6 +218,15 @@
 @enderror
 
 <div class="text-end mb-4">
+    <div class="mb-2">
+        <label class="form-label">Discount</label>
+        <input type="number" step="0.01" min="0" name="discount" id="discount"
+            class="form-control @error('discount') is-invalid @enderror text-end" value="{{ $discountValue }}">
+        @error('discount')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <h6>Sub Total: <span id="sub-total-label">Rp 0</span></h6>
     <h6>Grand Total: <span id="grand-total-label">Rp 0</span></h6>
 </div>
 
@@ -252,11 +263,14 @@
             }
 
             function refreshGrandTotal() {
-                let total = 0;
+                let subtotal = 0;
                 $('.item-total').each(function() {
-                    total += parseFloat($(this).val()) || 0;
+                    subtotal += parseFloat($(this).val()) || 0;
                 });
-                $('#grand-total-label').text(formatRupiah(total));
+                const discount = parseFloat($('#discount').val()) || 0;
+                const grandTotal = Math.max(subtotal - discount, 0);
+                $('#sub-total-label').text(formatRupiah(subtotal));
+                $('#grand-total-label').text(formatRupiah(grandTotal));
             }
 
             function reindexRows() {
@@ -363,6 +377,7 @@
             });
 
             itemTableBody.on('input', '.item-total', refreshGrandTotal);
+            $('#discount').on('input', refreshGrandTotal);
 
             $('#btn-add-term').on('click', function() {
                 const index = termsWrapper.find('.term-row').length;
@@ -388,6 +403,7 @@
                 }
 
                 $('#client_id').val(payload.client_id ?? '').trigger('change');
+                $('#discount').val(payload.discount ?? 0);
 
                 const items = Array.isArray(payload.items) && payload.items.length ? payload.items : [{
                     description: '',
@@ -415,7 +431,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Template quotation dimuat',
-                    text: 'Data client, item, dan terms berhasil diisi otomatis.',
+                    text: 'Data client, item, terms, dan discount berhasil diisi otomatis.',
                     timer: 1600,
                     showConfirmButton: false,
                 });
