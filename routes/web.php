@@ -219,6 +219,14 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:proyek.show')
         ->name('proyek.pekerjaan.show');
 
+    Route::post('/proyek/{proyek}/pekerjaan/{item}/layanan/{layanan}', [ProyekController::class, 'tambahReportPekerjaan'])
+        ->middleware('permission:proyek.show')
+        ->name('proyek.pekerjaan.tambah-report');
+
+    Route::patch('/proyek/{proyek}/pekerjaan/{item}/layanan/{layanan}', [ProyekController::class, 'updateReportPekerjaan'])
+        ->middleware('permission:proyek.show')
+        ->name('proyek.pekerjaan.update-report');
+
     Route::get('/proyek/{proyek}/timesheet/template-pdf', [ProyekController::class, 'exportTimesheetTemplate'])
         ->middleware('permission:proyek.show')
         ->name('proyek.timesheet.template-pdf');
