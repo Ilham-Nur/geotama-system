@@ -168,9 +168,22 @@
         }
 
         /* ─── HERO ─── */
-        .hero {
+        /* .hero {
             min-height: 100vh;
             background: var(--navy);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 120px 5% 80px;
+        } */
+
+        .hero {
+            min-height: 100vh;
+            background:
+                linear-gradient(rgba(10, 25, 50, 0.75), rgba(10, 25, 50, 0.85)),
+                url('{{ asset('template/assets/images/profile/foto_hero_section.png') }}') center/cover no-repeat;
+            /* gradient di atas foto agar teks tetap terbaca */
             display: flex;
             align-items: center;
             position: relative;
@@ -810,39 +823,79 @@
             font-weight: 500;
         }
 
-        .clients-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 16px;
+        /* Marquee wrapper */
+        .clients-marquee-wrapper {
+            overflow: hidden;
+            width: 100%;
+            position: relative;
         }
 
-        .client-logo-placeholder {
-            background: var(--off-white);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            height: 80px;
+        /* Fade kiri & kanan */
+        .clients-marquee-wrapper::before,
+        .clients-marquee-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 120px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .clients-marquee-wrapper::before {
+            left: 0;
+            background: linear-gradient(to right, var(--white), transparent);
+        }
+
+        .clients-marquee-wrapper::after {
+            right: 0;
+            background: linear-gradient(to left, var(--white), transparent);
+        }
+
+        .clients-marquee-track {
+            display: flex;
+            gap: 40px;
+            width: max-content;
+            animation: marquee 30s linear infinite;
+        }
+
+        .clients-marquee-track:hover {
+            animation-play-state: paused;
+        }
+
+        @keyframes marquee {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .client-logo-item {
+            flex-shrink: 0;
+            width: 130px;
+            height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--gray-mid);
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: border-color 0.2s, background 0.2s;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+            filter: grayscale(30%);
         }
 
-        .client-logo-placeholder:hover {
-            border-color: var(--blue-accent);
-            background: rgba(46, 123, 204, 0.04);
+        .client-logo-item:hover {
+            opacity: 1;
+            filter: grayscale(0%);
         }
 
-        .clients-note {
-            margin-top: 32px;
-            text-align: center;
-            font-size: 13px;
-            color: var(--gray-mid);
-            font-style: italic;
+        .client-logo-item img {
+            max-height: 55px;
+            max-width: 120px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
         }
 
         /* ─── CONTACT ─── */
@@ -1104,7 +1157,7 @@
 
     <!-- HERO -->
     <section class="hero" id="home">
-        <div class="hero-bg-pattern"></div>
+        {{-- <div class="hero-bg-pattern"></div> --}}
         <div class="hero-bg-glow"></div>
         <div class="hero-content">
             <div class="hero-badge">Non-Destructive Testing Specialist</div>
@@ -1433,7 +1486,11 @@
             </div>
 
             <div class="masonry-item">
-                <div class="placeholder" style="padding:58px 16px;">
+
+                <img src="{{ asset('/template/assets/images/dokumentasi/foto_lapangan2.jpeg') }}"
+                    alt="Tim Geotama di lapangan"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
+                <div class="placeholder" style="display:none">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1.5">
                         <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -1446,7 +1503,11 @@
             </div>
 
             <div class="masonry-item">
-                <div class="placeholder" style="padding:44px 16px;">
+
+                <img src="{{ asset('/template/assets/images/dokumentasi/foto_lapangan3.jpeg') }}"
+                    alt="Tim Geotama di lapangan"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
+                <div class="placeholder" style="display:none">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1.5">
                         <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -1482,17 +1543,28 @@
                 <div class="clients-count-label">Klien Terlayani</div>
             </div>
         </div>
-        <div class="clients-grid">
-            @for ($i = 1; $i <= 18; $i++)
-                <div class="client-logo-placeholder">
-                    <img src="{{ asset('template/assets/images/clients/client_' . $i . '.jpg') }}"
-                        alt="Client {{ $i }}" style="max-height:50px; max-width:100%; object-fit:contain;"
-                        onerror="this.src='{{ asset('template/assets/images/clients/client_' . $i . '.png') }}'"
-                        loading="lazy">
-                </div>
-            @endfor
+
+        <div class="clients-marquee-wrapper">
+            <div class="clients-marquee-track" id="marqueeTrack">
+                @for ($i = 1; $i <= 18; $i++)
+                    <div class="client-logo-item">
+                        <img src="{{ asset('template/assets/images/clients/client_' . $i . '.jpg') }}"
+                            alt="Client {{ $i }}"
+                            onerror="this.src='{{ asset('template/assets/images/clients/client_' . $i . '.png') }}'"
+                            loading="lazy">
+                    </div>
+                @endfor
+                {{-- Duplikat untuk loop seamless --}}
+                @for ($i = 1; $i <= 18; $i++)
+                    <div class="client-logo-item">
+                        <img src="{{ asset('template/assets/images/clients/client_' . $i . '.jpg') }}"
+                            alt="Client {{ $i }}"
+                            onerror="this.src='{{ asset('template/assets/images/clients/client_' . $i . '.png') }}'"
+                            loading="lazy">
+                    </div>
+                @endfor
+            </div>
         </div>
-        {{-- <p class="clients-note">* Logo klien akan ditampilkan setelah aset diterima</p> --}}
     </section>
 
     <!-- CONTACT -->
