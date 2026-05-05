@@ -398,6 +398,26 @@
             align-items: center;
         }
 
+        /* .about-image-placeholder {
+            background: var(--gray-light);
+            border-radius: 10px;
+            height: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed var(--border);
+            color: var(--gray-mid);
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        } */
+
+        /* .about-image-placeholder svg {
+            opacity: 0.4;
+        } */
+
+
         .about-image-placeholder {
             background: var(--gray-light);
             border-radius: 10px;
@@ -411,10 +431,24 @@
             gap: 12px;
             font-size: 14px;
             font-weight: 500;
+            overflow: hidden;
+            /* ← tambah ini */
+            position: relative;
+            /* ← tambah ini */
         }
 
         .about-image-placeholder svg {
             opacity: 0.4;
+        }
+
+        /* ← Tambah class baru untuk gambar */
+        .about-image-placeholder img {
+            width: 100%;
+            height: auto%;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 10px;
+            display: block;
         }
 
         .about-text .section-subtitle {
@@ -1195,6 +1229,9 @@
     <section class="about" id="about">
         <div class="about-grid">
             <div class="about-image-placeholder">
+                 <img src="{{ asset('/template/assets/images/dokumentasi/foto_kantor.JPG') }}"
+                    alt="Foto Kantor Geotama" loading="lazy">
+
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="1.5">
                     <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -1412,8 +1449,11 @@
             </div>
 
             <div class="masonry-item">
+                <img src="{{ asset('/template/assets/images/dokumentasi/foto_pt2.JPG') }}"
+                    alt="Tim Geotama di lapangan"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
                 <span class="item-tag">PT</span>
-                <div class="placeholder" style="padding:48px 16px;">
+                <div class="placeholder" style="display:none">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1.5">
                         <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -1426,8 +1466,11 @@
             </div>
 
             <div class="masonry-item">
+                <img src="{{ asset('/template/assets/images/dokumentasi/foto_ut2.JPG') }}"
+                    alt="Tim Geotama di lapangan"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
                 <span class="item-tag">UT</span>
-                <div class="placeholder" style="padding:70px 16px;">
+                <div class="placeholder" style="display:none">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1.5">
                         <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -1458,8 +1501,12 @@
             </div>
 
             <div class="masonry-item">
+
+                <img src="{{ asset('/template/assets/images/dokumentasi/foto_pt1.JPG') }}"
+                    alt="Tim Geotama di lapangan"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
                 <span class="item-tag">PT</span>
-                <div class="placeholder" style="padding:65px 16px;">
+                <div class="placeholder" style="display:none">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1.5">
                         <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -1472,8 +1519,12 @@
             </div>
 
             <div class="masonry-item">
+
+                <img src="{{ asset('/template/assets/images/dokumentasi/foto_ut1.JPG') }}"
+                    alt="Tim Geotama di lapangan"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy">
                 <span class="item-tag">UT</span>
-                <div class="placeholder" style="padding:55px 16px;">
+                <div class="placeholder" style="display:none">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1.5">
                         <rect x="3" y="3" width="18" height="18" rx="2" />
