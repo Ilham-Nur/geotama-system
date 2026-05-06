@@ -369,7 +369,7 @@
                 </div>
 
                 {{-- AKSI --}}
-                <div class="card">
+                {{-- <div class="card">
                     <div class="card-header">
                         <h5 class="mb-0">Aksi</h5>
                     </div>
@@ -377,7 +377,7 @@
                         <a href="#" class="btn btn-warning">Edit Proyek</a>
                         <a href="#" class="btn btn-primary">Ubah Status</a>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>

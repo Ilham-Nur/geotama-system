@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use App\Models\LaporanPekerjaan;
 use App\Models\LaporanFileReport;
 use App\Models\LaporanFotoLampiran;
+use App\Models\PermohonanItem;
+use Carbon\Carbon;
 
 class ProyekController extends Controller
 {
@@ -157,6 +159,17 @@ class ProyekController extends Controller
                 'created_by'          => auth()->id(),
             ]);
 
+            $tanggalPermintaan = PermohonanItem::where('id', $itemId)->value('tanggal_permintaan');
+
+            $durasi = Carbon::parse($tanggalPermintaan)
+                ->diffInDays(Carbon::parse($request->tanggal_pelaksanaan));
+
+            PermohonanItem::where('id', $itemId)
+                ->update([
+                    'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
+                    'durasi'              => $durasi,
+                ]);
+
             // ------------------------------------------
             //  3. Simpan File Report (foto / PDF)
             // ------------------------------------------
@@ -207,6 +220,9 @@ class ProyekController extends Controller
 
             DB::commit();
 
+            $proyek->load('permohonan.items.layanans');
+            $proyek->updateStatusDariLaporan();
+
             // ------------------------------------------
             //  5. Response JSON untuk AJAX
             // ------------------------------------------
@@ -250,14 +266,14 @@ class ProyekController extends Controller
             'hapus_foto_lampiran.*' => ['integer'],
         ]);
 
-        $laporan = \App\Models\LaporanPekerjaan::with(['fileReport', 'fotoLampiran'])
+        $laporan = LaporanPekerjaan::with(['fileReport', 'fotoLampiran'])
             ->where('proyek_id', $proyek->id)
             ->where('item_id', $itemId)
             ->where('layanan_id', $layananId)
             ->latest()
             ->firstOrFail();
 
-        \Illuminate\Support\Facades\DB::beginTransaction();
+        DB::beginTransaction();
 
         try {
             // Update data utama
@@ -266,16 +282,28 @@ class ProyekController extends Controller
                 'action'              => $request->action,
             ]);
 
+            $tanggalPermintaan = PermohonanItem::where('id', $itemId)->value('tanggal_permintaan');
+
+            $durasi = Carbon::parse($tanggalPermintaan)
+                ->diffInDays(Carbon::parse($request->tanggal_pelaksanaan));
+
+            PermohonanItem::where('id', $itemId)
+                ->update([
+                    'tanggal_pelaksanaan' => $request->tanggal_pelaksanaan,
+                    'durasi'              => $durasi,
+                ]);
+
+
             // ------------------------------------------
             //  Hapus file report yang dipilih user
             // ------------------------------------------
             if ($request->filled('hapus_file_report')) {
-                $fileHapus = \App\Models\LaporanFileReport::whereIn('id', $request->hapus_file_report)
+                $fileHapus = LaporanFileReport::whereIn('id', $request->hapus_file_report)
                     ->where('laporan_pekerjaan_id', $laporan->id)
                     ->get();
 
                 foreach ($fileHapus as $f) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($f->path);
+                    Storage::disk('public')->delete($f->path);
                     $f->delete();
                 }
             }
@@ -284,12 +312,12 @@ class ProyekController extends Controller
             //  Hapus foto lampiran yang dipilih user
             // ------------------------------------------
             if ($request->filled('hapus_foto_lampiran')) {
-                $fotoHapus = \App\Models\LaporanFotoLampiran::whereIn('id', $request->hapus_foto_lampiran)
+                $fotoHapus = LaporanFotoLampiran::whereIn('id', $request->hapus_foto_lampiran)
                     ->where('laporan_pekerjaan_id', $laporan->id)
                     ->get();
 
                 foreach ($fotoHapus as $f) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($f->path);
+                    Storage::disk('public')->delete($f->path);
                     $f->delete();
                 }
             }
@@ -306,7 +334,7 @@ class ProyekController extends Controller
                         'public'
                     );
 
-                    \App\Models\LaporanFileReport::create([
+                    LaporanFileReport::create([
                         'laporan_pekerjaan_id' => $laporan->id,
                         'nama_file'            => $file->getClientOriginalName(),
                         'path'                 => $path,
@@ -328,7 +356,7 @@ class ProyekController extends Controller
                         'public'
                     );
 
-                    \App\Models\LaporanFotoLampiran::create([
+                    LaporanFotoLampiran::create([
                         'laporan_pekerjaan_id' => $laporan->id,
                         'nama_file'            => $foto->getClientOriginalName(),
                         'path'                 => $foto->getMimeType(),
@@ -338,7 +366,10 @@ class ProyekController extends Controller
                 }
             }
 
-            \Illuminate\Support\Facades\DB::commit();
+            DB::commit();
+
+            $proyek->load('permohonan.items.layanans');
+            $proyek->updateStatusDariLaporan();
 
             $message = $request->action === 'draft'
                 ? 'Laporan berhasil diperbarui sebagai draft.'
@@ -349,7 +380,7 @@ class ProyekController extends Controller
                 'redirect' => route('proyek.show', $proyek->id),
             ], 200);
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\DB::rollBack();
+            DB::rollBack();
 
             return response()->json([
                 'message' => 'Terjadi kesalahan saat memperbarui laporan.',

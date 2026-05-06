@@ -102,4 +102,64 @@ class Proyek extends Model
 
         return $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
     }
+
+    public function updateStatusDariLaporan(): void
+    {
+        // Ambil semua item beserta layanans milik proyek ini
+        $items = $this->permohonan
+            ->items()
+            ->with('layanans')
+            ->get();
+
+        // Tidak ada item → skip
+        if ($items->isEmpty()) {
+            return;
+        }
+
+        // Kumpulkan semua kombinasi [item_id, layanan_id] yang harus ada laporannya
+        $kombinasiDibutuhkan = collect();
+
+        foreach ($items as $item) {
+            foreach ($item->layanans as $layanan) {
+                $kombinasiDibutuhkan->push([
+                    'item_id'    => $item->id,
+                    'layanan_id' => $layanan->id,
+                ]);
+            }
+        }
+
+        if ($kombinasiDibutuhkan->isEmpty()) {
+            return;
+        }
+
+        $totalKombinasi = $kombinasiDibutuhkan->count();
+
+        // Ambil semua laporan aktif (non-deleted) milik proyek ini
+        $semuaLaporan = LaporanPekerjaan::where('proyek_id', $this->id)
+            ->get(['item_id', 'layanan_id', 'action']);
+
+        // Belum ada laporan → tidak ubah status
+        if ($semuaLaporan->isEmpty()) {
+            return;
+        }
+
+        // Hitung kombinasi yang sudah punya laporan 'submit'
+        $sudahSubmit = $kombinasiDibutuhkan->filter(function ($k) use ($semuaLaporan) {
+            return $semuaLaporan->contains(function ($laporan) use ($k) {
+                return $laporan->item_id    == $k['item_id']
+                    && $laporan->layanan_id == $k['layanan_id']
+                    && $laporan->action     === 'submit';
+            });
+        })->count();
+
+        // Tentukan status baru
+        $statusBaru = ($sudahSubmit === $totalKombinasi)
+            ? self::STATUS_CLOSE
+            : self::STATUS_REPORTING;
+
+        // Update hanya jika status memang berubah
+        if ($this->status !== $statusBaru) {
+            $this->update(['status' => $statusBaru]);
+        }
+    }
 }
