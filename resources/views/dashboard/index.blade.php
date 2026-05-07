@@ -85,6 +85,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
     const paymentLabels = @json($paymentsByMethod->pluck('label')->values());
     const paymentData = @json($paymentsByMethod->pluck('total')->map(fn ($v) => (float) $v)->values());
