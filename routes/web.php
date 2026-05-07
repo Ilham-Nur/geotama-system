@@ -26,7 +26,9 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 
 Route::middleware('auth')->group(function () {
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->middleware('permission:dashboard.view')
+        ->name('dashboard');
 
     Route::get('/blank', function () {
         return view('dashboard.blank');

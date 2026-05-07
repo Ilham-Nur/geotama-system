@@ -15,6 +15,22 @@
 
               {{-- MENU GEOTAMA SYSTEM --}}
 
+
+              @can('dashboard.view')
+                  <li class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                      <a href="{{ route('dashboard') }}">
+                          <span class="icon">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M3 13.5C3 12.6716 3.67157 12 4.5 12H9.5C10.3284 12 11 12.6716 11 13.5V19.5C11 20.3284 10.3284 21 9.5 21H4.5C3.67157 21 3 20.3284 3 19.5V13.5Z" fill="currentColor" opacity="0.6"/>
+                                  <path d="M13 4.5C13 3.67157 13.6716 3 14.5 3H19.5C20.3284 3 21 3.67157 21 4.5V19.5C21 20.3284 20.3284 21 19.5 21H14.5C13.6716 21 13 20.3284 13 19.5V4.5Z" fill="currentColor"/>
+                                  <path d="M3 4.5C3 3.67157 3.67157 3 4.5 3H9.5C10.3284 3 11 3.67157 11 4.5V9.5C11 10.3284 10.3284 11 9.5 11H4.5C3.67157 11 3 10.3284 3 9.5V4.5Z" fill="currentColor"/>
+                              </svg>
+                          </span>
+                          <span class="text">Dashboard</span>
+                      </a>
+                  </li>
+              @endcan
+
               @can('pak.view')
                   <li class="nav-item {{ request()->routeIs('pak.index') ? 'active' : '' }}">
                       <a href="{{ route('pak.index') }}">
