@@ -3,12 +3,20 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="title-wrapper pt-20 pb-20">
-    <h2>Dashboard Operasional</h2>
+<div class="title-wrapper pt-20 pb-20 d-flex justify-content-between align-items-center">
+    <h2>Dashboard Operasional Tahun {{ $selectedYear }}</h2>
+    <form method="GET" action="{{ route('dashboard') }}" class="d-flex align-items-center gap-2">
+        <label for="year" class="mb-0">Filter Tahun</label>
+        <select name="year" id="year" class="form-select form-select-sm" onchange="this.form.submit()">
+            @foreach($availableYears as $year)
+                <option value="{{ $year }}" {{ (int) $year === (int) $selectedYear ? 'selected' : '' }}>{{ $year }}</option>
+            @endforeach
+        </select>
+    </form>
 </div>
 
 <div class="row g-2 mb-3">
-    <div class="col-xl-3 col-md-6"><div class="card-style"><small>Permohonan Bulan Ini</small><h4>{{ number_format($permohonanTotal) }}</h4></div></div>
+    <div class="col-xl-3 col-md-6"><div class="card-style"><small>Total Permohonan (Tahun Terpilih)</small><h4>{{ number_format($permohonanTotal) }}</h4></div></div>
     <div class="col-xl-3 col-md-6"><div class="card-style"><small>Permohonan OPEN</small><h4>{{ number_format($permohonanOpen) }}</h4></div></div>
     <div class="col-xl-3 col-md-6"><div class="card-style"><small>Permohonan CLOSE</small><h4>{{ number_format($permohonanClose) }}</h4></div></div>
     <div class="col-xl-3 col-md-6"><div class="card-style"><small>Proyek Aktif</small><h4>{{ number_format($proyekAktif) }}</h4></div></div>
@@ -30,7 +38,7 @@
     </div>
     <div class="col-lg-4">
         <div class="card-style">
-            <h6>Pembayaran per Bulan</h6>
+            <h6>Pembayaran per Bulan ({{ $selectedYear }})</h6>
             @foreach($monthlyPayments as $row)
                 <div class="d-flex justify-content-between border-bottom py-1"><span>{{ $row->month }}</span><strong>Rp {{ number_format($row->total,0,',','.') }}</strong></div>
             @endforeach
@@ -38,7 +46,7 @@
     </div>
     <div class="col-lg-4">
         <div class="card-style">
-            <h6>PAK per Bulan per Kategori</h6>
+            <h6>PAK per Bulan per Kategori ({{ $selectedYear }})</h6>
             @foreach($pakMonthlyByCategory as $row)
                 <div class="d-flex justify-content-between border-bottom py-1"><span>{{ $row->month }} - {{ $row->category }}</span><strong>Rp {{ number_format($row->total,0,',','.') }}</strong></div>
             @endforeach
@@ -49,7 +57,7 @@
 <div class="row">
     <div class="col-12">
         <div class="card-style">
-            <h6>Top 5 Outstanding Invoice</h6>
+            <h6>Top 5 Outstanding Invoice (Tahun {{ $selectedYear }})</h6>
             <div class="table-responsive">
                 <table class="table">
                     <thead>

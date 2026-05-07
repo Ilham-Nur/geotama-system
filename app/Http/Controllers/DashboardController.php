@@ -7,49 +7,77 @@ use App\Models\PakItem;
 use App\Models\Pembayaran;
 use App\Models\Permohonan;
 use App\Models\Proyek;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $startOfMonth = now()->startOfMonth();
+        $selectedYear = (int) $request->integer('year', now()->year);
 
-        $permohonanTotal = Permohonan::where('created_at', '>=', $startOfMonth)->count();
-        $permohonanOpen = Permohonan::with('items')->get()->where('status', 'OPEN')->count();
-        $permohonanClose = Permohonan::with('items')->get()->where('status', 'CLOSE')->count();
+        $availableYears = collect([
+            Permohonan::query()->selectRaw('YEAR(created_at) as year'),
+            Proyek::query()->selectRaw('YEAR(created_at) as year'),
+            Invoice::query()->selectRaw('YEAR(created_at) as year'),
+            Pembayaran::query()->selectRaw('YEAR(tanggal_bayar) as year')->whereNotNull('tanggal_bayar'),
+            PakItem::query()->selectRaw('YEAR(created_at) as year'),
+        ])->flatMap(function ($query) {
+            return $query->pluck('year');
+        })->filter()->unique()->sort()->values();
 
-        $proyekAktif = Proyek::whereIn('status', [
-            Proyek::STATUS_PROGRESS,
-            Proyek::STATUS_REPORTING,
-            Proyek::STATUS_ENDORSE,
-        ])->count();
+        if ($availableYears->isEmpty()) {
+            $availableYears = collect([now()->year]);
+        }
 
-        $invoiceTotal = (float) Invoice::sum('grand_total');
+        if (! $availableYears->contains($selectedYear)) {
+            $selectedYear = (int) $availableYears->last();
+        }
 
-        $invoiceWithPayments = Invoice::withSum('pembayarans', 'nominal_bayar')->get();
+        $permohonanCollection = Permohonan::with('items')
+            ->whereYear('created_at', $selectedYear)
+            ->get();
+
+        $permohonanTotal = $permohonanCollection->count();
+        $permohonanOpen = $permohonanCollection->where('status', 'OPEN')->count();
+        $permohonanClose = $permohonanCollection->where('status', 'CLOSE')->count();
+
+        $proyekAktif = Proyek::whereYear('created_at', $selectedYear)
+            ->whereIn('status', [
+                Proyek::STATUS_PROGRESS,
+                Proyek::STATUS_REPORTING,
+                Proyek::STATUS_ENDORSE,
+            ])->count();
+
+        $invoiceWithPayments = Invoice::withSum('pembayarans', 'nominal_bayar')
+            ->whereYear('created_at', $selectedYear)
+            ->get();
+
+        $invoiceTotal = (float) $invoiceWithPayments->sum('grand_total');
         $outstandingTotal = $invoiceWithPayments->sum(fn ($invoice) => $invoice->sisa_tagihan);
         $invoiceLunas = $invoiceWithPayments->where('status_pembayaran', 'lunas')->count();
         $invoiceSebagian = $invoiceWithPayments->where('status_pembayaran', 'sebagian')->count();
         $invoiceBelumBayar = $invoiceWithPayments->where('status_pembayaran', 'belum_bayar')->count();
 
-        $projectStatusChart = Proyek::select('status', DB::raw('COUNT(*) as total'))
+        $projectStatusChart = Proyek::whereYear('created_at', $selectedYear)
+            ->select('status', DB::raw('COUNT(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')
             ->toArray();
 
-        $monthlyPayments = Pembayaran::selectRaw("DATE_FORMAT(tanggal_bayar, '%Y-%m') as month, SUM(nominal_bayar) as total")
+        $monthlyPayments = Pembayaran::selectRaw("MONTH(tanggal_bayar) as month_number, DATE_FORMAT(tanggal_bayar, '%Y-%m') as month, SUM(nominal_bayar) as total")
+            ->whereYear('tanggal_bayar', $selectedYear)
             ->whereNotNull('tanggal_bayar')
-            ->groupBy('month')
-            ->orderBy('month')
-            ->limit(12)
+            ->groupBy('month_number', 'month')
+            ->orderBy('month_number')
             ->get();
 
         $pakMonthlyByCategory = PakItem::query()
             ->join('categories', 'categories.id', '=', 'pak_items.category_id')
-            ->selectRaw("DATE_FORMAT(pak_items.created_at, '%Y-%m') as month, categories.name as category, SUM(pak_items.total_cost) as total")
-            ->groupBy('month', 'categories.name')
-            ->orderBy('month')
+            ->selectRaw("MONTH(pak_items.created_at) as month_number, DATE_FORMAT(pak_items.created_at, '%Y-%m') as month, categories.name as category, SUM(pak_items.total_cost) as total")
+            ->whereYear('pak_items.created_at', $selectedYear)
+            ->groupBy('month_number', 'month', 'categories.name')
+            ->orderBy('month_number')
             ->get();
 
         $topOutstandingInvoices = $invoiceWithPayments
@@ -59,6 +87,8 @@ class DashboardController extends Controller
             ->values();
 
         return view('dashboard.index', compact(
+            'selectedYear',
+            'availableYears',
             'permohonanTotal',
             'permohonanOpen',
             'permohonanClose',
