@@ -6,10 +6,18 @@
 <div class="title-wrapper pt-20 pb-20 d-flex justify-content-between align-items-center">
     <h2>Dashboard Operasional Tahun {{ $selectedYear }}</h2>
     <form method="GET" action="{{ route('dashboard') }}" class="d-flex align-items-center gap-2">
-        <label for="year" class="mb-0">Filter Tahun</label>
+        <label for="year" class="mb-0">Tahun</label>
         <select name="year" id="year" class="form-select form-select-sm" onchange="this.form.submit()">
             @foreach($availableYears as $year)
                 <option value="{{ $year }}" {{ (int) $year === (int) $selectedYear ? 'selected' : '' }}>{{ $year }}</option>
+            @endforeach
+        </select>
+
+        <label for="month" class="mb-0">Bulan</label>
+        <select name="month" id="month" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="">Semua Bulan</option>
+            @foreach($monthOptions as $month => $monthName)
+                <option value="{{ $month }}" {{ (int) $month === (int) $selectedMonth ? 'selected' : '' }}>{{ $monthName }}</option>
             @endforeach
         </select>
     </form>
@@ -38,18 +46,14 @@
     </div>
     <div class="col-lg-4">
         <div class="card-style">
-            <h6>Pembayaran per Bulan ({{ $selectedYear }})</h6>
-            @foreach($monthlyPayments as $row)
-                <div class="d-flex justify-content-between border-bottom py-1"><span>{{ $row->month }}</span><strong>Rp {{ number_format($row->total,0,',','.') }}</strong></div>
-            @endforeach
+            <h6>Donut Pembayaran per Metode {{ $selectedMonth ? '(' . $monthOptions[$selectedMonth] . ')' : '(Semua Bulan)' }}</h6>
+            <canvas id="paymentsDonut" height="220"></canvas>
         </div>
     </div>
     <div class="col-lg-4">
         <div class="card-style">
-            <h6>PAK per Bulan per Kategori ({{ $selectedYear }})</h6>
-            @foreach($pakMonthlyByCategory as $row)
-                <div class="d-flex justify-content-between border-bottom py-1"><span>{{ $row->month }} - {{ $row->category }}</span><strong>Rp {{ number_format($row->total,0,',','.') }}</strong></div>
-            @endforeach
+            <h6>Donut PAK per Kategori {{ $selectedMonth ? '(' . $monthOptions[$selectedMonth] . ')' : '(Semua Bulan)' }}</h6>
+            <canvas id="pakDonut" height="220"></canvas>
         </div>
     </div>
 </div>
@@ -80,4 +84,28 @@
         </div>
     </div>
 </div>
+
+<script>
+    const paymentLabels = @json($paymentsByMethod->pluck('label')->values());
+    const paymentData = @json($paymentsByMethod->pluck('total')->map(fn ($v) => (float) $v)->values());
+
+    const pakLabels = @json($pakByCategory->pluck('label')->values());
+    const pakData = @json($pakByCategory->pluck('total')->map(fn ($v) => (float) $v)->values());
+
+    const palette = ['#4f46e5', '#06b6d4', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#64748b'];
+
+    if (window.Chart) {
+        new Chart(document.getElementById('paymentsDonut'), {
+            type: 'doughnut',
+            data: { labels: paymentLabels, datasets: [{ data: paymentData, backgroundColor: palette }] },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+
+        new Chart(document.getElementById('pakDonut'), {
+            type: 'doughnut',
+            data: { labels: pakLabels, datasets: [{ data: pakData, backgroundColor: palette }] },
+            options: { plugins: { legend: { position: 'bottom' } } }
+        });
+    }
+</script>
 @endsection

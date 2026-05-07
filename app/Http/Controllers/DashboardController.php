@@ -15,6 +15,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $selectedYear = (int) $request->integer('year', now()->year);
+        $selectedMonth = $request->filled('month') ? max(1, min(12, (int) $request->integer('month'))) : null;
 
         $availableYears = collect([
             Permohonan::query()->selectRaw('YEAR(created_at) as year'),
@@ -34,6 +35,8 @@ class DashboardController extends Controller
             $selectedYear = (int) $availableYears->last();
         }
 
+        $monthOptions = collect(range(1, 12))->mapWithKeys(fn ($month) => [$month => now()->startOfYear()->month($month)->translatedFormat('F')]);
+
         $permohonanCollection = Permohonan::with('items')
             ->whereYear('created_at', $selectedYear)
             ->get();
@@ -43,11 +46,8 @@ class DashboardController extends Controller
         $permohonanClose = $permohonanCollection->where('status', 'CLOSE')->count();
 
         $proyekAktif = Proyek::whereYear('created_at', $selectedYear)
-            ->whereIn('status', [
-                Proyek::STATUS_PROGRESS,
-                Proyek::STATUS_REPORTING,
-                Proyek::STATUS_ENDORSE,
-            ])->count();
+            ->whereIn('status', [Proyek::STATUS_PROGRESS, Proyek::STATUS_REPORTING, Proyek::STATUS_ENDORSE])
+            ->count();
 
         $invoiceWithPayments = Invoice::withSum('pembayarans', 'nominal_bayar')
             ->whereYear('created_at', $selectedYear)
@@ -65,19 +65,32 @@ class DashboardController extends Controller
             ->pluck('total', 'status')
             ->toArray();
 
-        $monthlyPayments = Pembayaran::selectRaw("MONTH(tanggal_bayar) as month_number, DATE_FORMAT(tanggal_bayar, '%Y-%m') as month, SUM(nominal_bayar) as total")
+        $paymentsByMethodQuery = Pembayaran::query()
+            ->selectRaw("COALESCE(NULLIF(metode_pembayaran, ''), 'Tanpa Metode') as label, SUM(nominal_bayar) as total")
             ->whereYear('tanggal_bayar', $selectedYear)
-            ->whereNotNull('tanggal_bayar')
-            ->groupBy('month_number', 'month')
-            ->orderBy('month_number')
+            ->whereNotNull('tanggal_bayar');
+
+        if ($selectedMonth) {
+            $paymentsByMethodQuery->whereMonth('tanggal_bayar', $selectedMonth);
+        }
+
+        $paymentsByMethod = $paymentsByMethodQuery
+            ->groupBy('label')
+            ->orderByDesc('total')
             ->get();
 
-        $pakMonthlyByCategory = PakItem::query()
+        $pakByCategoryQuery = PakItem::query()
             ->join('categories', 'categories.id', '=', 'pak_items.category_id')
-            ->selectRaw("MONTH(pak_items.created_at) as month_number, DATE_FORMAT(pak_items.created_at, '%Y-%m') as month, categories.name as category, SUM(pak_items.total_cost) as total")
-            ->whereYear('pak_items.created_at', $selectedYear)
-            ->groupBy('month_number', 'month', 'categories.name')
-            ->orderBy('month_number')
+            ->selectRaw('categories.name as label, SUM(pak_items.total_cost) as total')
+            ->whereYear('pak_items.created_at', $selectedYear);
+
+        if ($selectedMonth) {
+            $pakByCategoryQuery->whereMonth('pak_items.created_at', $selectedMonth);
+        }
+
+        $pakByCategory = $pakByCategoryQuery
+            ->groupBy('categories.name')
+            ->orderByDesc('total')
             ->get();
 
         $topOutstandingInvoices = $invoiceWithPayments
@@ -88,6 +101,8 @@ class DashboardController extends Controller
 
         return view('dashboard.index', compact(
             'selectedYear',
+            'selectedMonth',
+            'monthOptions',
             'availableYears',
             'permohonanTotal',
             'permohonanOpen',
@@ -99,8 +114,8 @@ class DashboardController extends Controller
             'invoiceSebagian',
             'invoiceBelumBayar',
             'projectStatusChart',
-            'monthlyPayments',
-            'pakMonthlyByCategory',
+            'paymentsByMethod',
+            'pakByCategory',
             'topOutstandingInvoices'
         ));
     }
