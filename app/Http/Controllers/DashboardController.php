@@ -35,7 +35,7 @@ class DashboardController extends Controller
             $selectedYear = (int) $availableYears->last();
         }
 
-        $monthOptions = collect(range(1, 12))->mapWithKeys(fn ($month) => [$month => now()->startOfYear()->month($month)->translatedFormat('F')]);
+        $monthOptions = collect(range(1, 12))->mapWithKeys(fn($month) => [$month => now()->startOfYear()->month($month)->translatedFormat('F')]);
 
         $permohonanCollection = Permohonan::with('items')
             ->whereYear('created_at', $selectedYear)
@@ -54,7 +54,7 @@ class DashboardController extends Controller
             ->get();
 
         $invoiceTotal = (float) $invoiceWithPayments->sum('grand_total');
-        $outstandingTotal = $invoiceWithPayments->sum(fn ($invoice) => $invoice->sisa_tagihan);
+        $outstandingTotal = $invoiceWithPayments->sum(fn($invoice) => $invoice->sisa_tagihan);
         $invoiceLunas = $invoiceWithPayments->where('status_pembayaran', 'lunas')->count();
         $invoiceSebagian = $invoiceWithPayments->where('status_pembayaran', 'sebagian')->count();
         $invoiceBelumBayar = $invoiceWithPayments->where('status_pembayaran', 'belum_bayar')->count();
@@ -94,10 +94,33 @@ class DashboardController extends Controller
             ->get();
 
         $topOutstandingInvoices = $invoiceWithPayments
-            ->filter(fn ($invoice) => $invoice->sisa_tagihan > 0)
+            ->filter(fn($invoice) => $invoice->sisa_tagihan > 0)
             ->sortByDesc('sisa_tagihan')
             ->take(5)
             ->values();
+
+        // Proyek aktif yang belum punya invoice sama sekali
+        $proyekTanpaInvoice = Proyek::with('permohonan')
+            ->whereIn('status', [Proyek::STATUS_PROGRESS, Proyek::STATUS_REPORTING, Proyek::STATUS_ENDORSE])
+            ->whereDoesntHave('invoices')
+            ->get();
+
+        // Invoice per bulan untuk bar chart (array 12 bulan)
+        $invoicePerBulan = array_fill(0, 12, 0);
+        $bayarPerBulan   = array_fill(0, 12, 0);
+
+        Invoice::whereYear('created_at', $selectedYear)
+            ->get()
+            ->each(function ($inv) use (&$invoicePerBulan) {
+                $invoicePerBulan[$inv->created_at->month - 1] += (float) $inv->grand_total;
+            });
+
+        Pembayaran::whereYear('tanggal_bayar', $selectedYear)
+            ->whereNotNull('tanggal_bayar')
+            ->get()
+            ->each(function ($p) use (&$bayarPerBulan) {
+                $bayarPerBulan[$p->tanggal_bayar->month - 1] += (float) $p->nominal_bayar;
+            });
 
         return view('dashboard.index', compact(
             'selectedYear',
@@ -116,7 +139,10 @@ class DashboardController extends Controller
             'projectStatusChart',
             'paymentsByMethod',
             'pakByCategory',
-            'topOutstandingInvoices'
+            'topOutstandingInvoices',
+            'proyekTanpaInvoice',
+            'invoicePerBulan',
+            'bayarPerBulan',
         ));
     }
 }
