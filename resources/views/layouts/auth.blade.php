@@ -25,7 +25,7 @@
 
             /* BACKGROUND IMAGE */
             background:
-                url('{{ asset('template/assets/images/backgroundlogin.png') }}');
+                url('{{ asset('template/assets/images/backgroundlogin1.png') }}');
 
             background-size: cover;
             background-position: center;
