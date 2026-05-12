@@ -236,7 +236,7 @@
                         <td class="text-right">{{ $loop->iteration }}</td>
                         <td>{{ $item->description }}</td>
                         <td>{{ $item->satuan ?? '-' }}</td>
-                        <td class="text-right">{{ number_format((float) $item->qty, 2, ',', '.') }}</td>
+                        <td class="text-right">{{ number_format((float) $item->qty, 0, ',', '.') }}</td>
                         <td class="text-right">Rp {{ number_format((float) $item->total, 0, ',', '.') }}</td>
                     </tr>
                 @empty
