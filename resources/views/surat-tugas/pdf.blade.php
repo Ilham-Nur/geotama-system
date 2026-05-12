@@ -291,7 +291,7 @@
                         <img src="{{ $qrBase64 }}" style="width:90px;">
                     @endif
 
-                    <div class="name">WAHYUDI KUSUMA</div>
+                    <div class="name">Wahyu Adi Kesuma</div>
                     <div style="font-size:10px;">DIRECTOR</div>
                 </div>
             </div>
