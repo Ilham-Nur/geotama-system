@@ -10,12 +10,14 @@ class Quotation extends Model
         'no_quo',
         'tanggal',
         'client_id',
+        'discount',
         'grand_total_quo',
         'qr_code_path',
     ];
 
     protected $casts = [
         'tanggal' => 'date',
+        'discount' => 'decimal:2',
         'grand_total_quo' => 'decimal:2',
     ];
 

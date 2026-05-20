@@ -246,6 +246,18 @@
                 @endforelse
 
                 <tr>
+                    <td colspan="4" class="text-right"><strong>Sub Total</strong></td>
+                    <td class="text-right">
+                        <strong>Rp {{ number_format((float) $quotation->items->sum('total'), 0, ',', '.') }}</strong>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="text-right"><strong>Discount</strong></td>
+                    <td class="text-right">
+                        <strong>Rp {{ number_format((float) $quotation->discount, 0, ',', '.') }}</strong>
+                    </td>
+                </tr>
+                <tr>
                     <td colspan="4" class="text-right"><strong>Grand Total</strong></td>
                     <td class="text-right">
                         <strong>Rp {{ number_format((float) $quotation->grand_total_quo, 0, ',', '.') }}</strong>
