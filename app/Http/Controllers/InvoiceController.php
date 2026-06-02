@@ -204,6 +204,149 @@ class InvoiceController extends Controller
         }
     }
 
+    public function edit(Invoice $invoice)
+    {
+        $invoice->load(['items', 'proyek.permohonan', 'pembayarans']);
+
+        if ($invoice->pembayarans()->exists()) {
+            return redirect()
+                ->route('invoice.index')
+                ->with('error', 'Invoice tidak bisa diedit karena sudah memiliki pembayaran.');
+        }
+
+        $proyek = $invoice->proyek()->with('invoices')->firstOrFail();
+        $firstInvoiceId = $proyek->invoices()->orderBy('id')->value('id');
+        $canEditNominalProyek = (int) $firstInvoiceId === (int) $invoice->id;
+        $totalInvoiceLain = (float) $proyek->invoices()
+            ->where('id', '!=', $invoice->id)
+            ->sum('grand_total');
+
+        return view('invoice.edit', compact(
+            'invoice',
+            'proyek',
+            'canEditNominalProyek',
+            'totalInvoiceLain'
+        ));
+    }
+
+    public function update(Request $request, Invoice $invoice)
+    {
+        $request->validate([
+            'jenis_invoice' => 'required|in:dp,termin,pelunasan',
+            'tanggal_invoice' => 'nullable|date',
+            'discount' => 'nullable|numeric|min:0',
+            'tax' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string',
+            'nominal_proyek' => 'nullable|numeric|min:0',
+            'items' => 'required|array|min:1',
+            'items.*.description' => 'required|string|max:255',
+            'items.*.unit' => 'nullable|string|max:100',
+            'items.*.qty' => 'required|numeric|min:0.01',
+            'items.*.amount' => 'required|numeric|min:0',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $invoice = Invoice::with(['items', 'pembayarans'])->lockForUpdate()->findOrFail($invoice->id);
+
+            if ($invoice->pembayarans()->exists()) {
+                throw ValidationException::withMessages([
+                    'invoice' => 'Invoice tidak bisa diedit karena sudah memiliki pembayaran.',
+                ]);
+            }
+
+            $proyek = Proyek::with('invoices')->lockForUpdate()->findOrFail($invoice->proyek_id);
+            $firstInvoiceId = $proyek->invoices()->orderBy('id')->value('id');
+            $canEditNominalProyek = (int) $firstInvoiceId === (int) $invoice->id;
+
+            $subTotal = 0;
+            foreach ($request->items as $item) {
+                $lineTotal = (float) $item['qty'] * (float) $item['amount'];
+                $subTotal += $lineTotal;
+            }
+
+            $discount = (float) ($request->discount ?? 0);
+            $tax = (float) ($request->tax ?? 0);
+            $grandTotal = $subTotal - $discount + $tax;
+
+            if ($grandTotal < 0) {
+                throw ValidationException::withMessages([
+                    'discount' => 'Grand total tidak boleh kurang dari 0.',
+                ]);
+            }
+
+            $nominalProyek = (float) ($proyek->nominal ?? 0);
+
+            if ($canEditNominalProyek) {
+                if ($request->filled('nominal_proyek') === false || (float) $request->nominal_proyek <= 0) {
+                    throw ValidationException::withMessages([
+                        'nominal_proyek' => 'Nominal proyek wajib diisi.',
+                    ]);
+                }
+
+                $nominalProyek = (float) $request->nominal_proyek;
+            }
+
+            $totalInvoiceLain = (float) $proyek->invoices()
+                ->where('id', '!=', $invoice->id)
+                ->sum('grand_total');
+            $totalInvoiceSetelahEdit = $totalInvoiceLain + $grandTotal;
+
+            if ($nominalProyek < $totalInvoiceSetelahEdit) {
+                throw ValidationException::withMessages([
+                    'nominal_proyek' => 'Nominal proyek tidak boleh lebih kecil dari total invoice proyek.',
+                    'items' => 'Grand total invoice melebihi sisa nominal proyek.',
+                ]);
+            }
+
+            if ($canEditNominalProyek) {
+                $proyek->update([
+                    'nominal' => $nominalProyek,
+                ]);
+            }
+
+            $invoice->update([
+                'jenis_invoice' => $request->jenis_invoice,
+                'tanggal_invoice' => $request->tanggal_invoice ?? now()->toDateString(),
+                'sub_total' => $subTotal,
+                'discount' => $discount,
+                'tax' => $tax,
+                'grand_total' => $grandTotal,
+                'notes' => $request->notes,
+            ]);
+
+            $invoice->items()->delete();
+
+            foreach ($request->items as $item) {
+                $lineTotal = (float) $item['qty'] * (float) $item['amount'];
+
+                $invoice->items()->create([
+                    'description' => $item['description'],
+                    'unit' => $item['unit'] ?? null,
+                    'qty' => $item['qty'],
+                    'amount' => $item['amount'],
+                    'total' => $lineTotal,
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('invoice.index')
+                ->with('success', 'Invoice berhasil diperbarui.');
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            throw $e;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan: ' . $th->getMessage());
+        }
+    }
+
     public function exportPdf(Invoice $invoice)
     {
         $invoice->load([

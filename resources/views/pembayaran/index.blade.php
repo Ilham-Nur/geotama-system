@@ -275,7 +275,17 @@
                                                                             <i class="lni lni-download"></i>
                                                                         </a>
                                                                     @endcan
-                                                                    
+
+                                                                    @can('invoice.store')
+                                                                        @if ($statusPembayaran == 'belum_bayar')
+                                                                            <a href="{{ route('invoice.edit', $invoice->id) }}"
+                                                                                class="text-primary me-2"
+                                                                                title="Edit Invoice">
+                                                                                <i class="lni lni-pencil"></i>
+                                                                            </a>
+                                                                        @endif
+                                                                    @endcan
+
                                                                     @can('pembayaran.create')
                                                                         @if ($statusPembayaran == 'belum_bayar')
                                                                             <a href="{{ route('pembayaran.create', ['invoice_id' => $invoice->id]) }}"

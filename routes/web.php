@@ -252,6 +252,14 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:invoice.store')
         ->name('invoice.store');
 
+    Route::get('/invoice/{invoice}/edit', [InvoiceController::class, 'edit'])
+        ->middleware('permission:invoice.store')
+        ->name('invoice.edit');
+
+    Route::put('/invoice/{invoice}', [InvoiceController::class, 'update'])
+        ->middleware('permission:invoice.store')
+        ->name('invoice.update');
+
     Route::get('/invoice/{invoice}/pdf', [InvoiceController::class, 'exportPdf'])
         ->middleware('permission:invoice.export_pdf')
         ->name('invoice.export-pdf');
