@@ -193,10 +193,12 @@
         <div class="row">
             <div class="left">
                 <strong>Kepada Yth</strong><br>
-                {{ $quotation->client->nama_perusahaan ?? '-' }}<br>
-                {{ $quotation->client->alamat ?? '-' }}
+                {{ optional($quotation->client)->nama_perusahaan && optional($quotation->client)->nama_perusahaan !== '-'
+                    ? optional($quotation->client)->nama_perusahaan
+                    : optional($quotation->client)->nama_pic ?? '-' }}<br>
+                {{ optional($quotation->client)->alamat ?? '-' }}
             </div>
-
+            
             <div class="right">
                 <table class="meta">
                     <tr>
@@ -300,7 +302,7 @@
                         Hormat kami,<br>
                         PT Geotama Global Intijaya
                     </td>
-                    <td width="30%" >
+                    <td width="30%">
 
                         {{-- <div class="muted">Scan untuk lihat TTD digital</div> --}}
                     </td>
