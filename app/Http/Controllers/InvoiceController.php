@@ -352,6 +352,7 @@ class InvoiceController extends Controller
         $invoice->load([
             'items',
             'proyek.permohonan',
+            'proyek.invoices',
         ]);
 
         $pdf = Pdf::loadView('invoice.pdf', compact('invoice'))

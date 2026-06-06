@@ -224,6 +224,7 @@
             text-align: right;
             font-weight: bold;
             width: 140px;
+            border-bottom: 1px solid #8a848a;
         }
 
         .grand-line td {
@@ -327,6 +328,54 @@
         tr {
             page-break-inside: avoid;
         }
+
+        .compact table.items th,
+        .compact table.items td {
+            padding-top: 4px;
+            padding-bottom: 4px;
+            font-size: 10px;
+        }
+
+        .compact .project-name {
+            margin-top: 18px;
+            margin-bottom: 9px;
+        }
+
+        .compact .notes-box {
+            margin-top: 5px;
+            margin-bottom: 8px;
+            font-size: 9px;
+            line-height: 1.25;
+        }
+
+        .compact .summary-table {
+            margin-top: 11px;
+        }
+
+        .compact .bottom-section {
+            margin-top: 15px !important;
+        }
+
+        .very-compact table.items th,
+        .very-compact table.items td {
+            padding-top: 2px;
+            padding-bottom: 2px;
+            font-size: 9px;
+        }
+
+        .very-compact .company-info p {
+            margin-bottom: 3px;
+        }
+
+        .very-compact .summary-table td {
+            padding-top: 2px;
+            padding-bottom: 2px;
+            font-size: 11px;
+        }
+
+        .very-compact .grand-line td {
+            font-size: 14px;
+        }
     </style>
 </head>
 
@@ -334,8 +383,7 @@
     @php
         $permohonan = $invoice->proyek->permohonan ?? null;
 
-        function base64Image($relativePath)
-        {
+        $base64Image = function ($relativePath) {
             $fullPath = public_path($relativePath);
 
             if (!file_exists($fullPath)) {
@@ -346,13 +394,26 @@
             $data = file_get_contents($fullPath);
 
             return 'data:image/' . $type . ';base64,' . base64_encode($data);
-        }
+        };
 
-        $logoBase64 = base64Image('template/assets/images/logo/logo-geotama-removebg-preview.png');
-        $watermarkBase64 = base64Image('template/assets/images/logo/logo-geotama-removebg-preview.png');
+        $logoBase64 = $base64Image('template/assets/images/logo/logo-geotama-removebg-preview.png');
+        $watermarkBase64 = $base64Image('template/assets/images/logo/logo-geotama-removebg-preview.png');
+
+        $grossTotal = (float) ($invoice->proyek->nominal ?? $invoice->sub_total);
+        $downPayment = (float) ($invoice->proyek->invoices ?? collect())
+            ->where('jenis_invoice', 'dp')
+            ->sum(fn($dpInvoice) => max((float) $dpInvoice->sub_total - (float) $dpInvoice->discount, 0));
+        $hasDownPayment = $downPayment > 0;
+
+        $notesLength = mb_strlen(strip_tags((string) $invoice->notes));
+        $itemCount = $invoice->items->count();
+        $layoutClass = $itemCount > 8 || $notesLength > 500
+            ? 'very-compact'
+            : ($itemCount > 5 || $notesLength > 250 ? 'compact' : '');
+        $emptyRowTarget = $hasDownPayment ? 5 : 6;
     @endphp
 
-    <div class="page">
+    <div class="page {{ $layoutClass }}">
         @if ($watermarkBase64)
             <img src="{{ $watermarkBase64 }}" class="watermark">
         @endif
@@ -446,7 +507,7 @@
                         </tr>
                     @endforeach
 
-                    @for ($i = 0; $i < max(0, 6 - $invoice->items->count()); $i++)
+                    @for ($i = 0; $i < max(0, $emptyRowTarget - $invoice->items->count()); $i++)
                         <tr class="empty-row">
                             <td class="col-desc">&nbsp;</td>
                             <td class="col-price"></td>
@@ -459,9 +520,9 @@
 
             <table class="summary-table">
                 <tr>
-                    <td class="summary-label">Sub Total :</td>
+                    <td class="summary-label">Gross Total :</td>
                     <td class="summary-currency">Rp</td>
-                    <td class="summary-value">{{ number_format($invoice->sub_total, 2, ',', '.') }}</td>
+                    <td class="summary-value">{{ number_format($grossTotal, 2, ',', '.') }}</td>
                 </tr>
                 <tr>
                     <td class="summary-label">Discount :</td>
@@ -470,6 +531,13 @@
                         {{ $invoice->discount > 0 ? number_format($invoice->discount, 2, ',', '.') : '-' }}
                     </td>
                 </tr>
+                @if ($hasDownPayment)
+                    <tr>
+                        <td class="summary-label">Down Payment :</td>
+                        <td class="summary-currency">Rp</td>
+                        <td class="summary-value">{{ number_format($downPayment, 2, ',', '.') }}</td>
+                    </tr>
+                @endif
                 <tr>
                     <td class="summary-label">Tax :</td>
                     <td class="summary-currency">Rp</td>
@@ -478,7 +546,7 @@
                     </td>
                 </tr>
                 <tr class="grand-line">
-                    <td class="summary-label">GRAND TOTAL :</td>
+                    <td class="summary-label">NET TOTAL :</td>
                     <td class="summary-currency">Rp</td>
                     <td class="summary-value">{{ number_format($invoice->grand_total, 2, ',', '.') }}</td>
                 </tr>
