@@ -371,6 +371,10 @@ class InvoiceController extends Controller
         }
 
         if ($pdf->getDomPDF()->getCanvas()->get_page_count() > 1) {
+            $pdf = $renderPdf(emptyRowsToRemove: PHP_INT_MAX);
+        }
+
+        if ($pdf->getDomPDF()->getCanvas()->get_page_count() > 1) {
             $pdf = $renderPdf(emptyRowsToRemove: PHP_INT_MAX, forceCompact: true);
         }
 

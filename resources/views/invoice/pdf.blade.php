@@ -405,16 +405,9 @@
             ->sum(fn($dpInvoice) => max((float) $dpInvoice->sub_total - (float) $dpInvoice->discount, 0));
         $hasDownPayment = $downPayment > 0;
 
-        $notesLength = mb_strlen(strip_tags((string) $invoice->notes));
-        $itemCount = $invoice->items->count();
         $forceCompact = $forceCompact ?? false;
         $emptyRowsToRemove = max(0, (int) ($emptyRowsToRemove ?? 0));
-        $layoutClass =
-            $forceCompact || $itemCount > 8 || $notesLength > 500
-                ? 'very-compact'
-                : ($itemCount > 5 || $notesLength > 250
-                    ? 'compact'
-                    : '');
+        $layoutClass = $forceCompact ? 'very-compact' : '';
         $emptyRowTarget = $hasDownPayment ? 5 : 6;
         $emptyRowCount = max(0, $emptyRowTarget - $invoice->items->count() - $emptyRowsToRemove);
     @endphp
