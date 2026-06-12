@@ -14,7 +14,7 @@
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
         "setasign/fpdf": "1.8.6",
-        "setasign/fpdi": "2.6.4",
+        "setasign/fpdi": "^2.6.8",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "spatie/laravel-permission": "^7.2"
     },
