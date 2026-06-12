@@ -297,6 +297,7 @@
 
                         const normalizedDocuments = Array.isArray(employee.documents) ? employee.documents : [];
                         const normalizedContracts = Array.isArray(employee.contracts) ? employee.contracts : [];
+                        const normalizedEducations = Array.isArray(employee.educations) ? employee.educations : [];
                         const normalizedExperiences = Array.isArray(employee.work_experiences) ? employee.work_experiences : [];
                         const normalizedCertificates = Array.isArray(employee.certificates) ? employee.certificates : [];
                         const documentsHtml = normalizedDocuments.length ?
@@ -312,13 +313,17 @@
                             '<p class="text-muted mb-0 text-start">Tidak ada dokumen.</p>';
 
 
-                        const educationHtml = employee.last_education || employee.last_education_file_url ?
-                            `<div class="list-group">
-                                <div class="list-group-item">
-                                    <div class="fw-semibold">${fallbackValue(employee.last_education)}</div>
-                                    ${employee.last_education_file_url ? `<a href="${employee.last_education_file_url}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">Lihat Berkas (${fallbackValue(employee.last_education_file_name)})</a>` : ''}
-                                </div>
-                            </div>` :
+                        const educationHtml = normalizedEducations.length ?
+                            `<ul class="list-group text-start">${normalizedEducations.map((education) => `
+                                <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <div class="fw-semibold">${[education.education_level, education.major].filter(Boolean).join(' - ') || fallbackValue(education.institution_name)}</div>
+                                        <small class="text-muted d-block">${fallbackValue(education.institution_name)} | ${fallbackValue(education.start_year)} - ${education.is_current ? 'Sekarang' : fallbackValue(education.end_year)}</small>
+                                        ${education.grade ? `<small class="text-muted d-block">Nilai/IPK: ${education.grade}</small>` : ''}
+                                    </div>
+                                    ${education.file_url ? `<a href="${education.file_url}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat Berkas</a>` : ''}
+                                </li>`).join('')}
+                            </ul>` :
                             '<p class="text-muted mb-0 text-start">Data pendidikan belum diisi.</p>';
 
                         const experiencesHtml = normalizedExperiences.length ?
@@ -326,7 +331,7 @@
                                 <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap gap-2">
                                     <div>
                                         <div class="fw-semibold">${fallbackValue(experience.company_name)}</div>
-                                        <small class="text-muted d-block">${fallbackValue(experience.position)} • ${fallbackValue(experience.start_year)} - ${fallbackValue(experience.end_year)}</small>
+                                        <small class="text-muted d-block">${fallbackValue(experience.position)} • ${fallbackValue(experience.start_year)} - ${experience.is_current ? 'Sekarang' : fallbackValue(experience.end_year)}</small>
                                         <small class="text-muted d-block">Berkas: ${fallbackValue(experience.certificate_file_name)}</small>
                                     </div>
                                     ${experience.certificate_file_url ? `<a href="${experience.certificate_file_url}" target="_blank" class="btn btn-sm btn-outline-primary">Lihat</a>` : ''}

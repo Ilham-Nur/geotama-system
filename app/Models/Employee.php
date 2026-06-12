@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class Employee extends Model
 {
@@ -64,9 +65,31 @@ class Employee extends Model
         return $this->hasMany(EmployeeWorkExperience::class);
     }
 
+    public function orderedWorkExperiences(): Collection
+    {
+        return $this->workExperiences
+            ->sortByDesc(function (EmployeeWorkExperience $experience) {
+                if ($experience->is_current) {
+                    return 100_000_000 + ($experience->start_year ?? 0);
+                }
+
+                return (($experience->end_year ?? 0) * 10_000) + ($experience->start_year ?? 0);
+            })
+            ->values();
+    }
+
+    public function latestWorkExperiencesForCv(): Collection
+    {
+        return $this->orderedWorkExperiences()->take(3)->values();
+    }
+
+    public function educations()
+    {
+        return $this->hasMany(EmployeeEducation::class);
+    }
+
     public function certificates()
     {
         return $this->hasMany(EmployeeCertificate::class);
     }
 }
-

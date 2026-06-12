@@ -5,19 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class EmployeeWorkExperience extends Model
+class EmployeeEducation extends Model
 {
     use HasFactory;
 
+    protected $table = 'employee_educations';
+
     protected $fillable = [
         'employee_id',
-        'company_name',
-        'position',
+        'education_level',
+        'institution_name',
+        'major',
         'start_year',
         'end_year',
         'is_current',
-        'certificate_file_path',
-        'certificate_file_name',
+        'grade',
+        'description',
+        'file_path',
+        'file_name',
+        'mime_type',
     ];
 
     protected function casts(): array

@@ -224,19 +224,31 @@
                     </div>
 
                     <hr class="my-4">
-                    <h6 class="mb-3">Data Pendidikan</h6>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Ijazah Terakhir</label>
-                            <input type="text" name="last_education" class="form-control" value="{{ old('last_education', $employee->last_education) }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Upload Berkas Ijazah</label>
-                            <input type="file" name="last_education_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
-                            @if ($employee->last_education_file_path)
-                                <small class="text-muted">File saat ini: <a href="{{ asset('storage/' . $employee->last_education_file_path) }}" target="_blank">{{ $employee->last_education_file_name }}</a></small>
-                            @endif
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Riwayat Pendidikan</h6>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-education-profile">+ Tambah</button>
+                    </div>
+                    <p class="text-muted small mb-3">Berkas yang didukung hanya PDF, PNG, JPG, atau JPEG dengan ukuran maksimal 5 MB.</p>
+                    <input type="hidden" name="educations_present" value="1">
+                    <div id="education-profile-wrapper">
+                        @foreach (old('educations', $employee->educations->map(fn($item) => ['id' => $item->id, 'education_level' => $item->education_level, 'institution_name' => $item->institution_name, 'major' => $item->major, 'start_year' => $item->start_year, 'end_year' => $item->end_year, 'is_current' => $item->is_current, 'grade' => $item->grade, 'description' => $item->description, 'file_name' => $item->file_name])->toArray()) as $i => $education)
+                            <div class="border rounded p-3 mb-3 education-item-profile bg-light">
+                                <div class="row g-3">
+                                    @if (!empty($education['id']))<input type="hidden" name="educations[{{ $i }}][id]" value="{{ $education['id'] }}">@endif
+                                    <div class="col-md-3"><label class="form-label">Jenjang</label><input type="text" name="educations[{{ $i }}][education_level]" class="form-control" value="{{ $education['education_level'] ?? '' }}"></div>
+                                    <div class="col-md-5"><label class="form-label">Institusi</label><input type="text" name="educations[{{ $i }}][institution_name]" class="form-control" value="{{ $education['institution_name'] ?? '' }}"></div>
+                                    <div class="col-md-4"><label class="form-label">Jurusan</label><input type="text" name="educations[{{ $i }}][major]" class="form-control" value="{{ $education['major'] ?? '' }}"></div>
+                                    <div class="col-md-2"><label class="form-label">Mulai</label><input type="number" name="educations[{{ $i }}][start_year]" class="form-control" value="{{ $education['start_year'] ?? '' }}"></div>
+                                    <div class="col-md-2"><label class="form-label">Selesai</label><input type="number" name="educations[{{ $i }}][end_year]" class="form-control" value="{{ $education['end_year'] ?? '' }}"></div>
+                                    <div class="col-md-2"><label class="form-label">Nilai / IPK</label><input type="text" name="educations[{{ $i }}][grade]" class="form-control" value="{{ $education['grade'] ?? '' }}"></div>
+                                    <div class="col-md-3 d-flex align-items-end"><div class="form-check mb-2"><input type="checkbox" name="educations[{{ $i }}][is_current]" value="1" class="form-check-input" {{ !empty($education['is_current']) ? 'checked' : '' }}><label class="form-check-label">Masih berlangsung</label></div></div>
+                                    <div class="col-md-3"><label class="form-label">Berkas</label><input type="file" name="education_files[{{ $i }}]" class="form-control" accept=".pdf,.png,.jpg,.jpeg"></div>
+                                    <div class="col-md-10"><label class="form-label">Keterangan / Pencapaian</label><textarea name="educations[{{ $i }}][description]" rows="2" class="form-control">{{ $education['description'] ?? '' }}</textarea></div>
+                                    <div class="col-md-2 text-end d-flex align-items-end justify-content-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-row">Hapus</button></div>
+                                </div>
+                                @if (!empty($education['file_name']))<small class="text-muted">File saat ini: {{ $education['file_name'] }}</small>@endif
+                            </div>
+                        @endforeach
                     </div>
 
                     <hr class="my-4">
@@ -244,18 +256,20 @@
                         <h6 class="mb-0">Pengalaman Kerja</h6>
                         <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-work-profile">+ Tambah</button>
                     </div>
+                    <p class="text-muted small mb-3">Berkas pendukung yang didukung: PDF, PNG, JPG, atau JPEG. Maksimal 5 MB.</p>
                     <div id="work-profile-wrapper">
-                        @foreach (old('work_experiences', $employee->workExperiences->map(fn($item) => ['id' => $item->id, 'company_name' => $item->company_name, 'position' => $item->position, 'start_year' => $item->start_year, 'end_year' => $item->end_year, 'certificate_file_name' => $item->certificate_file_name])->toArray()) as $i => $work)
+                        @foreach (old('work_experiences', $employee->workExperiences->map(fn($item) => ['id' => $item->id, 'company_name' => $item->company_name, 'position' => $item->position, 'start_year' => $item->start_year, 'end_year' => $item->end_year, 'is_current' => $item->is_current, 'certificate_file_name' => $item->certificate_file_name])->toArray()) as $i => $work)
                             <div class="border rounded p-3 mb-3 work-item-profile">
                                 <div class="row g-3">
                                     @if (!empty($work['id']))
                                         <input type="hidden" name="work_experiences[{{ $i }}][id]" value="{{ $work['id'] }}">
                                     @endif
-                                    <div class="col-md-4"><input type="text" name="work_experiences[{{ $i }}][company_name]" class="form-control" placeholder="Nama PT" value="{{ $work['company_name'] ?? '' }}"></div>
-                                    <div class="col-md-4"><input type="text" name="work_experiences[{{ $i }}][position]" class="form-control" placeholder="Posisi" value="{{ $work['position'] ?? '' }}"></div>
-                                    <div class="col-md-2"><input type="number" name="work_experiences[{{ $i }}][start_year]" class="form-control" placeholder="Mulai" value="{{ $work['start_year'] ?? '' }}"></div>
-                                    <div class="col-md-2"><input type="number" name="work_experiences[{{ $i }}][end_year]" class="form-control" placeholder="Selesai" value="{{ $work['end_year'] ?? '' }}"></div>
-                                    <div class="col-md-10"><input type="file" name="work_experience_files[{{ $i }}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></div>
+                                    <div class="col-md-3"><label class="form-label">Perusahaan</label><input type="text" name="work_experiences[{{ $i }}][company_name]" class="form-control" placeholder="Nama PT" value="{{ $work['company_name'] ?? '' }}"></div>
+                                    <div class="col-md-3"><label class="form-label">Posisi</label><input type="text" name="work_experiences[{{ $i }}][position]" class="form-control" placeholder="Posisi" value="{{ $work['position'] ?? '' }}"></div>
+                                    <div class="col-md-2"><label class="form-label">Tahun Mulai</label><input type="number" name="work_experiences[{{ $i }}][start_year]" class="form-control" placeholder="2025" value="{{ $work['start_year'] ?? '' }}"></div>
+                                    <div class="col-md-2"><label class="form-label">Tahun Selesai</label><input type="number" name="work_experiences[{{ $i }}][end_year]" class="form-control work-end-year" placeholder="2026" value="{{ $work['end_year'] ?? '' }}" {{ !empty($work['is_current']) ? 'disabled' : '' }}></div>
+                                    <div class="col-md-2 d-flex align-items-end"><div class="form-check mb-2"><input type="checkbox" name="work_experiences[{{ $i }}][is_current]" value="1" class="form-check-input work-current-toggle" {{ !empty($work['is_current']) ? 'checked' : '' }}><label class="form-check-label">Masih bekerja</label></div></div>
+                                    <div class="col-md-10"><input type="file" name="work_experience_files[{{ $i }}]" class="form-control" accept=".pdf,.png,.jpg,.jpeg"></div>
                                     <div class="col-md-2 text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-row">Hapus</button></div>
                                 </div>
                                 @if (!empty($work['certificate_file_name']))<small class="text-muted">File saat ini: {{ $work['certificate_file_name'] }}</small>@endif
@@ -268,7 +282,7 @@
                         <h6 class="mb-0">Sertifikat</h6>
                         <button type="button" class="btn btn-sm btn-outline-primary" id="btn-add-certificate-profile">+ Tambah</button>
                     </div>
-                    <p class="text-muted small mb-3">Sertifikat external yang memiliki tanggal expired dalam 3 bulan akan ditandai di detail.</p>
+                    <p class="text-muted small mb-3">Berkas yang didukung: PDF, PNG, JPG, atau JPEG, maksimal 5 MB. Sertifikat external yang akan kedaluwarsa dalam 3 bulan ditandai di detail.</p>
                     <div id="certificate-profile-wrapper">
                         @foreach (old('certificates', $employee->certificates->map(fn($item) => ['id' => $item->id, 'certificate_type' => $item->certificate_type, 'certificate_name' => $item->certificate_name, 'issuer' => $item->issuer, 'issued_at' => optional($item->issued_at)->format('Y-m-d'), 'expired_at' => optional($item->expired_at)->format('Y-m-d'), 'file_name' => $item->file_name])->toArray()) as $i => $certificate)
                             <div class="border rounded p-3 mb-3 certificate-item-profile bg-light">
@@ -287,7 +301,7 @@
                                     <div class="col-md-4"><label class="form-label">Penerbit</label><input type="text" name="certificates[{{ $i }}][issuer]" class="form-control" placeholder="Contoh: MT PT / Internal Perusahaan" value="{{ $certificate['issuer'] ?? '' }}"></div>
                                     <div class="col-md-3"><label class="form-label">Tgl Terbit</label><input type="date" name="certificates[{{ $i }}][issued_at]" class="form-control" value="{{ $certificate['issued_at'] ?? '' }}"></div>
                                     <div class="col-md-3"><label class="form-label">Tgl Expired</label><input type="date" name="certificates[{{ $i }}][expired_at]" class="form-control" value="{{ $certificate['expired_at'] ?? '' }}"></div>
-                                    <div class="col-md-4"><label class="form-label">Berkas</label><input type="file" name="certificate_files[{{ $i }}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></div>
+                                    <div class="col-md-4"><label class="form-label">Berkas</label><input type="file" name="certificate_files[{{ $i }}]" class="form-control" accept=".pdf,.png,.jpg,.jpeg"></div>
                                     <div class="col-md-2 text-end d-flex align-items-end justify-content-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-row">Hapus</button></div>
                                 </div>
                                 @if (!empty($certificate['file_name']))<small class="text-muted">File saat ini: {{ $certificate['file_name'] }}</small>@endif
@@ -313,7 +327,8 @@
                     <span class="overlay">Ubah Foto</span>
                 </label>
 
-                <input type="file" id="profile-photo-input" accept="image/*" class="d-none">
+                <input type="file" id="profile-photo-input" accept=".png,.jpg,.jpeg" class="d-none">
+                <small class="text-muted d-block mt-2">Format foto: PNG, JPG, atau JPEG. Maksimal 5 MB.</small>
 
                 <p class="mt-3 mb-0 fw-bold">{{ $employee->full_name }}</p>
                 <small class="text-muted">{{ auth()->user()->username }}</small>
@@ -335,7 +350,9 @@
                     <div class="mb-3">
                         <label class="form-label">File Dokumen</label>
                         <input type="file" name="document_file"
-                            class="form-control @error('document_file') is-invalid @enderror" required>
+                            class="form-control @error('document_file') is-invalid @enderror"
+                            accept=".pdf,.png,.jpg,.jpeg" required>
+                        <small class="text-muted">Format yang didukung: PDF, PNG, JPG, dan JPEG. Maksimal 5 MB.</small>
                         @error('document_file')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -411,8 +428,10 @@
     <script>
         $(function() {
             const input = document.getElementById('profile-photo-input');
+            const educationWrapper = $('#education-profile-wrapper');
             const workWrapper = $('#work-profile-wrapper');
             const certificateWrapper = $('#certificate-profile-wrapper');
+            let educationIndex = educationWrapper.find('.education-item-profile').length;
             let workIndex = workWrapper.find('.work-item-profile').length;
             let certificateIndex = certificateWrapper.find('.certificate-item-profile').length;
             const cropperImage = document.getElementById('cropper-image');
@@ -422,18 +441,29 @@
             const saveBtn = document.getElementById('btn-save-cropped-photo');
 
 
+            $('#btn-add-education-profile').on('click', function() {
+                educationWrapper.append(`<div class="border rounded p-3 mb-3 education-item-profile bg-light"><div class="row g-3"><div class="col-md-3"><label class="form-label">Jenjang</label><input type="text" name="educations[${educationIndex}][education_level]" class="form-control"></div><div class="col-md-5"><label class="form-label">Institusi</label><input type="text" name="educations[${educationIndex}][institution_name]" class="form-control"></div><div class="col-md-4"><label class="form-label">Jurusan</label><input type="text" name="educations[${educationIndex}][major]" class="form-control"></div><div class="col-md-2"><label class="form-label">Mulai</label><input type="number" name="educations[${educationIndex}][start_year]" class="form-control"></div><div class="col-md-2"><label class="form-label">Selesai</label><input type="number" name="educations[${educationIndex}][end_year]" class="form-control"></div><div class="col-md-2"><label class="form-label">Nilai / IPK</label><input type="text" name="educations[${educationIndex}][grade]" class="form-control"></div><div class="col-md-3 d-flex align-items-end"><div class="form-check mb-2"><input type="checkbox" name="educations[${educationIndex}][is_current]" value="1" class="form-check-input"><label class="form-check-label">Masih berlangsung</label></div></div><div class="col-md-3"><label class="form-label">Berkas</label><input type="file" name="education_files[${educationIndex}]" class="form-control" accept=".pdf,.png,.jpg,.jpeg"></div><div class="col-md-10"><label class="form-label">Keterangan / Pencapaian</label><textarea name="educations[${educationIndex}][description]" rows="2" class="form-control"></textarea></div><div class="col-md-2 text-end d-flex align-items-end justify-content-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-row">Hapus</button></div></div></div>`);
+                educationIndex++;
+            });
+
             $('#btn-add-work-profile').on('click', function() {
-                workWrapper.append(`<div class="border rounded p-3 mb-3 work-item-profile"><div class="row g-3"><div class="col-md-4"><input type="text" name="work_experiences[${workIndex}][company_name]" class="form-control" placeholder="Nama PT"></div><div class="col-md-4"><input type="text" name="work_experiences[${workIndex}][position]" class="form-control" placeholder="Posisi"></div><div class="col-md-2"><input type="number" name="work_experiences[${workIndex}][start_year]" class="form-control" placeholder="Mulai"></div><div class="col-md-2"><input type="number" name="work_experiences[${workIndex}][end_year]" class="form-control" placeholder="Selesai"></div><div class="col-md-10"><input type="file" name="work_experience_files[${workIndex}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></div><div class="col-md-2 text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-row">Hapus</button></div></div></div>`);
+                workWrapper.append(`<div class="border rounded p-3 mb-3 work-item-profile"><div class="row g-3"><div class="col-md-3"><label class="form-label">Perusahaan</label><input type="text" name="work_experiences[${workIndex}][company_name]" class="form-control" placeholder="Nama PT"></div><div class="col-md-3"><label class="form-label">Posisi</label><input type="text" name="work_experiences[${workIndex}][position]" class="form-control" placeholder="Posisi"></div><div class="col-md-2"><label class="form-label">Tahun Mulai</label><input type="number" name="work_experiences[${workIndex}][start_year]" class="form-control" placeholder="2025"></div><div class="col-md-2"><label class="form-label">Tahun Selesai</label><input type="number" name="work_experiences[${workIndex}][end_year]" class="form-control work-end-year" placeholder="2026"></div><div class="col-md-2 d-flex align-items-end"><div class="form-check mb-2"><input type="checkbox" name="work_experiences[${workIndex}][is_current]" value="1" class="form-check-input work-current-toggle"><label class="form-check-label">Masih bekerja</label></div></div><div class="col-md-10"><input type="file" name="work_experience_files[${workIndex}]" class="form-control" accept=".pdf,.png,.jpg,.jpeg"></div><div class="col-md-2 text-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-row">Hapus</button></div></div></div>`);
                 workIndex++;
             });
 
+            $(document).on('change', '.work-current-toggle', function() {
+                const endYear = $(this).closest('.work-item-profile').find('.work-end-year');
+                endYear.prop('disabled', this.checked);
+                if (this.checked) endYear.val('');
+            });
+
             $('#btn-add-certificate-profile').on('click', function() {
-                certificateWrapper.append(`<div class="border rounded p-3 mb-3 certificate-item-profile bg-light"><div class="d-flex justify-content-between align-items-center mb-3"><span class="badge bg-secondary">INTERNAL</span><small class="text-muted">Sertifikat #${certificateIndex + 1}</small></div><div class="row g-3"><div class="col-md-3"><label class="form-label">Jenis</label><select name="certificates[${certificateIndex}][certificate_type]" class="form-select"><option value="internal">Internal</option><option value="external">External</option></select></div><div class="col-md-5"><label class="form-label">Nama Sertifikat</label><input type="text" name="certificates[${certificateIndex}][certificate_name]" class="form-control" placeholder="Contoh: Pelatihan APAR"></div><div class="col-md-4"><label class="form-label">Penerbit</label><input type="text" name="certificates[${certificateIndex}][issuer]" class="form-control" placeholder="Contoh: MT PT / Internal Perusahaan"></div><div class="col-md-3"><label class="form-label">Tgl Terbit</label><input type="date" name="certificates[${certificateIndex}][issued_at]" class="form-control"></div><div class="col-md-3"><label class="form-label">Tgl Expired</label><input type="date" name="certificates[${certificateIndex}][expired_at]" class="form-control"></div><div class="col-md-4"><label class="form-label">Berkas</label><input type="file" name="certificate_files[${certificateIndex}]" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"></div><div class="col-md-2 text-end d-flex align-items-end justify-content-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-row">Hapus</button></div></div></div>`);
+                certificateWrapper.append(`<div class="border rounded p-3 mb-3 certificate-item-profile bg-light"><div class="d-flex justify-content-between align-items-center mb-3"><span class="badge bg-secondary">INTERNAL</span><small class="text-muted">Sertifikat #${certificateIndex + 1}</small></div><div class="row g-3"><div class="col-md-3"><label class="form-label">Jenis</label><select name="certificates[${certificateIndex}][certificate_type]" class="form-select"><option value="internal">Internal</option><option value="external">External</option></select></div><div class="col-md-5"><label class="form-label">Nama Sertifikat</label><input type="text" name="certificates[${certificateIndex}][certificate_name]" class="form-control" placeholder="Contoh: Pelatihan APAR"></div><div class="col-md-4"><label class="form-label">Penerbit</label><input type="text" name="certificates[${certificateIndex}][issuer]" class="form-control" placeholder="Contoh: MT PT / Internal Perusahaan"></div><div class="col-md-3"><label class="form-label">Tgl Terbit</label><input type="date" name="certificates[${certificateIndex}][issued_at]" class="form-control"></div><div class="col-md-3"><label class="form-label">Tgl Expired</label><input type="date" name="certificates[${certificateIndex}][expired_at]" class="form-control"></div><div class="col-md-4"><label class="form-label">Berkas</label><input type="file" name="certificate_files[${certificateIndex}]" class="form-control" accept=".pdf,.png,.jpg,.jpeg"></div><div class="col-md-2 text-end d-flex align-items-end justify-content-end"><button type="button" class="btn btn-sm btn-outline-danger btn-remove-profile-row">Hapus</button></div></div></div>`);
                 certificateIndex++;
             });
 
             $(document).on('click', '.btn-remove-profile-row', function() {
-                $(this).closest('.work-item-profile, .certificate-item-profile').remove();
+                $(this).closest('.education-item-profile, .work-item-profile, .certificate-item-profile').remove();
             });
 
             $(document).on('change', 'select[name^="certificates"][name$="[certificate_type]"]', function() {

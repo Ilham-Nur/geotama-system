@@ -5,6 +5,7 @@ use App\Http\Controllers\AssetController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmployeeCvController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PakController;
 use App\Http\Controllers\PembayaranController;
@@ -136,6 +137,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/employees', [EmployeeController::class, 'store'])
         ->middleware('permission:employees.create')
         ->name('employees.store');
+
+    Route::get('/employees/{employee}/cv', [EmployeeCvController::class, 'configure'])
+        ->middleware('permission:employees.cv.generate')
+        ->name('employees.cv.configure');
+
+    Route::post('/employees/{employee}/cv/preview', [EmployeeCvController::class, 'preview'])
+        ->middleware('permission:employees.cv.generate')
+        ->name('employees.cv.preview');
+
+    Route::post('/employees/{employee}/cv/generate', [EmployeeCvController::class, 'generate'])
+        ->middleware('permission:employees.cv.generate')
+        ->name('employees.cv.generate');
 
     Route::get('/employees/{employee}', [EmployeeController::class, 'show'])
         ->middleware('permission:employees.view')

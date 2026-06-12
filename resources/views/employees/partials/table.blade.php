@@ -58,6 +58,12 @@
                                 </button>
                             @endcan
 
+                            @can('employees.cv.generate')
+                                <a href="{{ route('employees.cv.configure', $employee) }}" class="text-success" title="Generate CV">
+                                    <i class="lni lni-download"></i>
+                                </a>
+                            @endcan
+
                             @can('employees.edit')
                                 <a href="{{ route('employees.edit', $employee->id) }}" class="text-warning" title="Edit">
                                     <i class="lni lni-pencil"></i>

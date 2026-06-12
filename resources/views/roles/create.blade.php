@@ -28,29 +28,7 @@
                     @enderror
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Permissions</label>
-                    <div class="row">
-                        @foreach($permissions as $permission)
-                            <div class="col-md-6 mb-2">
-                                <div class="form-check">
-                                    <input class="form-check-input"
-                                        type="checkbox"
-                                        name="permissions[]"
-                                        value="{{ $permission->name }}"
-                                        id="permission_{{ $loop->index }}"
-                                        {{ in_array($permission->name, old('permissions', [])) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="permission_{{ $loop->index }}">
-                                        {{ $permission->name }}
-                                    </label>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                    @error('permissions')
-                        <small class="text-danger">{{ $message }}</small>
-                    @enderror
-                </div>
+                @include('roles._permission-fields', ['selectedPermissions' => []])
 
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">Simpan</button>

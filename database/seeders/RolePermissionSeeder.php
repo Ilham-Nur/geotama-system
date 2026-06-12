@@ -19,6 +19,7 @@ class RolePermissionSeeder extends Seeder
             'employees.create',
             'employees.edit',
             'employees.delete',
+            'employees.cv.generate',
 
             // User management
             'users.view',
@@ -103,6 +104,7 @@ class RolePermissionSeeder extends Seeder
             'employees.view',
             'employees.create',
             'employees.edit',
+            'employees.cv.generate',
 
             'users.view',
             'users.create',

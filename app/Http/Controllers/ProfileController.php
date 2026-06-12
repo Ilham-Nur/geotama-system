@@ -13,13 +13,13 @@ class ProfileController extends Controller
     {
         $employee = auth()->user()->employee;
 
-        if (!$employee) {
+        if (! $employee) {
             return redirect()
                 ->route('blank')
                 ->with('error', 'Data karyawan belum terhubung ke akun Anda. Hubungi admin.');
         }
 
-        $employee->load(['documents', 'workExperiences', 'certificates']);
+        $employee->load(['documents', 'educations', 'workExperiences', 'certificates']);
 
         return view('profile.show', compact('employee'));
     }
@@ -28,7 +28,7 @@ class ProfileController extends Controller
     {
         $employee = auth()->user()->employee;
 
-        if (!$employee) {
+        if (! $employee) {
             return redirect()
                 ->route('dashboard')
                 ->with('error', 'Data karyawan belum terhubung ke akun Anda. Hubungi admin.');
@@ -51,15 +51,28 @@ class ProfileController extends Controller
             'religion' => ['nullable', 'string', 'max:100'],
             'important_information' => ['nullable', 'string'],
             'last_education' => ['nullable', 'string', 'max:255'],
-            'last_education_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'],
+            'last_education_file' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+
+            'educations' => ['nullable', 'array'],
+            'educations.*.id' => ['nullable', 'integer'],
+            'educations.*.education_level' => ['nullable', 'string', 'max:100'],
+            'educations.*.institution_name' => ['required_with:educations.*.education_level,educations.*.major,educations.*.start_year,educations.*.end_year,educations.*.grade,educations.*.description,education_files.*', 'nullable', 'string', 'max:255'],
+            'educations.*.major' => ['nullable', 'string', 'max:255'],
+            'educations.*.start_year' => ['nullable', 'integer', 'min:1900', 'max:2100'],
+            'educations.*.end_year' => ['nullable', 'integer', 'min:1900', 'max:2100'],
+            'educations.*.is_current' => ['nullable', 'boolean'],
+            'educations.*.grade' => ['nullable', 'string', 'max:50'],
+            'educations.*.description' => ['nullable', 'string'],
+            'education_files.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
 
             'work_experiences' => ['nullable', 'array'],
             'work_experiences.*.id' => ['nullable', 'integer'],
-            'work_experiences.*.company_name' => ['required_with:work_experiences.*.start_year,work_experiences.*.end_year,work_experiences.*.position', 'nullable', 'string', 'max:255'],
+            'work_experiences.*.company_name' => ['required_with:work_experiences.*.start_year,work_experiences.*.end_year,work_experiences.*.position,work_experiences.*.is_current', 'nullable', 'string', 'max:255'],
             'work_experiences.*.position' => ['nullable', 'string', 'max:255'],
             'work_experiences.*.start_year' => ['nullable', 'integer', 'min:1900', 'max:2100'],
-            'work_experiences.*.end_year' => ['nullable', 'integer', 'min:1900', 'max:2100'],
-            'work_experience_files.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'],
+            'work_experiences.*.end_year' => ['nullable', 'integer', 'min:1900', 'max:2100', 'gte:work_experiences.*.start_year'],
+            'work_experiences.*.is_current' => ['nullable', 'boolean'],
+            'work_experience_files.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
 
             'certificates' => ['nullable', 'array'],
             'certificates.*.id' => ['nullable', 'integer'],
@@ -68,7 +81,7 @@ class ProfileController extends Controller
             'certificates.*.issuer' => ['nullable', 'string', 'max:255'],
             'certificates.*.issued_at' => ['nullable', 'date'],
             'certificates.*.expired_at' => ['nullable', 'date'],
-            'certificate_files.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx', 'max:5120'],
+            'certificate_files.*' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);
 
         $employee->update([
@@ -104,18 +117,18 @@ class ProfileController extends Controller
 
         $this->syncWorkExperiences($request, $employee);
         $this->syncCertificates($request, $employee);
+        $this->syncEducations($request, $employee);
 
         return redirect()
             ->route('profile.show')
             ->with('success', 'Profil berhasil diperbarui.');
     }
 
-
     public function updatePhoto(Request $request)
     {
         $employee = auth()->user()->employee;
 
-        if (!$employee) {
+        if (! $employee) {
             return response()->json([
                 'success' => false,
                 'message' => 'Data karyawan belum terhubung ke akun Anda. Hubungi admin.',
@@ -135,7 +148,7 @@ class ProfileController extends Controller
 
         return response()->json([
             'success' => true,
-            'photo_url' => asset('storage/' . $path),
+            'photo_url' => asset('storage/'.$path),
         ]);
     }
 
@@ -143,7 +156,7 @@ class ProfileController extends Controller
     {
         $employee = auth()->user()->employee;
 
-        if (!$employee) {
+        if (! $employee) {
             return redirect()
                 ->route('dashboard')
                 ->with('error', 'Data karyawan belum terhubung ke akun Anda. Hubungi admin.');
@@ -151,7 +164,7 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'document_label' => ['required', 'string', 'max:255'],
-            'document_file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx', 'max:5120'],
+            'document_file' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ]);
 
         $file = $request->file('document_file');
@@ -174,7 +187,7 @@ class ProfileController extends Controller
     {
         $employee = auth()->user()->employee;
 
-        if (!$employee || $document->employee_id !== $employee->id) {
+        if (! $employee || $document->employee_id !== $employee->id) {
             abort(403);
         }
 
@@ -191,7 +204,7 @@ class ProfileController extends Controller
 
     private function syncWorkExperiences(Request $request, $employee): void
     {
-        if (!$request->has('work_experiences') && !$request->hasFile('work_experience_files')) {
+        if (! $request->has('work_experiences') && ! $request->hasFile('work_experience_files')) {
             return;
         }
 
@@ -205,11 +218,11 @@ class ProfileController extends Controller
             }
 
             $file = $files[$index] ?? null;
-            $experience = !empty($row['id'])
+            $experience = ! empty($row['id'])
                 ? $employee->workExperiences()->whereKey($row['id'])->first()
                 : null;
 
-            if (!$experience) {
+            if (! $experience) {
                 $experience = $employee->workExperiences()->make();
             }
 
@@ -221,7 +234,8 @@ class ProfileController extends Controller
                 'company_name' => $row['company_name'],
                 'position' => $row['position'] ?? null,
                 'start_year' => $row['start_year'] ?? null,
-                'end_year' => $row['end_year'] ?? null,
+                'end_year' => ! empty($row['is_current']) ? null : ($row['end_year'] ?? null),
+                'is_current' => ! empty($row['is_current']),
             ]);
 
             if ($file) {
@@ -235,8 +249,8 @@ class ProfileController extends Controller
         }
 
         $toDelete = $employee->workExperiences()
-            ->when(!empty($keptIds), fn($query) => $query->whereNotIn('id', $keptIds))
-            ->when(empty($keptIds), fn($query) => $query)
+            ->when(! empty($keptIds), fn ($query) => $query->whereNotIn('id', $keptIds))
+            ->when(empty($keptIds), fn ($query) => $query)
             ->get();
 
         foreach ($toDelete as $item) {
@@ -247,9 +261,71 @@ class ProfileController extends Controller
         }
     }
 
+    private function syncEducations(Request $request, $employee): void
+    {
+        if (! $request->has('educations_present') && ! $request->has('educations') && ! $request->hasFile('education_files')) {
+            return;
+        }
+
+        $rows = $request->input('educations', []);
+        $files = $request->file('education_files', []);
+        $keptIds = [];
+
+        foreach ($rows as $index => $row) {
+            if (blank($row['institution_name'] ?? null)) {
+                continue;
+            }
+
+            $file = $files[$index] ?? null;
+            $education = ! empty($row['id'])
+                ? $employee->educations()->whereKey($row['id'])->first()
+                : null;
+
+            if (! $education) {
+                $education = $employee->educations()->make();
+            }
+
+            if ($file && $education->file_path && Storage::disk('public')->exists($education->file_path)) {
+                Storage::disk('public')->delete($education->file_path);
+            }
+
+            $education->fill([
+                'education_level' => $row['education_level'] ?? null,
+                'institution_name' => $row['institution_name'],
+                'major' => $row['major'] ?? null,
+                'start_year' => $row['start_year'] ?? null,
+                'end_year' => ! empty($row['is_current']) ? null : ($row['end_year'] ?? null),
+                'is_current' => ! empty($row['is_current']),
+                'grade' => $row['grade'] ?? null,
+                'description' => $row['description'] ?? null,
+            ]);
+
+            if ($file) {
+                $education->file_path = $file->store('employee-education', 'public');
+                $education->file_name = $file->getClientOriginalName();
+                $education->mime_type = $file->getClientMimeType();
+            }
+
+            $education->employee()->associate($employee);
+            $education->save();
+            $keptIds[] = $education->id;
+        }
+
+        $toDelete = $employee->educations()
+            ->when(! empty($keptIds), fn ($query) => $query->whereNotIn('id', $keptIds))
+            ->get();
+
+        foreach ($toDelete as $education) {
+            if ($education->file_path && Storage::disk('public')->exists($education->file_path)) {
+                Storage::disk('public')->delete($education->file_path);
+            }
+            $education->delete();
+        }
+    }
+
     private function syncCertificates(Request $request, $employee): void
     {
-        if (!$request->has('certificates') && !$request->hasFile('certificate_files')) {
+        if (! $request->has('certificates') && ! $request->hasFile('certificate_files')) {
             return;
         }
 
@@ -263,11 +339,11 @@ class ProfileController extends Controller
             }
 
             $file = $files[$index] ?? null;
-            $certificate = !empty($row['id'])
+            $certificate = ! empty($row['id'])
                 ? $employee->certificates()->whereKey($row['id'])->first()
                 : null;
 
-            if (!$certificate) {
+            if (! $certificate) {
                 $certificate = $employee->certificates()->make();
             }
 
@@ -294,8 +370,8 @@ class ProfileController extends Controller
         }
 
         $toDelete = $employee->certificates()
-            ->when(!empty($keptIds), fn($query) => $query->whereNotIn('id', $keptIds))
-            ->when(empty($keptIds), fn($query) => $query)
+            ->when(! empty($keptIds), fn ($query) => $query->whereNotIn('id', $keptIds))
+            ->when(empty($keptIds), fn ($query) => $query)
             ->get();
 
         foreach ($toDelete as $item) {
