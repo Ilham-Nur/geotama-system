@@ -134,35 +134,45 @@ class EmployeeCvController extends Controller
         $attachments = collect();
 
         foreach ($employee->educations as $education) {
-            $this->pushAttachment($attachments, 'education:'.$education->id, 'Pendidikan', $education->file_name, $education->file_path);
+            $name = collect([$education->education_level, $education->major, $education->institution_name])
+                ->filter()
+                ->join(' - ');
+
+            $this->pushAttachment($attachments, 'education:'.$education->id, 'Pendidikan', $name, $education->file_path);
         }
 
         foreach ($employee->workExperiences as $experience) {
-            $this->pushAttachment($attachments, 'experience:'.$experience->id, 'Pengalaman Kerja', $experience->certificate_file_name, $experience->certificate_file_path);
+            $name = collect([$experience->position, $experience->company_name])
+                ->filter()
+                ->join(' - ');
+
+            $this->pushAttachment($attachments, 'experience:'.$experience->id, 'Pengalaman Kerja', $name, $experience->certificate_file_path);
         }
 
         foreach ($employee->certificates as $certificate) {
-            $this->pushAttachment($attachments, 'certificate:'.$certificate->id, 'Sertifikat', $certificate->file_name, $certificate->file_path);
+            $this->pushAttachment($attachments, 'certificate:'.$certificate->id, 'Sertifikat', $certificate->certificate_name, $certificate->file_path);
         }
 
         foreach ($employee->documents as $document) {
-            $this->pushAttachment($attachments, 'document:'.$document->id, $document->document_label, $document->file_name, $document->file_path);
+            $this->pushAttachment($attachments, 'document:'.$document->id, 'Dokumen', $document->document_label, $document->file_path);
         }
 
         return $attachments->values();
     }
 
-    private function pushAttachment(Collection $attachments, string $token, string $type, ?string $fileName, ?string $path): void
+    private function pushAttachment(Collection $attachments, string $token, string $type, ?string $name, ?string $path): void
     {
         if (! $path || ! in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), ['pdf', 'png', 'jpg', 'jpeg'], true)) {
             return;
         }
 
+        $name = filled($name) ? $name : $type;
+
         $attachments->push([
             'token' => $token,
             'type' => $type,
-            'label' => $fileName ? "{$type}: {$fileName}" : $type,
-            'file_name' => $fileName,
+            'name' => $name,
+            'label' => "{$type}: {$name}",
             'path' => $path,
         ]);
     }

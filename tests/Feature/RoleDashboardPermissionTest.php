@@ -3,14 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Tests\Concerns\UsesIsolatedTestDatabase;
 use Tests\TestCase;
 
 class RoleDashboardPermissionTest extends TestCase
 {
-    use RefreshDatabase;
+    use UsesIsolatedTestDatabase;
 
     public function test_dashboard_permission_is_visible_and_can_be_managed_per_role(): void
     {

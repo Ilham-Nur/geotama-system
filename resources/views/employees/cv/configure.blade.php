@@ -75,11 +75,18 @@
                 </div>
 
                 <div class="card-style mb-30">
-                    <h6 class="mb-2">Proyek yang Ditampilkan</h6>
+                    <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                        <h6 class="mb-0">Proyek yang Ditampilkan</h6>
+                        @if ($projects->isNotEmpty())
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="toggle-all-projects">
+                                Pilih Semua
+                            </button>
+                        @endif
+                    </div>
                     <p class="text-muted small">Hanya proyek yang terhubung ke akun karyawan ini yang tersedia.</p>
                     @forelse ($projects as $project)
                         <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" name="project_ids[]" value="{{ $project->id }}"
+                            <input class="form-check-input project-checkbox" type="checkbox" name="project_ids[]" value="{{ $project->id }}"
                                 id="project-{{ $project->id }}" {{ in_array($project->id, old('project_ids', $projects->pluck('id')->all())) ? 'checked' : '' }}>
                             <label class="form-check-label" for="project-{{ $project->id }}">
                                 {{ $project->permohonan?->nama_proyek ?? $project->no_proyek }}
@@ -114,8 +121,8 @@
                                                 value="{{ $attachment['token'] }}" {{ in_array($attachment['token'], old('attachments', []), true) ? 'checked' : '' }}>
                                         </td>
                                         <td>
-                                            <strong>{{ $attachment['type'] }}</strong>
-                                            <small class="text-muted d-block">{{ $attachment['file_name'] }}</small>
+                                            <strong>{{ $attachment['name'] }}</strong>
+                                            <small class="text-muted d-block">{{ $attachment['type'] }}</small>
                                         </td>
                                         <td>
                                             <input type="hidden" class="attachment-order" name="attachment_orders[{{ $attachment['token'] }}]" value="{{ old('attachment_orders.' . $attachment['token'], $index + 1) }}">
@@ -148,11 +155,27 @@
 @push('scripts')
     <script>
         $(function() {
+            function syncProjectToggleLabel() {
+                const projects = $('.project-checkbox');
+                const allSelected = projects.length && projects.filter(':checked').length === projects.length;
+                $('#toggle-all-projects').text(allSelected ? 'Batalkan Semua' : 'Pilih Semua');
+            }
+
             function syncOrder() {
                 $('#attachment-table tbody .attachment-row').each(function(index) {
                     $(this).find('.attachment-order').val(index + 1);
                 });
             }
+
+            $('#toggle-all-projects').on('click', function() {
+                const projects = $('.project-checkbox');
+                const selectAll = projects.filter(':checked').length !== projects.length;
+
+                projects.prop('checked', selectAll);
+                syncProjectToggleLabel();
+            });
+
+            $(document).on('change', '.project-checkbox', syncProjectToggleLabel);
 
             $(document).on('click', '.btn-up', function() {
                 const row = $(this).closest('tr');
@@ -167,6 +190,7 @@
             });
 
             syncOrder();
+            syncProjectToggleLabel();
         });
     </script>
 @endpush

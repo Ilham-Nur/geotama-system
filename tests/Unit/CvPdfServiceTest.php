@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Services\CvPdfService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use setasign\Fpdi\Fpdi;
 use Tests\TestCase;
 
 class CvPdfServiceTest extends TestCase
@@ -24,11 +25,15 @@ class CvPdfServiceTest extends TestCase
         $cv = Pdf::loadHtml('<h1>Curriculum Vitae</h1>')->setPaper('a4')->output();
 
         $merged = $service->merge($cv, [
-            ['label' => 'Dokumen', 'path' => 'attachments/document.pdf'],
-            ['label' => 'Gambar', 'path' => 'attachments/image.png'],
+            ['type' => 'Dokumen', 'name' => 'Surat Keterangan', 'label' => 'Dokumen: Surat Keterangan', 'path' => 'attachments/document.pdf'],
+            ['type' => 'Sertifikat', 'name' => 'Sertifikat Kompetensi', 'label' => 'Sertifikat: Sertifikat Kompetensi', 'path' => 'attachments/image.png'],
         ]);
+
+        Storage::disk('public')->put('attachments/merged.pdf', $merged);
+        $mergedPdf = new Fpdi;
 
         $this->assertStringStartsWith('%PDF-', $merged);
         $this->assertGreaterThan(strlen($cv), strlen($merged));
+        $this->assertSame(3, $mergedPdf->setSourceFile(Storage::disk('public')->path('attachments/merged.pdf')));
     }
 }

@@ -3,16 +3,18 @@
 namespace Tests\Feature;
 
 use App\Models\Employee;
+use App\Models\Permohonan;
+use App\Models\Proyek;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Models\Permission;
+use Tests\Concerns\UsesIsolatedTestDatabase;
 use Tests\TestCase;
 
 class EmployeeCvTest extends TestCase
 {
-    use RefreshDatabase;
+    use UsesIsolatedTestDatabase;
 
     public function test_authorized_user_can_open_preview_and_generate_employee_cv(): void
     {
@@ -27,11 +29,28 @@ class EmployeeCvTest extends TestCase
         $user->givePermissionTo($permission);
 
         $employee = Employee::create([
+            'user_id' => $user->id,
             'employee_code' => 'EMP-CV-001',
             'full_name' => 'Karyawan Contoh',
             'position' => 'Inspector',
             'employment_status' => 'tetap',
         ]);
+
+        $permohonan = Permohonan::create([
+            'nomor' => 'GGI-FP-2026-0001',
+            'nama_perusahaan' => 'Klien Contoh',
+            'alamat' => 'Batam',
+            'nama_pic' => 'PIC Contoh',
+            'no_telp' => '08123456789',
+            'testuji' => 'quality_internal',
+            'lokasi' => 'Batam',
+            'nama_proyek' => 'Proyek Contoh',
+        ]);
+        $project = Proyek::create([
+            'no_proyek' => 'GGI-PK-2026-0001',
+            'permohonan_id' => $permohonan->id,
+        ]);
+        $project->users()->attach($user);
 
         $education = $employee->educations()->create([
             'education_level' => 'S1',
@@ -65,7 +84,10 @@ class EmployeeCvTest extends TestCase
         $this->actingAs($user)
             ->get(route('employees.cv.configure', $employee))
             ->assertOk()
-            ->assertSee('Generate CV: Karyawan Contoh');
+            ->assertSee('Generate CV: Karyawan Contoh')
+            ->assertSee('Pilih Semua')
+            ->assertSee('S1 - Teknik - Universitas Contoh')
+            ->assertDontSee('ijazah.png');
 
         $this->actingAs($user)
             ->post(route('employees.cv.preview', $employee), $configuration)
