@@ -355,8 +355,24 @@ class InvoiceController extends Controller
             'proyek.invoices',
         ]);
 
-        $pdf = Pdf::loadView('invoice.pdf', compact('invoice'))
-            ->setPaper('a4', 'portrait');
+        $renderPdf = function (int $emptyRowsToRemove = 0, bool $forceCompact = false) use ($invoice) {
+            $pdf = Pdf::loadView('invoice.pdf', compact('invoice', 'emptyRowsToRemove', 'forceCompact'))
+                ->setPaper('a4', 'portrait');
+
+            $pdf->render();
+
+            return $pdf;
+        };
+
+        $pdf = $renderPdf();
+
+        if ($pdf->getDomPDF()->getCanvas()->get_page_count() > 1) {
+            $pdf = $renderPdf(emptyRowsToRemove: 1);
+        }
+
+        if ($pdf->getDomPDF()->getCanvas()->get_page_count() > 1) {
+            $pdf = $renderPdf(emptyRowsToRemove: PHP_INT_MAX, forceCompact: true);
+        }
 
         return $pdf->stream($invoice->no_invoice . '.pdf');
     }

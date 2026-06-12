@@ -407,10 +407,16 @@
 
         $notesLength = mb_strlen(strip_tags((string) $invoice->notes));
         $itemCount = $invoice->items->count();
-        $layoutClass = $itemCount > 8 || $notesLength > 500
-            ? 'very-compact'
-            : ($itemCount > 5 || $notesLength > 250 ? 'compact' : '');
+        $forceCompact = $forceCompact ?? false;
+        $emptyRowsToRemove = max(0, (int) ($emptyRowsToRemove ?? 0));
+        $layoutClass =
+            $forceCompact || $itemCount > 8 || $notesLength > 500
+                ? 'very-compact'
+                : ($itemCount > 5 || $notesLength > 250
+                    ? 'compact'
+                    : '');
         $emptyRowTarget = $hasDownPayment ? 5 : 6;
+        $emptyRowCount = max(0, $emptyRowTarget - $invoice->items->count() - $emptyRowsToRemove);
     @endphp
 
     <div class="page {{ $layoutClass }}">
@@ -502,12 +508,12 @@
                                 {{ rtrim(rtrim(number_format($item->qty, 2, '.', ''), '0'), '.') }}
                             </td>
                             <td class="col-amount">
-                                Rp {{ number_format($item->total, 2, ',', '.') }}
+                                Rp {{ number_format($item->total, 0, ',', '.') }}
                             </td>
                         </tr>
                     @endforeach
 
-                    @for ($i = 0; $i < max(0, $emptyRowTarget - $invoice->items->count()); $i++)
+                    @for ($i = 0; $i < $emptyRowCount; $i++)
                         <tr class="empty-row">
                             <td class="col-desc">&nbsp;</td>
                             <td class="col-price"></td>
@@ -522,33 +528,33 @@
                 <tr>
                     <td class="summary-label">Gross Total :</td>
                     <td class="summary-currency">Rp</td>
-                    <td class="summary-value">{{ number_format($grossTotal, 2, ',', '.') }}</td>
+                    <td class="summary-value">{{ number_format($grossTotal, 0, ',', '.') }}</td>
                 </tr>
                 <tr>
                     <td class="summary-label">Discount :</td>
                     <td class="summary-currency">Rp</td>
                     <td class="summary-value">
-                        {{ $invoice->discount > 0 ? number_format($invoice->discount, 2, ',', '.') : '-' }}
+                        {{ $invoice->discount > 0 ? number_format($invoice->discount, 0, ',', '.') : '-' }}
                     </td>
                 </tr>
-                @if ($hasDownPayment)
-                    <tr>
-                        <td class="summary-label">Down Payment :</td>
-                        <td class="summary-currency">Rp</td>
-                        <td class="summary-value">{{ number_format($downPayment, 2, ',', '.') }}</td>
-                    </tr>
-                @endif
+                <tr>
+                    <td class="summary-label">Down Payment :</td>
+                    <td class="summary-currency">Rp</td>
+                    <td class="summary-value">
+                        {{ $hasDownPayment ? number_format($downPayment, 0, ',', '.') : '-' }}
+                    </td>
+                </tr>
                 <tr>
                     <td class="summary-label">Tax :</td>
                     <td class="summary-currency">Rp</td>
                     <td class="summary-value">
-                        {{ $invoice->tax > 0 ? number_format($invoice->tax, 2, ',', '.') : '-' }}
+                        {{ $invoice->tax > 0 ? number_format($invoice->tax, 0, ',', '.') : '-' }}
                     </td>
                 </tr>
                 <tr class="grand-line">
                     <td class="summary-label">NET TOTAL :</td>
                     <td class="summary-currency">Rp</td>
-                    <td class="summary-value">{{ number_format($invoice->grand_total, 2, ',', '.') }}</td>
+                    <td class="summary-value">{{ number_format($invoice->grand_total, 0, ',', '.') }}</td>
                 </tr>
             </table>
 
