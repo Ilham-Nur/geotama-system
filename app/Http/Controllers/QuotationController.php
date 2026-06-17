@@ -53,6 +53,7 @@ class QuotationController extends Controller
             'items.*.satuan' => ['nullable', 'string', 'max:100'],
             'items.*.qty' => ['required', 'numeric', 'min:0.01'],
             'items.*.total' => ['required', 'numeric', 'min:0'],
+            'discount' => ['nullable', 'numeric', 'min:0'],
             'terms' => ['nullable', 'array'],
             'terms.*.name' => ['required', 'string', 'max:255'],
         ]);
@@ -60,14 +61,23 @@ class QuotationController extends Controller
         $client = $this->resolveClient($request);
 
         $quotation = DB::transaction(function () use ($validated, $client) {
-            $grandTotal = collect($validated['items'])->sum(function ($item) {
+            $subTotal = collect($validated['items'])->sum(function ($item) {
                 return (float) $item['total'];
             });
+            $discount = (float) ($validated['discount'] ?? 0);
+            $grandTotal = $subTotal - $discount;
+
+            if ($grandTotal < 0) {
+                throw ValidationException::withMessages([
+                    'discount' => 'Discount tidak boleh lebih besar dari subtotal.',
+                ]);
+            }
 
             $quotation = Quotation::create([
                 'no_quo' => $validated['no_quo'],
                 'tanggal' => $validated['tanggal'],
                 'client_id' => $client?->id,
+                'discount' => $discount,
                 'grand_total_quo' => $grandTotal,
             ]);
 
@@ -119,6 +129,7 @@ class QuotationController extends Controller
             'items.*.satuan' => ['nullable', 'string', 'max:100'],
             'items.*.qty' => ['required', 'numeric', 'min:0.01'],
             'items.*.total' => ['required', 'numeric', 'min:0'],
+            'discount' => ['nullable', 'numeric', 'min:0'],
             'terms' => ['nullable', 'array'],
             'terms.*.name' => ['required', 'string', 'max:255'],
         ]);
@@ -126,14 +137,23 @@ class QuotationController extends Controller
         $client = $this->resolveClient($request);
 
         DB::transaction(function () use ($validated, $quotation, $client) {
-            $grandTotal = collect($validated['items'])->sum(function ($item) {
+            $subTotal = collect($validated['items'])->sum(function ($item) {
                 return (float) $item['total'];
             });
+            $discount = (float) ($validated['discount'] ?? 0);
+            $grandTotal = $subTotal - $discount;
+
+            if ($grandTotal < 0) {
+                throw ValidationException::withMessages([
+                    'discount' => 'Discount tidak boleh lebih besar dari subtotal.',
+                ]);
+            }
 
             $quotation->update([
                 'no_quo' => $validated['no_quo'],
                 'tanggal' => $validated['tanggal'],
                 'client_id' => $client?->id,
+                'discount' => $discount,
                 'grand_total_quo' => $grandTotal,
             ]);
 
