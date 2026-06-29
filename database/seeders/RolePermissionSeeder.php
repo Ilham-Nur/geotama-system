@@ -54,6 +54,12 @@ class RolePermissionSeeder extends Seeder
             'proyek.view',
             'proyek.show',
 
+            // NDT Master Data
+            'ndt_master.view',
+            'ndt_master.create',
+            'ndt_master.edit',
+            'ndt_master.delete',
+
             // Invoice
             'invoice.view',
             'invoice.create',
@@ -127,6 +133,11 @@ class RolePermissionSeeder extends Seeder
 
             'proyek.view',
             'proyek.show',
+
+            'ndt_master.view',
+            'ndt_master.create',
+            'ndt_master.edit',
+            'ndt_master.delete',
 
             'invoice.view',
             'invoice.create',

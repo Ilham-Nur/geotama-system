@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeCvController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\NdtMasterDataController;
 use App\Http\Controllers\PakController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PermohonanController;
@@ -241,6 +242,14 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:proyek.show')
         ->name('proyek.pekerjaan.update-report');
 
+    Route::get('/proyek/{proyek}/pekerjaan/{item}/layanan/{layanan}/ndt/reference/{reference}', [ProyekController::class, 'ndtReportReference'])
+        ->middleware('permission:proyek.show')
+        ->name('proyek.pekerjaan.ndt.reference');
+
+    Route::get('/proyek/{proyek}/pekerjaan/{item}/layanan/{layanan}/ndt/pdf', [ProyekController::class, 'exportNdtReportPdf'])
+        ->middleware('permission:proyek.show')
+        ->name('proyek.pekerjaan.ndt.pdf');
+
     Route::get('/proyek/{proyek}/timesheet/template-pdf', [ProyekController::class, 'exportTimesheetTemplate'])
         ->middleware('permission:proyek.show')
         ->name('proyek.timesheet.template-pdf');
@@ -252,6 +261,22 @@ Route::middleware('auth')->group(function () {
     Route::delete('/proyek/{proyek}/timesheet/{timesheet}', [ProyekController::class, 'destroyTimesheet'])
         ->middleware('permission:proyek.show')
         ->name('proyek.timesheet.destroy');
+
+    Route::get('/ndt-master-data', [NdtMasterDataController::class, 'index'])
+        ->middleware('permission:ndt_master.view')
+        ->name('ndt-master-data.index');
+
+    Route::post('/ndt-master-data/{type}', [NdtMasterDataController::class, 'store'])
+        ->middleware('permission:ndt_master.create')
+        ->name('ndt-master-data.store');
+
+    Route::put('/ndt-master-data/{type}/{id}', [NdtMasterDataController::class, 'update'])
+        ->middleware('permission:ndt_master.edit')
+        ->name('ndt-master-data.update');
+
+    Route::delete('/ndt-master-data/{type}/{id}', [NdtMasterDataController::class, 'destroy'])
+        ->middleware('permission:ndt_master.delete')
+        ->name('ndt-master-data.destroy');
 
     Route::get('/invoice', [InvoiceController::class, 'index'])
         ->middleware('permission:invoice.view')

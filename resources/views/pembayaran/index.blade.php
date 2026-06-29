@@ -2,6 +2,36 @@
 
 @section('title', 'Pembayaran')
 
+@push('styles')
+    <style>
+        #invoice-pane {
+            position: relative;
+            min-height: 220px;
+        }
+
+        .invoice-loading-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, .78);
+            backdrop-filter: blur(1px);
+        }
+
+        .invoice-loading-box {
+            min-width: 190px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #fff;
+            padding: 18px;
+            text-align: center;
+            box-shadow: 0 14px 35px rgba(15, 23, 42, .14);
+        }
+    </style>
+@endpush
+
 @section('content')
     <!-- ========== title-wrapper start ========== -->
     <div class="title-wrapper pt-30">
@@ -39,9 +69,7 @@
         <div class="alert alert-danger">{{ $errors->first('file_invoice_signed') }}</div>
     @endif
 
-
-    @if ($proyekBelumInvoice->count())
-        <div class="card-style mb-30">
+    <div class="card-style mb-30">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="text-medium mb-0 text-danger">
                     Proyek Belum Dibuatkan Invoice
@@ -52,7 +80,7 @@
             </div>
 
             <div class="table-wrapper table-responsive">
-                <table class="table align-middle">
+                <table class="table align-middle" id="tableProyekBelumInvoice">
                     <thead>
                         <tr>
                             <th>
@@ -99,7 +127,6 @@
                 </table>
             </div>
         </div>
-    @endif
 
     <div class="card-style mb-30">
         <div class="d-flex flex-wrap align-items-center justify-content-between mb-30 gap-2">
@@ -124,14 +151,14 @@
         {{-- Tabs --}}
         <ul class="nav nav-tabs mb-3" id="pembayaranTab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="invoice-tab" data-bs-toggle="tab" data-bs-target="#invoice-pane"
-                    type="button" role="tab" aria-controls="invoice-pane" aria-selected="true">
+                <button class="nav-link {{ ($activeTab ?? 'invoice') === 'invoice' ? 'active' : '' }}" id="invoice-tab" data-bs-toggle="tab" data-bs-target="#invoice-pane"
+                    type="button" role="tab" aria-controls="invoice-pane" aria-selected="{{ ($activeTab ?? 'invoice') === 'invoice' ? 'true' : 'false' }}">
                     Invoice
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="pembayaran-tab" data-bs-toggle="tab" data-bs-target="#pembayaran-pane"
-                    type="button" role="tab" aria-controls="pembayaran-pane" aria-selected="false">
+                <button class="nav-link {{ ($activeTab ?? 'invoice') === 'pembayaran' ? 'active' : '' }}" id="pembayaran-tab" data-bs-toggle="tab" data-bs-target="#pembayaran-pane"
+                    type="button" role="tab" aria-controls="pembayaran-pane" aria-selected="{{ ($activeTab ?? 'invoice') === 'pembayaran' ? 'true' : 'false' }}">
                     Pembayaran
                 </button>
             </li>
@@ -139,7 +166,79 @@
 
         <div class="tab-content" id="pembayaranTabContent">
             {{-- TAB INVOICE --}}
-            <div class="tab-pane fade show active" id="invoice-pane" role="tabpanel" aria-labelledby="invoice-tab">
+            <div class="tab-pane fade {{ ($activeTab ?? 'invoice') === 'invoice' ? 'show active' : '' }}" id="invoice-pane" role="tabpanel" aria-labelledby="invoice-tab">
+                <div id="invoiceAjaxContainer">
+                <form method="GET" action="{{ route('pembayaran.index') }}" class="mb-3" id="invoiceFilterForm">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Search</label>
+                            <input type="text" name="invoice_search" class="form-control"
+                                value="{{ request('invoice_search') }}"
+                                placeholder="No invoice, no proyek, proyek, perusahaan">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Status</label>
+                            <select name="invoice_status" class="form-control">
+                                <option value="">Semua</option>
+                                <option value="belum_bayar" @selected(request('invoice_status') === 'belum_bayar')>Belum Bayar</option>
+                                <option value="sebagian" @selected(request('invoice_status') === 'sebagian')>Sebagian</option>
+                                <option value="lunas" @selected(request('invoice_status') === 'lunas')>Lunas</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Jenis</label>
+                            <select name="invoice_jenis" class="form-control">
+                                <option value="">Semua</option>
+                                <option value="dp" @selected(request('invoice_jenis') === 'dp')>DP</option>
+                                <option value="termin" @selected(request('invoice_jenis') === 'termin')>Termin</option>
+                                <option value="pelunasan" @selected(request('invoice_jenis') === 'pelunasan')>Pelunasan</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Hardcopy</label>
+                            <select name="invoice_signed" class="form-control">
+                                <option value="">Semua</option>
+                                <option value="uploaded" @selected(request('invoice_signed') === 'uploaded')>Sudah Upload</option>
+                                <option value="missing" @selected(request('invoice_signed') === 'missing')>Belum Upload</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Per Halaman</label>
+                            <select name="invoice_per_page" class="form-control">
+                                @foreach ([10, 25, 50] as $pageSize)
+                                    <option value="{{ $pageSize }}" @selected((int) request('invoice_per_page', 10) === $pageSize)>
+                                        {{ $pageSize }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Tanggal Dari</label>
+                            <input type="date" name="invoice_date_from" class="form-control"
+                                value="{{ request('invoice_date_from') }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Tanggal Sampai</label>
+                            <input type="date" name="invoice_date_to" class="form-control"
+                                value="{{ request('invoice_date_to') }}">
+                        </div>
+                        <div class="col-md-8 d-flex gap-2 justify-content-md-end">
+                            <button type="submit" class="btn btn-primary">Terapkan</button>
+                            <a href="{{ route('pembayaran.index') }}" class="btn btn-outline-secondary" id="invoiceFilterReset">Reset</a>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <small class="text-muted">
+                        @if ($proyeks->total())
+                            Menampilkan {{ $proyeks->firstItem() }} - {{ $proyeks->lastItem() }} dari {{ $proyeks->total() }} proyek invoice.
+                        @else
+                            Tidak ada proyek invoice sesuai filter.
+                        @endif
+                    </small>
+                </div>
+
                 <div class="table-wrapper table-responsive">
                     <table class="table align-middle">
                         <thead>
@@ -332,12 +431,23 @@
                         </tbody>
                     </table>
                 </div>
+
+                <div class="mt-3">
+                    {{ $proyeks->links() }}
+                </div>
+                </div>
+                <div id="invoiceLoadingOverlay" class="invoice-loading-overlay d-none">
+                    <div class="invoice-loading-box">
+                        <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+                        <div class="mt-2 fw-semibold">Memuat data invoice...</div>
+                    </div>
+                </div>
             </div>
 
             {{-- TAB PEMBAYARAN --}}
-            <div class="tab-pane fade" id="pembayaran-pane" role="tabpanel" aria-labelledby="pembayaran-tab">
+            <div class="tab-pane fade {{ ($activeTab ?? 'invoice') === 'pembayaran' ? 'show active' : '' }}" id="pembayaran-pane" role="tabpanel" aria-labelledby="pembayaran-tab">
                 <div class="table-wrapper table-responsive">
-                    <table class="table">
+                    <table class="table" id="tablePembayaran">
                         <thead>
                             <tr>
                                 <th>
@@ -367,10 +477,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($pembayarans as $row)
+                            @foreach($pembayarans as $row)
                                 <tr>
                                     <td>{{ $row->no_pembayaran }}</td>
-                                    <td>{{ $row->tanggal_bayar?->format('d-m-Y') }}</td>
+                                    <td data-order="{{ optional($row->tanggal_bayar)->timestamp ?? 0 }}">{{ $row->tanggal_bayar?->format('d-m-Y') }}</td>
                                     <td>{{ $row->invoice->no_invoice ?? '-' }}</td>
                                     <td>{{ $row->invoice->proyek->permohonan->nama_proyek ?? '-' }}</td>
                                     <td>{{ $row->invoice->proyek->permohonan->nama_perusahaan ?? '-' }}</td>
@@ -386,17 +496,9 @@
                                         @endif
                                     </td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="8" class="text-center">Belum ada data pembayaran.</td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
-                </div>
-
-                <div class="mt-3">
-                    {{ $pembayarans->links() }}
                 </div>
             </div>
         </div>
@@ -450,30 +552,155 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const buttons = document.querySelectorAll('.btn-upload-signed');
-            const form = document.getElementById('uploadSignedForm');
-            const noInvoiceInput = document.getElementById('modal_no_invoice');
-            const currentFileWrapper = document.getElementById('currentFileWrapper');
-            const currentFileLink = document.getElementById('currentFileLink');
+        $(document).ready(function() {
+            const dataTableLanguage = {
+                search: 'Cari:',
+                lengthMenu: 'Tampilkan _MENU_ data',
+                info: 'Menampilkan _START_ - _END_ dari _TOTAL_ data',
+                infoEmpty: 'Belum ada data untuk ditampilkan',
+                infoFiltered: '(difilter dari _MAX_ data)',
+                emptyTable: 'Belum ada data.',
+                zeroRecords: 'Tidak ada data yang sesuai dengan pencarian.',
+                paginate: {
+                    first: 'Pertama',
+                    last: 'Terakhir',
+                    next: 'Berikutnya',
+                    previous: 'Sebelumnya'
+                }
+            };
 
-            buttons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const uploadUrl = this.dataset.upload_url;
-                    const noInvoice = this.dataset.no_invoice;
-                    const fileUrl = this.dataset.file_url;
-
-                    form.action = uploadUrl;
-                    noInvoiceInput.value = noInvoice;
-
-                    if (fileUrl) {
-                        currentFileWrapper.style.display = 'block';
-                        currentFileLink.href = fileUrl;
-                    } else {
-                        currentFileWrapper.style.display = 'none';
-                        currentFileLink.href = '#';
+            if ($('#tableProyekBelumInvoice').length) {
+                $('#tableProyekBelumInvoice').DataTable({
+                    order: [[0, 'desc']],
+                    language: {
+                        ...dataTableLanguage,
+                        emptyTable: 'Tidak ada proyek yang belum dibuatkan invoice.'
                     }
                 });
+            }
+
+            if ($('#tablePembayaran').length) {
+                $('#tablePembayaran').DataTable({
+                    order: [[1, 'desc']],
+                    language: {
+                        ...dataTableLanguage,
+                        emptyTable: 'Belum ada data pembayaran.'
+                    }
+                });
+            }
+
+            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function() {
+                $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+            });
+
+            const invoiceContainer = $('#invoiceAjaxContainer');
+            const invoiceOverlay = $('#invoiceLoadingOverlay');
+            let invoiceSearchTimer = null;
+
+            function setInvoiceLoading(isLoading) {
+                invoiceOverlay.toggleClass('d-none', !isLoading);
+                invoiceContainer.css('opacity', isLoading ? '.45' : '1');
+            }
+
+            function loadInvoiceContent(url, pushState = true) {
+                setInvoiceLoading(true);
+
+                return fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Gagal memuat data invoice.');
+                        }
+
+                        return response.json();
+                    })
+                    .then(data => {
+                        invoiceContainer.html(data.html);
+
+                        if (pushState) {
+                            window.history.replaceState({}, '', url);
+                        }
+                    })
+                    .catch(() => {
+                        Swal.fire('Gagal', 'Data invoice gagal dimuat. Coba ulangi lagi.', 'error');
+                    })
+                    .finally(() => {
+                        setInvoiceLoading(false);
+                    });
+            }
+
+            function submitInvoiceFilter(form) {
+                const url = new URL(form.action, window.location.origin);
+                const formData = new FormData(form);
+
+                formData.forEach((value, key) => {
+                    if (value !== null && String(value).trim() !== '') {
+                        url.searchParams.set(key, value);
+                    } else {
+                        url.searchParams.delete(key);
+                    }
+                });
+
+                url.searchParams.delete('invoice_page');
+                url.searchParams.set('tab', 'invoice');
+                loadInvoiceContent(url.toString());
+            }
+
+            $(document).on('submit', '#invoiceFilterForm', function(event) {
+                event.preventDefault();
+                submitInvoiceFilter(this);
+            });
+
+            $(document).on('change', '#invoiceFilterForm select, #invoiceFilterForm input[type="date"]', function() {
+                this.form.requestSubmit();
+            });
+
+            $(document).on('input', '#invoiceFilterForm input[name="invoice_search"]', function() {
+                window.clearTimeout(invoiceSearchTimer);
+                invoiceSearchTimer = window.setTimeout(() => {
+                    this.form.requestSubmit();
+                }, 500);
+            });
+
+            $(document).on('click', '#invoiceFilterReset', function(event) {
+                event.preventDefault();
+                loadInvoiceContent(this.href);
+            });
+
+            $(document).on('click', '#invoiceAjaxContainer .pagination a, #invoiceAjaxContainer nav a, #invoiceAjaxContainer a[href*="invoice_page="]', function(event) {
+                if (!this.href) {
+                    return;
+                }
+
+                event.preventDefault();
+                const url = new URL(this.href, window.location.origin);
+                url.searchParams.set('tab', 'invoice');
+                loadInvoiceContent(url.toString());
+            });
+
+            $(document).on('click', '.btn-upload-signed', function() {
+                const form = document.getElementById('uploadSignedForm');
+                const noInvoiceInput = document.getElementById('modal_no_invoice');
+                const currentFileWrapper = document.getElementById('currentFileWrapper');
+                const currentFileLink = document.getElementById('currentFileLink');
+                const uploadUrl = this.dataset.upload_url;
+                const noInvoice = this.dataset.no_invoice;
+                const fileUrl = this.dataset.file_url;
+
+                form.action = uploadUrl;
+                noInvoiceInput.value = noInvoice;
+
+                if (fileUrl) {
+                    currentFileWrapper.style.display = 'block';
+                    currentFileLink.href = fileUrl;
+                } else {
+                    currentFileWrapper.style.display = 'none';
+                    currentFileLink.href = '#';
+                }
             });
         });
     </script>

@@ -127,6 +127,31 @@
                   </li>
               @endcan
 
+              @can('ndt_master.view')
+                  <li class="nav-item {{ request()->routeIs('ndt-master-data.*') ? 'active' : '' }}">
+                      <a href="{{ route('ndt-master-data.index') }}">
+                          <span class="icon">
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                  xmlns="http://www.w3.org/2000/svg">
+                                  <path
+                                      d="M7 3.75C7 2.7835 7.7835 2 8.75 2H15.25C16.2165 2 17 2.7835 17 3.75V5.25C17 6.2165 16.2165 7 15.25 7H8.75C7.7835 7 7 6.2165 7 5.25V3.75Z"
+                                      fill="currentColor" />
+                                  <path opacity="0.45"
+                                      d="M4.75 5H6V5.25C6 6.76878 7.23122 8 8.75 8H15.25C16.7688 8 18 6.76878 18 5.25V5H19.25C20.2165 5 21 5.7835 21 6.75V20.25C21 21.2165 20.2165 22 19.25 22H4.75C3.7835 22 3 21.2165 3 20.25V6.75C3 5.7835 3.7835 5 4.75 5Z"
+                                      fill="currentColor" />
+                                  <path
+                                      d="M7.75 12C7.33579 12 7 12.3358 7 12.75C7 13.1642 7.33579 13.5 7.75 13.5H16.25C16.6642 13.5 17 13.1642 17 12.75C17 12.3358 16.6642 12 16.25 12H7.75Z"
+                                      fill="currentColor" />
+                                  <path
+                                      d="M7.75 16C7.33579 16 7 16.3358 7 16.75C7 17.1642 7.33579 17.5 7.75 17.5H13.25C13.6642 17.5 14 17.1642 14 16.75C14 16.3358 13.6642 16 13.25 16H7.75Z"
+                                      fill="currentColor" />
+                              </svg>
+                          </span>
+                          <span class="text">NDT Master</span>
+                      </a>
+                  </li>
+              @endcan
+
               @can('surat_tugas.view')
                   <li class="nav-item {{ request()->routeIs('surat-tugas.*') ? 'active' : '' }}">
                       <a href="{{ route('surat-tugas.index') }}">

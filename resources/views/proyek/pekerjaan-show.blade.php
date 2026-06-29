@@ -77,6 +77,9 @@
             {{-- ===================== KONTEN KANAN ===================== --}}
             <div class="col-md-8">
 
+                @if ($isNdtLayanan)
+                    @include('proyek.partials.ndt-report-form')
+                @else
                 @if ($laporan)
                     {{-- ============================================
                          MODE: LAPORAN SUDAH ADA
@@ -438,6 +441,7 @@
                             </form>
                         </div>
                     </div>
+                @endif
                 @endif
 
             </div>{{-- end col-md-8 --}}

@@ -36,20 +36,29 @@
     <div class="row mt-3">
         <div class="col-12">
             <div class="card-style mb-30">
-                <div class="title d-flex flex-wrap align-items-center justify-content-between">
-                    <div class="left">
-                        <h6 class="text-medium mb-30">List Proyek</h6>
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                    <div>
+                        <h6 class="text-medium mb-1">List Proyek</h6>
+                        <small class="text-muted">
+                            {{ $proyeks->count() }} proyek terdaftar
+                        </small>
                     </div>
 
-                    {{-- <div class="col-md-6 mb-30 text-end">
-                        <a href="" class="btn btn-primary">
-                            + Tambah Proyek
-                        </a>
-                    </div> --}}
+                    <div class="d-flex flex-wrap gap-2 align-items-center">
+                        <label for="projectStatusFilter" class="mb-0 text-muted">Status</label>
+                        <select id="projectStatusFilter" class="form-select" style="width: 170px;">
+                            <option value="">Semua Status</option>
+                            @foreach ($statusOptions as $value => $label)
+                                <option value="{{ $value }}">
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
 
                 <div class="table-wrapper table-responsive">
-                    <table class="table">
+                    <table class="table" id="tableProyek">
                         <thead>
                             <tr>
                                 <th>
@@ -76,13 +85,24 @@
                                 <th>
                                     <h6>Aksi</h6>
                                 </th>
+                                <th>Tanggal Dibuat</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($proyeks as $proyek)
+                            @php
+                                $statusOrder = [
+                                    'progress' => 1,
+                                    'reporting' => 2,
+                                    'endorse' => 3,
+                                    'close' => 4,
+                                ];
+                            @endphp
+                            @foreach ($proyeks as $proyek)
                                 <tr>
                                     {{-- Nomor --}}
-                                    <td>{{ $proyek->no_proyek }}</td>
+                                    <td>
+                                        <strong>{{ $proyek->no_proyek }}</strong>
+                                    </td>
 
                                     {{-- Nama Proyek --}}
                                     <td>{{ $proyek->permohonan->nama_proyek ?? '-' }}</td>
@@ -108,7 +128,7 @@
                                     </td>
 
                                     {{-- Status --}}
-                                    <td>
+                                    <td data-order="{{ $statusOrder[$proyek->status] ?? 5 }}" data-status="{{ $proyek->status }}">
                                         @if ($proyek->status == 'progress')
                                             <span class="badge bg-warning">PROGRESS</span>
                                         @elseif ($proyek->status == 'reporting')
@@ -116,7 +136,9 @@
                                         @elseif ($proyek->status == 'endorse')
                                             <span class="badge bg-primary">ENDORSE</span>
                                         @elseif ($proyek->status == 'close')
-                                            <span class="badge bg-secondary">CLOSE</span>
+                                            <span class="badge bg-success">SELESAI</span>
+                                        @else
+                                            <span class="badge bg-secondary">{{ strtoupper($proyek->status) }}</span>
                                         @endif
                                     </td>
 
@@ -130,12 +152,9 @@
                                             <span class="text-muted">-</span>
                                         @endcan
                                     </td>
+                                    <td>{{ optional($proyek->created_at)->timestamp ?? 0 }}</td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="9" class="text-center">Belum ada data invoice.</td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -143,3 +162,58 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            const table = $('#tableProyek').DataTable({
+                order: [
+                    [6, 'asc'],
+                    [8, 'desc']
+                ],
+                columnDefs: [{
+                        targets: 7,
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        targets: 8,
+                        visible: false,
+                        searchable: false
+                    }
+                ],
+                language: {
+                    search: 'Cari:',
+                    lengthMenu: 'Tampilkan _MENU_ proyek',
+                    info: 'Menampilkan _START_ - _END_ dari _TOTAL_ proyek',
+                    infoEmpty: 'Belum ada proyek untuk ditampilkan',
+                    infoFiltered: '(difilter dari _MAX_ proyek)',
+                    emptyTable: 'Belum ada data proyek.',
+                    zeroRecords: 'Tidak ada proyek yang sesuai dengan pencarian.',
+                    paginate: {
+                        first: 'Pertama',
+                        last: 'Terakhir',
+                        next: 'Berikutnya',
+                        previous: 'Sebelumnya'
+                    }
+                }
+            });
+
+            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                if (settings.nTable.id !== 'tableProyek') {
+                    return true;
+                }
+
+                const selectedStatus = $('#projectStatusFilter').val();
+                const row = table.row(dataIndex).node();
+                const rowStatus = $(row).find('td[data-status]').data('status');
+
+                return !selectedStatus || rowStatus === selectedStatus;
+            });
+
+            $('#projectStatusFilter').on('change', function() {
+                table.draw();
+            });
+        });
+    </script>
+@endpush

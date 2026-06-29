@@ -11,34 +11,115 @@ use Illuminate\Validation\ValidationException;
 
 class PembayaranController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $proyeks = Proyek::with([
+        $perPage = in_array((int) $request->input('invoice_per_page'), [10, 25, 50], true)
+            ? (int) $request->input('invoice_per_page')
+            : 10;
+        $invoiceSearch = trim((string) $request->input('invoice_search'));
+        $invoiceStatus = $request->input('invoice_status');
+        $invoiceJenis = $request->input('invoice_jenis');
+        $invoiceSigned = $request->input('invoice_signed');
+        $invoiceDateFrom = $request->input('invoice_date_from');
+        $invoiceDateTo = $request->input('invoice_date_to');
+
+        $invoiceTotalSubQuery = Invoice::query()
+            ->selectRaw('COALESCE(SUM(grand_total), 0)')
+            ->whereColumn('proyek_id', 'proyek.id');
+        $paymentTotalSubQuery = Invoice::query()
+            ->leftJoin('pembayarans', 'pembayarans.invoice_id', '=', 'invoices.id')
+            ->selectRaw('COALESCE(SUM(pembayarans.nominal_bayar), 0)')
+            ->whereColumn('invoices.proyek_id', 'proyek.id');
+
+        $proyeks = Proyek::query()
+            ->select('proyek.*')
+            ->selectSub($invoiceTotalSubQuery, 'invoice_total')
+            ->selectSub($paymentTotalSubQuery, 'payment_total')
+            ->with([
             'permohonan',
             'invoices' => function ($query) {
                 $query->with('pembayarans')->orderBy('tanggal_invoice', 'asc');
             }
-        ])
+            ])
             ->whereHas('invoices')
             ->latest()
-            ->get();
+            ->when($invoiceSearch !== '', function ($query) use ($invoiceSearch) {
+                $search = '%' . $invoiceSearch . '%';
+
+                $query->where(function ($query) use ($search) {
+                    $query->where('no_proyek', 'like', $search)
+                        ->orWhere('deskripsi', 'like', $search)
+                        ->orWhereHas('permohonan', function ($query) use ($search) {
+                            $query->where(function ($query) use ($search) {
+                                $query->where('nomor', 'like', $search)
+                                    ->orWhere('nama_proyek', 'like', $search)
+                                    ->orWhere('nama_perusahaan', 'like', $search)
+                                    ->orWhere('nama_pic', 'like', $search);
+                            });
+                        })
+                        ->orWhereHas('invoices', function ($query) use ($search) {
+                            $query->where('no_invoice', 'like', $search);
+                        });
+                });
+            })
+            ->when(in_array($invoiceJenis, ['dp', 'termin', 'pelunasan'], true), function ($query) use ($invoiceJenis) {
+                $query->whereHas('invoices', fn ($query) => $query->where('jenis_invoice', $invoiceJenis));
+            })
+            ->when($invoiceDateFrom, function ($query) use ($invoiceDateFrom) {
+                $query->whereHas('invoices', fn ($query) => $query->whereDate('tanggal_invoice', '>=', $invoiceDateFrom));
+            })
+            ->when($invoiceDateTo, function ($query) use ($invoiceDateTo) {
+                $query->whereHas('invoices', fn ($query) => $query->whereDate('tanggal_invoice', '<=', $invoiceDateTo));
+            })
+            ->when($invoiceSigned === 'uploaded', function ($query) {
+                $query->whereHas('invoices', fn ($query) => $query->whereNotNull('file_invoice_signed')->where('file_invoice_signed', '!=', ''));
+            })
+            ->when($invoiceSigned === 'missing', function ($query) {
+                $query->whereHas('invoices', function ($query) {
+                    $query->where(function ($query) {
+                        $query->whereNull('file_invoice_signed')
+                            ->orWhere('file_invoice_signed', '');
+                    });
+                });
+            })
+            ->when($invoiceStatus === 'belum_bayar', function ($query) {
+                $query->havingRaw('payment_total <= 0');
+            })
+            ->when($invoiceStatus === 'sebagian', function ($query) {
+                $query->havingRaw('payment_total > 0 AND payment_total < invoice_total');
+            })
+            ->when($invoiceStatus === 'lunas', function ($query) {
+                $query->havingRaw('invoice_total > 0 AND payment_total >= invoice_total');
+            })
+            ->paginate($perPage, ['*'], 'invoice_page')
+            ->withQueryString();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('pembayaran.partials.invoice-table', compact('proyeks'))->render(),
+            ]);
+        }
 
         $pembayarans = Pembayaran::with([
             'invoice.proyek.permohonan'
         ])
             ->latest()
-            ->paginate(10);
+            ->get();
 
 
         $proyekBelumInvoice = Proyek::with('permohonan')
             ->whereDoesntHave('invoices')
             ->latest()
             ->get();
+        $activeTab = in_array($request->input('tab'), ['invoice', 'pembayaran'], true)
+            ? $request->input('tab')
+            : 'invoice';
 
         return view('pembayaran.index', compact(
             'proyeks',
             'pembayarans',
-            'proyekBelumInvoice'
+            'proyekBelumInvoice',
+            'activeTab'
         ));
     }
 

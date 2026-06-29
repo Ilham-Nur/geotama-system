@@ -31,7 +31,7 @@ class PakController extends Controller
     // =========================
     public function index()
     {
-        $paks = Pak::latest()->paginate(10);
+        $paks = Pak::latest()->get();
         return view('pak.index', compact('paks'));
     }
 

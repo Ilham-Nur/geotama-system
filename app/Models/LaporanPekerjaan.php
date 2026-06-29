@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class LaporanPekerjaan extends Model
 {
@@ -62,6 +63,11 @@ class LaporanPekerjaan extends Model
     public function fotoLampiran(): HasMany
     {
         return $this->hasMany(LaporanFotoLampiran::class, 'laporan_pekerjaan_id');
+    }
+
+    public function ndtReport(): HasOne
+    {
+        return $this->hasOne(LaporanNdtReport::class, 'laporan_pekerjaan_id');
     }
 
     // =============================================

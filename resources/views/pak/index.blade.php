@@ -48,6 +48,22 @@
             </div>
 
 
+            <div class="row g-2 align-items-end mb-3">
+                <div class="col-md-3">
+                    <label class="form-label">Tanggal Dari</label>
+                    <input type="date" id="pakDateFrom" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Tanggal Sampai</label>
+                    <input type="date" id="pakDateTo" class="form-control">
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <button type="button" id="pakDateReset" class="btn btn-outline-secondary">
+                        Reset Filter
+                    </button>
+                </div>
+            </div>
+
             <div class="table-wrapper table-responsive">
                 <table id="tablePAK" class="table table-striped table-hover align-middle">
 
@@ -55,6 +71,9 @@
                         <tr>
                             <th>
                                 <h6>No PAK</h6>
+                            </th>
+                            <th>
+                                <h6>Tanggal</h6>
                             </th>
                             <th>
                                 <h6>Nama Proyek</h6>
@@ -98,6 +117,11 @@
                                 {{-- NO PAK --}}
                                 <td>
                                     {{ $row->pak_number }}
+                                </td>
+
+                                <td data-pak-date="{{ optional($row->created_at)->format('Y-m-d') }}"
+                                    data-order="{{ optional($row->created_at)->timestamp ?? 0 }}">
+                                    {{ optional($row->created_at)->format('d-m-Y') ?? '-' }}
                                 </td>
 
                                 {{-- NAMA PROYEK --}}
@@ -181,10 +205,6 @@
                 </table>
             </div>
 
-            <div class="mt-3">
-                {{ $paks->links() }}
-            </div>
-
         </div>
     </div>
 
@@ -193,10 +213,54 @@
 @push('scripts')
     <script>
         $(document).ready(function() {
-            $('#tablePAK').DataTable({
+            const tablePak = $('#tablePAK').DataTable({
+                order: [[1, 'desc']],
+                columnDefs: [{
+                    targets: 8,
+                    orderable: false,
+                    searchable: false
+                }],
                 language: {
-                    emptyTable: 'Tidak ada data PAK'
+                    search: 'Cari:',
+                    lengthMenu: 'Tampilkan _MENU_ PAK',
+                    info: 'Menampilkan _START_ - _END_ dari _TOTAL_ PAK',
+                    infoEmpty: 'Belum ada PAK untuk ditampilkan',
+                    infoFiltered: '(difilter dari _MAX_ PAK)',
+                    emptyTable: 'Tidak ada data PAK',
+                    zeroRecords: 'Tidak ada PAK yang sesuai dengan pencarian.',
+                    paginate: {
+                        first: 'Pertama',
+                        last: 'Terakhir',
+                        next: 'Berikutnya',
+                        previous: 'Sebelumnya'
+                    }
                 }
+            });
+
+            $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                if (settings.nTable.id !== 'tablePAK') {
+                    return true;
+                }
+
+                const dateFrom = $('#pakDateFrom').val();
+                const dateTo = $('#pakDateTo').val();
+                const row = tablePak.row(dataIndex).node();
+                const rowDate = $(row).find('td[data-pak-date]').data('pak-date');
+
+                if (!rowDate) {
+                    return !dateFrom && !dateTo;
+                }
+
+                return (!dateFrom || rowDate >= dateFrom) && (!dateTo || rowDate <= dateTo);
+            });
+
+            $('#pakDateFrom, #pakDateTo').on('change', function() {
+                tablePak.draw();
+            });
+
+            $('#pakDateReset').on('click', function() {
+                $('#pakDateFrom, #pakDateTo').val('');
+                tablePak.draw();
             });
         });
 
