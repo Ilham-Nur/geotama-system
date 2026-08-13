@@ -27,7 +27,7 @@ class QuotationController extends Controller
         $clients = Client::orderBy('nama_perusahaan')->get();
         $previousQuotations = Quotation::with(['items', 'terms'])
             ->orderByDesc('id')
-            ->get(['id', 'no_quo', 'client_id']);
+            ->get(['id', 'no_quo', 'client_id', 'discount']);
 
         return view('quotation.create', [
             'clients' => $clients,
@@ -46,29 +46,28 @@ class QuotationController extends Controller
             'nama_perusahaan' => ['required_without:client_id', 'nullable', 'string', 'max:255'],
             'alamat' => ['required_without:client_id', 'nullable', 'string'],
             'nama_pic' => ['required_without:client_id', 'nullable', 'string', 'max:255'],
-            'no_telp' => [ 'nullable', 'string', 'max:30'],
+            'no_telp' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.description' => ['required', 'string'],
             'items.*.satuan' => ['nullable', 'string', 'max:100'],
             'items.*.qty' => ['required', 'numeric', 'min:0.01'],
             'items.*.total' => ['required', 'numeric', 'min:0'],
+            'discount' => ['nullable', 'numeric', 'min:0'],
             'terms' => ['nullable', 'array'],
             'terms.*.name' => ['required', 'string', 'max:255'],
         ]);
 
+        $totals = $this->calculateTotals($validated);
         $client = $this->resolveClient($request);
 
-        $quotation = DB::transaction(function () use ($validated, $client) {
-            $grandTotal = collect($validated['items'])->sum(function ($item) {
-                return (float) $item['total'];
-            });
-
+        $quotation = DB::transaction(function () use ($validated, $client, $totals) {
             $quotation = Quotation::create([
                 'no_quo' => $validated['no_quo'],
                 'tanggal' => $validated['tanggal'],
                 'client_id' => $client?->id,
-                'grand_total_quo' => $grandTotal,
+                'discount' => $totals['discount'],
+                'grand_total_quo' => $totals['grand_total'],
             ]);
 
             foreach ($validated['items'] as $item) {
@@ -105,7 +104,7 @@ class QuotationController extends Controller
     public function update(Request $request, Quotation $quotation)
     {
         $validated = $request->validate([
-            'no_quo' => ['required', 'string', 'max:255', 'unique:quotations,no_quo,' . $quotation->id],
+            'no_quo' => ['required', 'string', 'max:255', 'unique:quotations,no_quo,'.$quotation->id],
             'tanggal' => ['required', 'date'],
             'client_id' => ['nullable', 'exists:clients,id'],
             'client_mode' => ['nullable', 'in:new,existing'],
@@ -119,22 +118,21 @@ class QuotationController extends Controller
             'items.*.satuan' => ['nullable', 'string', 'max:100'],
             'items.*.qty' => ['required', 'numeric', 'min:0.01'],
             'items.*.total' => ['required', 'numeric', 'min:0'],
+            'discount' => ['nullable', 'numeric', 'min:0'],
             'terms' => ['nullable', 'array'],
             'terms.*.name' => ['required', 'string', 'max:255'],
         ]);
 
+        $totals = $this->calculateTotals($validated);
         $client = $this->resolveClient($request);
 
-        DB::transaction(function () use ($validated, $quotation, $client) {
-            $grandTotal = collect($validated['items'])->sum(function ($item) {
-                return (float) $item['total'];
-            });
-
+        DB::transaction(function () use ($validated, $quotation, $client, $totals) {
             $quotation->update([
                 'no_quo' => $validated['no_quo'],
                 'tanggal' => $validated['tanggal'],
                 'client_id' => $client?->id,
-                'grand_total_quo' => $grandTotal,
+                'discount' => $totals['discount'],
+                'grand_total_quo' => $totals['grand_total'],
             ]);
 
             $quotation->items()->delete();
@@ -184,7 +182,7 @@ class QuotationController extends Controller
             ])
             ->setPaper('a4', 'portrait');
 
-        return $pdf->stream($quotation->no_quo . '.pdf');
+        return $pdf->stream($quotation->no_quo.'.pdf');
     }
 
     public function publicShow(Quotation $quotation)
@@ -203,10 +201,10 @@ class QuotationController extends Controller
     private function ensureQrCodePath(Quotation $quotation, bool $forceRegenerate = false): string
     {
         $scanUrl = route('quotation.public-show', $quotation->id);
-        $fileName = 'quotation-' . $quotation->id . '.svg';
-        $storagePath = 'quotation/qr/' . $fileName;
+        $fileName = 'quotation-'.$quotation->id.'.svg';
+        $storagePath = 'quotation/qr/'.$fileName;
 
-        if ($forceRegenerate || !$quotation->qr_code_path || !Storage::disk('public')->exists($quotation->qr_code_path)) {
+        if ($forceRegenerate || ! $quotation->qr_code_path || ! Storage::disk('public')->exists($quotation->qr_code_path)) {
             $qrSvg = QrCode::format('svg')
                 ->size(300)
                 ->margin(1)
@@ -226,7 +224,7 @@ class QuotationController extends Controller
 
     private function qrPathToBase64(?string $path): string
     {
-        if (!$path || !Storage::disk('public')->exists($path)) {
+        if (! $path || ! Storage::disk('public')->exists($path)) {
             return '';
         }
 
@@ -234,7 +232,27 @@ class QuotationController extends Controller
 
         $mime = str_ends_with(strtolower($path), '.svg') ? 'image/svg+xml' : 'image/png';
 
-        return 'data:' . $mime . ';base64,' . base64_encode($content);
+        return 'data:'.$mime.';base64,'.base64_encode($content);
+    }
+
+    private function calculateTotals(array $validated): array
+    {
+        $subTotal = collect($validated['items'])->sum(function ($item) {
+            return (float) $item['total'];
+        });
+        $discount = (float) ($validated['discount'] ?? 0);
+
+        if ($discount > $subTotal) {
+            throw ValidationException::withMessages([
+                'discount' => 'Discount tidak boleh melebihi subtotal.',
+            ]);
+        }
+
+        return [
+            'sub_total' => $subTotal,
+            'discount' => $discount,
+            'grand_total' => $subTotal - $discount,
+        ];
     }
 
     private function resolveClient(Request $request): ?Client
@@ -250,11 +268,11 @@ class QuotationController extends Controller
         }
 
         if (
-            !$request->filled('nama_perusahaan')
-            && !$request->filled('nama_pic')
-            && !$request->filled('no_telp')
-            && !$request->filled('email')
-            && !$request->filled('alamat')
+            ! $request->filled('nama_perusahaan')
+            && ! $request->filled('nama_pic')
+            && ! $request->filled('no_telp')
+            && ! $request->filled('email')
+            && ! $request->filled('alamat')
         ) {
             return null;
         }

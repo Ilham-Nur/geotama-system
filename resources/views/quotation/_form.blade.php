@@ -30,6 +30,8 @@
     } else {
         $termsData = [['name' => '']];
     }
+
+    $discount = old('discount', $quotation->discount ?? 0);
 @endphp
 
 <div class="row">
@@ -42,6 +44,7 @@
                     @php
                         $quotationPayload = [
                             'client_id' => $previousQuotation->client_id,
+                            'discount' => $previousQuotation->discount,
                             'items' => $previousQuotation->items
                                 ->map(function ($item) {
                                     return [
@@ -215,8 +218,27 @@
     <div class="text-danger small mb-3">{{ $message }}</div>
 @enderror
 
-<div class="text-end mb-4">
-    <h6>Grand Total: <span id="grand-total-label">Rp 0</span></h6>
+<div class="row justify-content-end mb-4">
+    <div class="col-md-5">
+        <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal</span>
+            <strong id="subtotal-label">Rp 0</strong>
+        </div>
+
+        <div class="mb-3">
+            <label for="discount" class="form-label">Discount (Rp)</label>
+            <input type="number" step="0.01" min="0" name="discount" id="discount"
+                class="form-control @error('discount') is-invalid @enderror" value="{{ $discount }}">
+            @error('discount')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="d-flex justify-content-between border-top pt-2">
+            <h6>Grand Total</h6>
+            <h6 id="grand-total-label">Rp 0</h6>
+        </div>
+    </div>
 </div>
 
 <hr>
@@ -252,11 +274,18 @@
             }
 
             function refreshGrandTotal() {
-                let total = 0;
+                let subTotal = 0;
                 $('.item-total').each(function() {
-                    total += parseFloat($(this).val()) || 0;
+                    subTotal += parseFloat($(this).val()) || 0;
                 });
-                $('#grand-total-label').text(formatRupiah(total));
+
+                const discountInput = $('#discount');
+                const discount = parseFloat(discountInput.val()) || 0;
+                const grandTotal = Math.max(subTotal - discount, 0);
+
+                discountInput.attr('max', subTotal);
+                $('#subtotal-label').text(formatRupiah(subTotal));
+                $('#grand-total-label').text(formatRupiah(grandTotal));
             }
 
             function reindexRows() {
@@ -363,6 +392,7 @@
             });
 
             itemTableBody.on('input', '.item-total', refreshGrandTotal);
+            $('#discount').on('input', refreshGrandTotal);
 
             $('#btn-add-term').on('click', function() {
                 const index = termsWrapper.find('.term-row').length;
@@ -388,6 +418,7 @@
                 }
 
                 $('#client_id').val(payload.client_id ?? '').trigger('change');
+                $('#discount').val(payload.discount ?? 0);
 
                 const items = Array.isArray(payload.items) && payload.items.length ? payload.items : [{
                     description: '',
@@ -415,7 +446,7 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Template quotation dimuat',
-                    text: 'Data client, item, dan terms berhasil diisi otomatis.',
+                    text: 'Data client, item, discount, dan terms berhasil diisi otomatis.',
                     timer: 1600,
                     showConfirmButton: false,
                 });
