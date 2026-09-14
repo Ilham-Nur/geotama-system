@@ -27,6 +27,7 @@ class Employee extends Model
         'identity_number',
         'bpjs_ketenagakerjaan_number',
         'bpjs_kesehatan_number',
+        'npwp_number',
         'marital_status',
         'nationality',
         'religion',

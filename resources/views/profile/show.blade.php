@@ -217,6 +217,15 @@
                             <input type="text" name="bpjs_kesehatan_number" class="form-control"
                                 value="{{ old('bpjs_kesehatan_number', $employee->bpjs_kesehatan_number) }}">
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label">No. NPWP</label>
+                            <input type="text" name="npwp_number"
+                                class="form-control @error('npwp_number') is-invalid @enderror"
+                                value="{{ old('npwp_number', $employee->npwp_number) }}">
+                            @error('npwp_number')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
                         <div class="col-12">
                             <label class="form-label">Informasi Penting Lainnya</label>
                             <textarea name="important_information" rows="3" class="form-control">{{ old('important_information', $employee->important_information) }}</textarea>
@@ -335,7 +344,7 @@
             </div>
 
             <div class="card-style mb-30">
-                <h6 class="mb-3">Upload Dokumen / Sertifikat</h6>
+                <h6 class="mb-3">Upload Dokumen Administrasi</h6>
                 <form action="{{ route('profile.documents.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="mb-3">

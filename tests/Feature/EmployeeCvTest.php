@@ -169,4 +169,27 @@ class EmployeeCvTest extends TestCase
             'is_current' => true,
         ]);
     }
+
+    public function test_employee_can_update_npwp_number_from_profile(): void
+    {
+        $user = User::factory()->create(['username' => 'employee-npwp']);
+        $employee = Employee::create([
+            'user_id' => $user->id,
+            'employee_code' => 'EMP-NPWP-001',
+            'full_name' => 'Karyawan NPWP',
+            'employment_status' => 'tetap',
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('profile.update'), [
+                'full_name' => $employee->full_name,
+                'npwp_number' => '12.345.678.9-012.345',
+            ])
+            ->assertRedirect(route('profile.show'));
+
+        $this->assertDatabaseHas('employees', [
+            'id' => $employee->id,
+            'npwp_number' => '12.345.678.9-012.345',
+        ]);
+    }
 }

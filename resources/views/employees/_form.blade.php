@@ -47,7 +47,7 @@
 <h6 class="mb-3">1. Data Diri Karyawan</h6>
 <div class="row g-3">
     <div class="col-md-6">
-        <label class="form-label">Kode Karyawan / NIK</label>
+        <label class="form-label">Kode Karyawan</label>
         <input type="text" name="employee_code" value="{{ old('employee_code', $employee->employee_code ?? '') }}"
             class="form-control @error('employee_code') is-invalid @enderror" required>
         @error('employee_code')
@@ -121,6 +121,13 @@
         <input type="text" name="bpjs_kesehatan_number"
             value="{{ old('bpjs_kesehatan_number', $employee->bpjs_kesehatan_number ?? '') }}"
             class="form-control @error('bpjs_kesehatan_number') is-invalid @enderror">
+    </div>
+
+    <div class="col-md-6">
+        <label class="form-label">No. NPWP</label>
+        <input type="text" name="npwp_number"
+            value="{{ old('npwp_number', $employee->npwp_number ?? '') }}"
+            class="form-control @error('npwp_number') is-invalid @enderror">
     </div>
 
     <div class="col-md-6">
