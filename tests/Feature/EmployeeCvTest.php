@@ -191,5 +191,13 @@ class EmployeeCvTest extends TestCase
             'id' => $employee->id,
             'npwp_number' => '12.345.678.9-012.345',
         ]);
+
+        $permission = Permission::create(['name' => 'employees.view']);
+        $user->givePermissionTo($permission);
+
+        $this->actingAs($user)
+            ->get(route('employees.show', $employee))
+            ->assertOk()
+            ->assertJsonPath('npwp_number', '12.345.678.9-012.345');
     }
 }

@@ -55,6 +55,7 @@ class EmployeeController extends Controller
             'identity_number' => $employee->identity_number,
             'bpjs_ketenagakerjaan_number' => $employee->bpjs_ketenagakerjaan_number,
             'bpjs_kesehatan_number' => $employee->bpjs_kesehatan_number,
+            'npwp_number' => $employee->npwp_number,
             'marital_status' => $employee->marital_status,
             'nationality' => $employee->nationality,
             'religion' => $employee->religion,

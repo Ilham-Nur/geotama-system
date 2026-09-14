@@ -274,6 +274,10 @@
                                 value: employee.bpjs_kesehatan_number
                             },
                             {
+                                label: 'No. NPWP',
+                                value: employee.npwp_number
+                            },
+                            {
                                 label: 'Status Pernikahan',
                                 value: employee.marital_status
                             },
